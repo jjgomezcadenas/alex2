@@ -13,7 +13,10 @@
 #include <memory>
 #include <map>
 #include <alex/SingletonTemplate.h>
- #include <alex/IAlgorithm.h>
+#include <alex/IAlgorithm.h>
+
+#include <alex/AConfigSvc.h>
+#include <alex/LogUtil.h>
 
 
 namespace alex {

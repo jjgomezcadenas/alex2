@@ -8,7 +8,8 @@ link_directories (${ALEX_SOURCE_DIR})
 #add_executable (testAConfig testAconfig.cpp) 
 #add_executable (testISvc testISvc.cpp) 
 #add_executable (testPaolina testPaolina.cpp) 
-add_executable (testXml testXml.cpp) 
+add_executable (testXml testXml.cpp)
+add_executable (testAlex testAlex.cpp) 
 
 
 
@@ -17,3 +18,4 @@ add_executable (testXml testXml.cpp)
 #target_link_libraries (testISvc alex)
 #target_link_libraries (testPaolina alex)
 target_link_libraries (testXml alex)
+target_link_libraries (testAlex alex)
