@@ -9,7 +9,7 @@
 // ---------------------------------------------------------------------------- 
 
 
-#include <Riostream.h>
+
 #include <TCanvas.h>
 #include <TStyle.h>
 
@@ -18,11 +18,14 @@
 #include <utility>
 #include <memory>
 #include <map>
-#include <alex/LogUtil.h>
+
+#include <alex/Alex.h>
 #include <alex/ToyAnalysis.h>
+#include <alex/ToyData.h>
 
 using std::string; 
-using std::cout; 
+using std::cout;
+using std::cin; 
 using std::endl; 
 using std::ostream;
 using std::vector;
@@ -31,29 +34,26 @@ namespace alex {
 
 
 //--------------------------------------------------------------------
-  bool  ToyAnalysis::AlexManager::Init()
+  bool ToyAnalysis::Init()
 //--------------------------------------------------------------------
   {
-    fName="ToyAnalysis";
     
-    fIn.open(Form("%sbasic.dat");
     fH1 = new TH1F("fH1","x distribution",100,-4,4);
+    return true;
 
   }
 //--------------------------------------------------------------------
-  void ToyAnalysis::AlexManager::Execute()
+  bool ToyAnalysis::Execute()
 //--------------------------------------------------------------------
   {
-    while (1) {
-      fIn >> x >> y >> z;
-      if (!fIn.good()) break;
-      if (nlines < 5) printf("x=%8f, y=%8f, z=%8f\n",x,y,z);
-      fH1->Fill(x);
-      nlines++;
-   }
+    IData* itoyData =alex::Alex::Instance().RetrieveData("toyData");
+    ToyData* toyData =dynamic_cast<ToyData*> (itoyData);
+    TVector3 V3 = toyData->GetData();
+    fH1->Fill(V3[0]);
+      return true;
   }
 //--------------------------------------------------------------------
-  void ToyAnalysis::AlexManager::End()
+  bool ToyAnalysis::End()
 //--------------------------------------------------------------------
   {
     TCanvas *c1 = new TCanvas( "c1", "Hits", 200, 10, 600, 800 );
@@ -61,10 +61,13 @@ namespace alex {
 
     c1->cd();
     fH1->Draw();
+    c1->Update();
     
     string input ;
     cout << "Return to continue:\n>";
     getline(cin, input);
+
+    return true;
   }
 
 }

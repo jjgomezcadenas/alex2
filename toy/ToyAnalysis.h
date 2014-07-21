@@ -1,14 +1,7 @@
 #ifndef TOYA_H
 #define TOYA_H
 
-#include <string>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <cstdio>
-#include <cstring>
+
 #include <alex/IAlgorithm.h>
 #include <TH1.h>
 
@@ -23,12 +16,14 @@ namespace alex {
 		bool Init() ;
 		bool Execute() ;
 		bool End() ;
-		std::string  Name(){return fName;}
+		
+		std::string  Name() const {return fName;}
+		void SetName(std::string name) {fName = name;}
+
 
 	private:
 		std::string fName;
 		TH1F* fH1;
-		std::ifstream fIn;
 
 	};
 }

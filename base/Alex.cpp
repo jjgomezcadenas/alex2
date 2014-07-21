@@ -60,5 +60,12 @@ namespace alex {
     for (auto algo : fIAlgo)
       algo->End();
   }
+  //--------------------------------------------------------------------
+  void AlexManager::ClearAlgorithms()
+//--------------------------------------------------------------------
+  {
+    for (auto algo : fIAlgo)
+      delete algo;
+  }
 }
 

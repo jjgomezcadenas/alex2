@@ -52,7 +52,7 @@ EXECUTE_PROCESS(
   COMMAND mkdir -p alex)
 
 
-FILE(GLOB alex_headers . util/*.h config/*.h base/*.h)
+FILE(GLOB alex_headers . util/*.h config/*.h base/*.h toy/*.h)
 
 FOREACH(file ${alex_headers})
   EXECUTE_PROCESS(
@@ -66,7 +66,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR} ${IRENE_INCLUDE_DIR} ${PAOLINA_INCLUDE_D
 					${LOG4CPP_INCLUDE_DIR} ${RECPACK_INCLUDES_DIR} ${CLHEP_INCLUDE_DIR})
 
 
-FILE(GLOB alex_src . util/*.cpp config/*.cpp base/*.cpp)
+FILE(GLOB alex_src . util/*.cpp config/*.cpp base/*.cpp toy/*.cpp)
 
 # # Finally, create it!
 ADD_LIBRARY(alex SHARED ${alex_src})

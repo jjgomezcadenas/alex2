@@ -14,6 +14,7 @@
 #include <map>
 #include <alex/SingletonTemplate.h>
 #include <alex/IAlgorithm.h>
+ #include <alex/IData.h>
 
 #include <alex/AConfigSvc.h>
 #include <alex/LogUtil.h>
@@ -26,13 +27,24 @@ class AlexManager {
 		AlexManager(){};
 		virtual ~AlexManager(){};
 		void Init(std::string debugLevel);
+
 		void RegisterAlgorithm(IAlgorithm* algo );
 		void InitAlgorithms();
 		void ExecuteAlgorithms();
 		void EndAlgorithms();
+		void ClearAlgorithms();
+
+		void RegisterData(std::string name, IData* data )
+		{fIData[name]=data;}
+
+		IData* RetrieveData(std::string name){return fIData[name]; }
+
+		// const IData* RetrieveData(std::string name) const
+		// {return fIData[name];} 
 
 	private:
 		std::vector<IAlgorithm*> fIAlgo;
+		std::map<std::string,IData*> fIData;
 			
 	};
 
