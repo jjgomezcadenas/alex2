@@ -11,6 +11,7 @@ link_directories (${ALEX_SOURCE_DIR})
 add_executable (testXml testXml.cpp)
 add_executable (testAlex testAlex.cpp)
 add_executable (testToyAnalysis testToyAnalysis.cpp) 
+add_executable (testAlexConfigure testAlexConfigure.cpp)
 
 
 
@@ -21,3 +22,5 @@ add_executable (testToyAnalysis testToyAnalysis.cpp)
 target_link_libraries (testXml alex)
 target_link_libraries (testAlex alex)
 target_link_libraries (testToyAnalysis alex)
+target_link_libraries (testAlexConfigure alex)
+

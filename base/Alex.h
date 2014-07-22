@@ -19,6 +19,10 @@
 #include <alex/AConfigSvc.h>
 #include <alex/LogUtil.h>
 
+#include <TFile.h>
+#include <TH1F.h>
+ #include <TH2F.h>
+
 
 namespace alex {
 
@@ -36,15 +40,20 @@ class AlexManager {
 
 		void RegisterData(std::string name, IData* data )
 		{fIData[name]=data;}
-
 		IData* RetrieveData(std::string name){return fIData[name]; }
-
+		void ClearData();
 		// const IData* RetrieveData(std::string name) const
 		// {return fIData[name];} 
+
+		void InitHistoFile(std::string fileName);
+		void WriteHistoFile();
+		void CloseHistoFile();
 
 	private:
 		std::vector<IAlgorithm*> fIAlgo;
 		std::map<std::string,IData*> fIData;
+		
+		TFile* fHistoFile;
 			
 	};
 

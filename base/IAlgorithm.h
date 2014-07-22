@@ -9,7 +9,7 @@ namespace alex {
 
 	class IAlgorithm {
 	public:
-
+	virtual ~IAlgorithm() {};
 	virtual bool Init() = 0;
 	virtual bool Execute() = 0;
 	virtual bool End() = 0;

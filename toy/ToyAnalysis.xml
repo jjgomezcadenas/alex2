@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ToyAnalysis>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>ToyAnalysis</value>
+  </Param>
+  <H1D>
+    <name>fH1</name>
+    <title>X distribution</title>
+    <nbinsx>50</nbinsx>
+    <xlow>-4.0</xlow>
+    <xup>4.0</xup>
+  </H1D>
+  <H2D>
+    <name>fH2</name>
+    <title>X vs Y distribution</title>
+    <nbinsx>10</nbinsx>
+    <nbinsy>10</nbinsy>
+    <xlow>-4.0</xlow>
+    <xup>4.0</xup>
+    <ylow>-10.</ylow>
+    <yup>10.0</yup>
+  </H2D>
+</ToyAnalysis>

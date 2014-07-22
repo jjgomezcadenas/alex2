@@ -11,6 +11,9 @@ int main(int argc, char **argv)
 	InitLogger();
   	log4cpp::Category& klog = log4cpp::Category::getRoot();
 
+  	klog << log4cpp::Priority::INFO 
+        << " Init Alex  " ;
+
 	alex::Alex::Instance().Init("DEBUG");
     return 0;
  }
