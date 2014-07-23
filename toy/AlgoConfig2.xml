@@ -3,9 +3,11 @@
   <Algo>
     <name>ToyAnalysis</name>
     <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
+    <configFile>ToyAnalysis.xml</configFile>
   </Algo>
   <Algo>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
     <name>ToyAnalysis2</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
+    <configFile>ToyAnalysis2.xml</configFile>
   </Algo>
 </AlgoConfig>

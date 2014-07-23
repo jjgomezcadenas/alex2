@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<ToyAnalysis2>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>ToyAnalysis2</value>
+  </Param>
+  <Param>
+    <name>dataPath</name>
+    <dataType>string</dataType>
+    <value>/Users/jjgomezcadenas/Development/NEXT/DATA</value>
+  </Param>
+  <Param>
+    <name>fileName</name>
+    <dataType>string</dataType>
+    <value>/MagBox_Xe_10atm_00tesla.e2447.next</value>
+  </Param>
+  <Param>
+    <name>nEvents</name>
+    <dataType>int</dataType>
+    <value>10</value>
+  </Param>
+  <Param>
+    <name>BField</name>
+    <dataType>double</dataType>
+    <value>0.1</value>
+  </Param>
+  <Array>
+    <name>DoubleArray</name>
+    <dataType>double</dataType>
+    <dim>3</dim>
+    <value>0.1 1.0 3</value>
+  </Array>
+  <Array>
+    <name>IntArray</name>
+    <dataType>int</dataType>
+    <dim>5</dim>
+    <value>1 10 100 1000 10000</value>
+  </Array>
+  <Array>
+    <name>StringArray</name>
+    <dataType>string</dataType>
+    <dim>2</dim>
+    <value>Hello Baby</value>
+  </Array>
+  <H1D>
+    <name>fHY</name>
+    <title>Y distribution</title>
+    <nbinsx>50</nbinsx>
+    <xlow>-10.0</xlow>
+    <xup>10.0</xup>
+  </H1D>
+  <H2D>
+    <name>fHYZ</name>
+    <title>Y vs Z distribution</title>
+    <nbinsx>10</nbinsx>
+    <nbinsy>10</nbinsy>
+    <xlow>-10.0</xlow>
+    <xup>10.0</xup>
+    <ylow>-10.</ylow>
+    <yup>10.0</yup>
+  </H2D>
+</ToyAnalysis2>

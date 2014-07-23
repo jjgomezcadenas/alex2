@@ -42,6 +42,14 @@ int main(int argc, char **argv)
 
 	AlexConfigure::Instance().
 	ParseConfiguration("/Users/jjgomezcadenas/Development/devnext/alex2/toy/AlexConfig.xml");
-
+	klog << log4cpp::Priority::INFO << "SerializeHeader";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAConfHeader();
+	klog << log4cpp::Priority::INFO << "SerializeCPP";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAConfCPP();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoNames";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoNames();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoPaths";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoPaths();
+	
   return 0;
  }
