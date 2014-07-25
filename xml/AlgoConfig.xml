@@ -2,10 +2,10 @@
 <AlgoConfig>
   <Algo>
     <name>ToyAnalysis</name>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/xml</path>
   </Algo>
   <Algo>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/xml</path>
     <name>ToyAnalysis2</name>
   </Algo>
 </AlgoConfig>

@@ -41,7 +41,7 @@ int main(int argc, char **argv)
         << " Parse AlexConfig file " ;
 
 	AlexConfigure::Instance().
-	ParseConfiguration("/Users/jjgomezcadenas/Development/devnext/alex2/toy/AlexConfig.xml");
+	ParseConfiguration("/Users/jjgomezcadenas/Development/devnext/alex2/xml/AlexConfig.xml");
 	klog << log4cpp::Priority::INFO << "SerializeHeader";
 	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAConfHeader();
 	klog << log4cpp::Priority::INFO << "SerializeCPP";
@@ -50,6 +50,14 @@ int main(int argc, char **argv)
 	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoNames();
 	klog << log4cpp::Priority::INFO << "SerializeAlgoPaths";
 	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoPaths();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoParam";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoParam();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoArray";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoArray();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoH1D";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoH1D();
+	klog << log4cpp::Priority::INFO << "SerializeAlgoH2D";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoH2D();
 	
   return 0;
  }

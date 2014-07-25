@@ -10,13 +10,13 @@
 
 namespace alex {
 
-	class ToyData: public IData {
+	class ToyData: public IData, public INamed {
 	public:
 		ToyData() {};
 		virtual ~ToyData(){};
 		
 		std::string Serialize() const ;
-		void Recreate(std::string) ;
+		//void Recreate(std::string) ;
 	
 		void SetData(TVector3 x){fX = x;}
 		TVector3 GetData(){return fX;}

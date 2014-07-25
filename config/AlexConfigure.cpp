@@ -19,7 +19,8 @@
 #include <cstdio>
 #include <cstring>
 
-using std::string; 
+using std::string;
+using std::pair; 
 using std::cout; 
 using std::endl; 
 using std::ostream;
@@ -38,7 +39,6 @@ namespace alex {
     fDebugLevel = debugLevel;
     fRootName = rootName;
 
-    
     fStags.first = "path";
     fStags.second="name";
 
@@ -60,40 +60,41 @@ namespace alex {
       exit (EXIT_FAILURE);
     }
 
-
     XMLElement* rootElement = fDoc.RootElement();
     klog << log4cpp::Priority::DEBUG << " rootElement " << rootElement->Name();
+    string rootName = rootElement->Name();
+
+    if (rootName !="AlexConfig")
+    {
+      klog << log4cpp::Priority::ERROR 
+      << "ParseConfiguration::expected root name AlexConfig, found = " 
+      << rootName;
+      exit (EXIT_FAILURE);
+    }
 
     const XMLElement* algoElement = rootElement->FirstChildElement ("Algos") ;
-    klog << log4cpp::Priority::DEBUG << " algoElement " << algoElement->Name();
     fAlgosPathName =  ParseStringPair(algoElement,fStags);
 
-    const XMLElement* dstElement = algoElement->NextSiblingElement ("DST") ;
-    klog << log4cpp::Priority::DEBUG << " dstElement " << dstElement->Name();
+    const XMLElement* dstElement = rootElement->FirstChildElement ("DST") ;
     fDstPathName =  ParseStringPair(dstElement,fStags);
 
-    const XMLElement* histoElement = algoElement->NextSiblingElement ("HistoFile") ;
-    klog << log4cpp::Priority::DEBUG << " histoElement " << histoElement->Name();
+    const XMLElement* histoElement = rootElement->FirstChildElement ("HistoFile") ;
     fHistoPathName =  ParseStringPair(histoElement,fStags);
 
-    const XMLElement* eventElement = algoElement->NextSiblingElement ("Events") ;
-    klog << log4cpp::Priority::DEBUG << " eventElement " << eventElement->Name();
+    const XMLElement* eventElement = rootElement->FirstChildElement ("Events") ;
 
     std::pair<std::string,std::string> tags;
     tags.first = "runMax";
     tags.second="runDebug";
-
     fEvents =  ParseIntPair(eventElement,tags);
 
-    const XMLElement* debugElement = algoElement->NextSiblingElement ("Debug") ;
-    klog << log4cpp::Priority::DEBUG << " debugElement " << debugElement->Name();
-
+    const XMLElement* debugElement = rootElement->FirstChildElement ("Debug") ;
+  
     const XMLElement* elem = debugElement->FirstChildElement ("level") ;
-    string fDebug  = elem->GetText();
+    fDebug  = elem->GetText();
     klog << log4cpp::Priority::DEBUG << " debug = " << fDebug;
 
     ParseAlgosConfiguration();
-
     ParseAlgos();
 
   }
@@ -104,8 +105,12 @@ namespace alex {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::DEBUG << " In ParseAlgos() " ;
 
-    for (auto algoPath : fAlgoPath)
+    for (auto i=0; i < fAlgoNames.size(); ++i)
     {
+      auto algoPath = fAlgoPath[i];
+      auto algoName = fAlgoNames[i];
+      vector<DParam> paramVector;
+
       klog << log4cpp::Priority::DEBUG << " algoPath = " << algoPath;
       fDoc.LoadFile( algoPath.c_str() );
       if (fDoc.ErrorID()!=0) 
@@ -115,57 +120,76 @@ namespace alex {
         << fDoc.ErrorID();
         exit (EXIT_FAILURE);
       }
-
-      XMLElement*  rootElement = fDoc.RootElement();
-      klog << log4cpp::Priority::DEBUG << " rootElement " << rootElement->Name();
-
+      XMLElement* rootElement = fDoc.RootElement();  
       const XMLElement* param = rootElement->FirstChildElement ("Param") ;
-      klog << log4cpp::Priority::DEBUG << "FirstChildElement (must be Param) " << param->Name();
-
+      
       if (param != NULL)
       {
-        ParseParamElement(param);
+        vector<DParam> paramVector;
+
+        DParam par = ParseParamElement(param);
+        paramVector.push_back(par);
         param = param->NextSiblingElement ("Param") ;
         while (param != NULL)
         {
-          klog << log4cpp::Priority::DEBUG << "Next Sibling Param (must be Param) " << param->Name();
-          ParseParamElement(param);
+          DParam par = ParseParamElement(param);
+          paramVector.push_back(par);
           param = param->NextSiblingElement ("Param") ;
         }
+        fAlgoParam[algoName]=paramVector;
       }
 
       const XMLElement* array = rootElement->FirstChildElement ("Array") ;
 
       if (array != NULL)
       {
-        ParseArrayElement(array);
+        vector<DArray> arrayVector;
+        DArray ar = ParseArrayElement(array);
+        arrayVector.push_back(ar);
         array = array->NextSiblingElement ("Array") ;
         while (array != NULL)
         {
-          ParseParamElement(array);
+          DArray ar = ParseArrayElement(array);
+          arrayVector.push_back(ar);
           array = array->NextSiblingElement ("Array") ;
         }
+        fAlgoArray[algoName]=arrayVector;
       }
     
+      const XMLElement* h1d = rootElement->FirstChildElement ("H1D") ;
 
-//   <H1D>
-//     <name>fHY</name>
-//     <title>Y distribution</title>
-//     <nbinsx>50</nbinsx>
-//     <xlow>-10.0</xlow>
-//     <xup>10.0</xup>
-//   </H1D>
-//   <H2D>
-//     <name>fHYZ</name>
-//     <title>Y vs Z distribution</title>
-//     <nbinsx>10</nbinsx>
-//     <nbinsy>10</nbinsy>
-//     <xlow>-10.0</xlow>
-//     <xup>10.0</xup>
-//     <ylow>-10.</ylow>
-//     <yup>10.0</yup>
-//   </H2D>
-// </ToyAnalysis2>
+      if (h1d != NULL)
+      {
+        vector<DH1> h1Vector;
+        DH1 h1 = ParseH1DElement(h1d);
+        h1Vector.push_back(h1);
+        h1d = h1d->NextSiblingElement ("H1D") ;
+        while (h1d != NULL)
+        {
+          DH1 h1 = ParseH1DElement(h1d);
+          h1Vector.push_back(h1);
+          h1d = h1d->NextSiblingElement ("H1D") ;
+        }
+        fAlgoH1D[algoName]=h1Vector;
+      }
+
+      const XMLElement* h2d = rootElement->FirstChildElement ("H2D") ;
+
+      if (h2d != NULL)
+      {
+        vector<DH2> h2Vector;
+        DH2 h2 = ParseH2DElement(h2d);
+        h2Vector.push_back(h2);
+        h2d = h2d->NextSiblingElement ("H2D") ;
+        while (h2d != NULL)
+        {
+          vector<DH2> h2Vector;
+          DH2 h2 = ParseH2DElement(h2d);
+          h2Vector.push_back(h2);
+          h2d = h2d->NextSiblingElement ("H2D") ;
+        }
+        fAlgoH2D[algoName]=h2Vector;
+      }
     }
   }
 //--------------------------------------------------------------------
@@ -189,36 +213,39 @@ namespace alex {
     }
 
     XMLElement* rootElement = fDoc.RootElement();
-    klog << log4cpp::Priority::DEBUG << " rootElement " << rootElement->Name();
+    string rootName = rootElement->Name();
 
-    const XMLElement* algoElement = rootElement->FirstChildElement ("Algo") ;
-    klog << log4cpp::Priority::DEBUG 
-    << " ParseAlgosConfiguration:: algoElement " << algoElement->Name();
-
-    std::pair<std::string,std::string> algoPathName = ParseStringPair(algoElement,fStags);
-    string algoPath = PathFromStrings(algoPathName.first,algoPathName.second);
-    klog << log4cpp::Priority::DEBUG 
-    << " algoPath " << algoPath;
-
-    fAlgoNames.push_back(algoPathName.second);
-    algoPath = MergeStrings(algoPath,".xml");
-    fAlgoPath.push_back(algoPath);
-
-    const XMLElement*  nextAlgo = algoElement->NextSiblingElement ("Algo") ;
-
-    while (nextAlgo != NULL)
+    if (rootName !="AlgoConfig")
     {
-      algoPathName = ParseStringPair(nextAlgo,fStags);
-      algoPath = PathFromStrings(algoPathName.first,algoPathName.second);
-      algoPath = MergeStrings(algoPath,".xml");
-      klog << log4cpp::Priority::DEBUG 
-      << " algoPath " << algoPath;
-
-      fAlgoNames.push_back(algoPathName.second);
-      fAlgoPath.push_back(algoPath);
-      nextAlgo = nextAlgo->NextSiblingElement ("Algo") ;
+      klog << log4cpp::Priority::ERROR 
+      << "ParseConfiguration::expected root name AlexConfig, found = " 
+      << rootName;
+      exit (EXIT_FAILURE);
     }
 
+    const XMLElement* algoElement = rootElement->FirstChildElement ("Algo") ;
+    
+    if (algoElement != NULL)
+    {
+      pair<string,string> algoPathName = ParseStringPair(algoElement,fStags);
+      string algoPath = PathFromStrings(algoPathName.first,algoPathName.second);
+      klog << log4cpp::Priority::DEBUG << " algoPath " << algoPath;
+      fAlgoNames.push_back(algoPathName.second);
+      algoPath = MergeStrings(algoPath,".xml");
+      fAlgoPath.push_back(algoPath);
+
+      const XMLElement*  nextAlgo = algoElement->NextSiblingElement ("Algo") ;
+
+      while (nextAlgo != NULL)
+      {
+        algoPathName = ParseStringPair(nextAlgo,fStags);
+        algoPath = PathFromStrings(algoPathName.first,algoPathName.second);
+        algoPath = MergeStrings(algoPath,".xml");
+        fAlgoNames.push_back(algoPathName.second);
+        fAlgoPath.push_back(algoPath);
+        nextAlgo = nextAlgo->NextSiblingElement ("Algo") ;
+      }
+    }
   }
 
 //--------------------------------------------------------------------
@@ -232,6 +259,116 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     return SerializeVectorInList(fAlgoPath);
+  }
+//--------------------------------------------------------------------
+  std::string AlexConf::SerializeAlgoParam() const
+//--------------------------------------------------------------------
+  {
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+    
+    ostringstream s;
+    s << std::endl;
+    
+    for (auto& kv : fAlgoParam) 
+    {
+      string algoName = kv.first;
+      klog << log4cpp::Priority::DEBUG << " algo name " << algoName;
+      s << "Algo: =" << algoName << endl;
+      
+      std::vector<alex::DParam> vparam = kv.second;
+      for (auto param : vparam)
+      {
+        klog << log4cpp::Priority::DEBUG << " ++Param++ ";
+        klog << log4cpp::Priority::DEBUG <<param.Serialize();
+
+        s << param.Serialize() << endl; 
+      }
+    }
+    s<< std::ends;
+    return s.str();
+  }
+
+//--------------------------------------------------------------------
+  std::string AlexConf::SerializeAlgoArray() const
+//--------------------------------------------------------------------
+  {
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+    
+    ostringstream s;
+    s << std::endl;
+    
+    for (auto& kv : fAlgoArray) 
+    {
+      string algoName = kv.first;
+      klog << log4cpp::Priority::DEBUG << " algo name " << algoName;
+      s << "Algo: =" << algoName << endl;
+      
+      std::vector<alex::DArray> vparam = kv.second;
+      for (auto param : vparam)
+      {
+        klog << log4cpp::Priority::DEBUG << " ++Array++ ";
+        klog << log4cpp::Priority::DEBUG <<param.Serialize();
+
+        s << param.Serialize() << endl; 
+      }
+    }
+    s<< std::ends;
+    return s.str();
+  }
+
+//--------------------------------------------------------------------
+  std::string AlexConf::SerializeAlgoH1D() const
+//--------------------------------------------------------------------
+  {
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+    
+    ostringstream s;
+    s << std::endl;
+    
+    for (auto& kv : fAlgoH1D) 
+    {
+      string algoName = kv.first;
+      klog << log4cpp::Priority::DEBUG << " algo name " << algoName;
+      s << "Algo: =" << algoName << endl;
+      
+      std::vector<alex::DH1> vparam = kv.second;
+      for (auto param : vparam)
+      {
+        klog << log4cpp::Priority::DEBUG << " ++H1D++ ";
+        klog << log4cpp::Priority::DEBUG <<param.Serialize();
+
+        s << param.Serialize() << endl; 
+      }
+    }
+    s<< std::ends;
+    return s.str();
+  }
+//--------------------------------------------------------------------
+  std::string AlexConf::SerializeAlgoH2D() const
+//--------------------------------------------------------------------
+  {
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+    
+    ostringstream s;
+    s << std::endl;
+    
+    for (auto& kv : fAlgoH2D) 
+    {
+      string algoName = kv.first;
+      klog << log4cpp::Priority::DEBUG << " algo name " << algoName;
+      s << "Algo: =" << algoName << endl;
+      
+      std::vector<alex::DH2> vparam = kv.second;
+      for (auto param : vparam)
+      {
+        klog << log4cpp::Priority::DEBUG << " ++H2D++ ";
+        klog << log4cpp::Priority::DEBUG <<param.Serialize();
+
+        s << param.Serialize() << endl; 
+      }
+    }
+    s<< std::ends;
+    return s.str();
   }
 //--------------------------------------------------------------------
   std::string AlexConf::SerializeAConfHeader() const
@@ -350,7 +487,7 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  void AlexConf::ParseParamElement(const XMLElement* param) const
+  DParam AlexConf::ParseParamElement(const XMLElement* param) const
 //--------------------------------------------------------------------
   {
     //   <Param>
@@ -372,9 +509,13 @@ namespace alex {
     const XMLElement* ValueParam = param->FirstChildElement ("value") ;
     string ValueParamText= ValueParam->GetText();
     klog << log4cpp::Priority::DEBUG << "Param value text =" << ValueParamText;
+
+    auto par = DParam();
+    par.SetData(textNameParam,dataTypeParamText,ValueParamText);
+    return par;
   }
 //--------------------------------------------------------------------
-  void AlexConf::ParseArrayElement(const XMLElement* array) const
+  DArray  AlexConf::ParseArrayElement(const XMLElement* array) const
 //--------------------------------------------------------------------
   {
     //   <Array>
@@ -401,7 +542,105 @@ namespace alex {
     const XMLElement* value = array->FirstChildElement ("value") ;
     string textValue= value->GetText();
     klog << log4cpp::Priority::DEBUG << "Array value text =" << textValue;
+
+    auto ar = DArray();
+    ar.SetData(textName,textDataType,textDim,textValue);
+    return ar;
   }
 
+//--------------------------------------------------------------------
+  DH1 AlexConf::ParseH1DElement(const XMLElement* h1d) const
+//--------------------------------------------------------------------
+  {
+    //   <H1D>
+    //     <name>fHY</name>
+    //     <title>Y distribution</title>
+    //     <nbinsx>50</nbinsx>
+    //     <xlow>-10.0</xlow>
+    //     <xup>10.0</xup>
+    //   </H1D>
+    
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+
+    const XMLElement* name = h1d->FirstChildElement ("name") ;
+    string textName = name->GetText();
+    klog << log4cpp::Priority::DEBUG << " H1D name text = " << textName;
+
+    const XMLElement* title = h1d->FirstChildElement ("title") ;
+    string textTitle= title->GetText();
+    klog << log4cpp::Priority::DEBUG << "H1D title text =" << textTitle;
+
+    const XMLElement* nbinsx = h1d->FirstChildElement ("nbinsx") ;
+    string textNbinsx= nbinsx->GetText();
+    klog << log4cpp::Priority::DEBUG << "nbinsx text =" << textNbinsx;
+
+    const XMLElement* xlow = h1d->FirstChildElement ("xlow") ;
+    string textXlow= xlow->GetText();
+    klog << log4cpp::Priority::DEBUG << "xlow text =" << textXlow;
+
+    const XMLElement* xup = h1d->FirstChildElement ("xup") ;
+    string textXup= xup->GetText();
+    klog << log4cpp::Priority::DEBUG << "xup text =" << textXup;
+
+    auto h1 = DH1();
+    h1.SetData(textName,textTitle,textNbinsx,textXlow,textXup);
+    return h1;
+  }
+//--------------------------------------------------------------------
+  DH2 AlexConf::ParseH2DElement(const XMLElement* h2d) const
+//--------------------------------------------------------------------
+  {
+    //   <H2D>
+    //     <name>fHYZ</name>
+    //     <title>Y vs Z distribution</title>
+    //     <nbinsx>10</nbinsx>
+    //     <nbinsy>10</nbinsy>
+    //     <xlow>-10.0</xlow>
+    //     <xup>10.0</xup>
+    //     <ylow>-10.</ylow>
+    //     <yup>10.0</yup>
+    //   </H2D>
+    // </ToyAnalysis2>
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+
+    const XMLElement* name = h2d->FirstChildElement ("name") ;
+    string textName = name->GetText();
+    klog << log4cpp::Priority::DEBUG << " H2D name text = " << textName;
+
+    const XMLElement* title = h2d->FirstChildElement ("title") ;
+    string textTitle= title->GetText();
+    klog << log4cpp::Priority::DEBUG << "H2D title text =" << textTitle;
+
+    const XMLElement* nbinsx = h2d->FirstChildElement ("nbinsx") ;
+    string textNbinsx= nbinsx->GetText();
+    klog << log4cpp::Priority::DEBUG << "nbinsx text =" << textNbinsx;
+
+    const XMLElement* nbinsy = h2d->FirstChildElement ("nbinsy") ;
+    string textNbinsy= nbinsy->GetText();
+    klog << log4cpp::Priority::DEBUG << "nbinsy text =" << textNbinsy;
+
+    const XMLElement* xlow = h2d->FirstChildElement ("xlow") ;
+    string textXlow= xlow->GetText();
+    klog << log4cpp::Priority::DEBUG << "xlow text =" << textXlow;
+
+    const XMLElement* xup = h2d->FirstChildElement ("xup") ;
+    string textXup= xup->GetText();
+    klog << log4cpp::Priority::DEBUG << "xup text =" << textXup;
+
+    const XMLElement* ylow = h2d->FirstChildElement ("ylow") ;
+    string textYlow= ylow->GetText();
+    klog << log4cpp::Priority::DEBUG << "ylow text =" << textYlow;
+
+    const XMLElement* yup = h2d->FirstChildElement ("yup") ;
+    string textYup= yup->GetText();
+    klog << log4cpp::Priority::DEBUG << "yup text =" << textYup;
+
+    auto h2 = DH2();
+    h2.SetData(textName,textTitle,textNbinsx,textXlow,textXup,
+      textNbinsy,textYlow,textYup);
+
+    return h2;
+
+  }
 }
 

@@ -95,9 +95,9 @@ int main(int argc, char **argv)
 
       klog << log4cpp::Priority::DEBUG << toyData->Serialize();
 
-      klog << log4cpp::Priority::DEBUG 
-      	  << " Recreate data " ;
-      toyData->Recreate(toyData->Serialize());
+      // klog << log4cpp::Priority::DEBUG 
+      // 	  << " Recreate data " ;
+      // toyData->Recreate(toyData->Serialize());
     }
     
     alex::Alex::Instance().ExecuteAlgorithms();

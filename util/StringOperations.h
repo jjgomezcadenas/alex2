@@ -23,7 +23,7 @@ namespace alex {
     std::ostringstream s;
     s << std::endl;
     for (auto elem : v)
-      s<< elem << std::endl;
+      s<< elem << std::endl << std::ends;
 
     return s.str();
   }

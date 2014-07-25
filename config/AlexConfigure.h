@@ -14,6 +14,10 @@
 #include <map>
 #include <alex/SingletonTemplate.h>
 #include <tinyxml2.h>
+#include <alex/DParam.h>
+#include <alex/DArray.h>
+#include <alex/DHistos.h>
+
 
 
 namespace alex {
@@ -29,6 +33,10 @@ class AlexConf {
 		std::string SerializeAConfCPP() const;
 		std::string SerializeAlgoNames() const;
 		std::string SerializeAlgoPaths() const;
+		std::string SerializeAlgoParam() const;
+		std::string SerializeAlgoArray() const;
+		std::string SerializeAlgoH1D() const;
+		std::string SerializeAlgoH2D() const;
 
 	private:
 		void ParseAlgosConfiguration();
@@ -40,8 +48,11 @@ class AlexConf {
 		std::pair<int,int> ParseIntPair(const tinyxml2::XMLElement* mom, 
                                        const std::pair<std::string,std::string>& tags);
 
-		void ParseParamElement(const tinyxml2::XMLElement* param) const;
-		void ParseArrayElement(const tinyxml2::XMLElement* array) const;
+		alex::DParam ParseParamElement(const tinyxml2::XMLElement* param) const;
+		alex::DArray  ParseArrayElement(const tinyxml2::XMLElement* array) const;
+		alex::DH1 ParseH1DElement(const tinyxml2::XMLElement* h1d) const;
+		alex::DH2 ParseH2DElement(const tinyxml2::XMLElement* h2d) const;
+
 		tinyxml2::XMLDocument fDoc;
 
 		std::string fDebugLevel;
@@ -55,6 +66,11 @@ class AlexConf {
 
 		std::vector<std::string> fAlgoNames;
     std::vector<std::string> fAlgoPath;
+
+    std::map<std::string, std::vector<alex::DParam> > fAlgoParam;
+    std::map<std::string, std::vector<alex::DArray> > fAlgoArray;
+    std::map<std::string, std::vector<alex::DH1> > fAlgoH1D;
+    std::map<std::string, std::vector<alex::DH2> > fAlgoH2D;
 			
 	};
 

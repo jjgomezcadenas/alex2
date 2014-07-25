@@ -11,7 +11,12 @@ namespace alex {
 	public:
 	virtual ~IData () {};
 	virtual std::string Serialize() const = 0;
-	virtual void Recreate(std::string) = 0;
+	//virtual void Recreate(std::string) = 0;
+	};
+
+	class INamed {
+	public:
+	virtual ~INamed () {};
 	virtual std::string  Name() const = 0;
 	virtual void SetName(std::string) = 0;
 	};

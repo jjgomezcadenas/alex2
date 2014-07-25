@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <AlexConfig>
   <Algos>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex2/toy</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/xml</path>
     <name>AlgoConfig.xml</name>
   </Algos>
   <DST>
