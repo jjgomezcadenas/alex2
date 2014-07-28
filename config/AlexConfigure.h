@@ -29,8 +29,11 @@ class AlexConf {
 		void Init(std::string debugLevel, std::string rootName);
 		void ParseConfiguration(std::string configFile);
 		
-		std::string SerializeAConfHeader() const;
-		std::string SerializeAConfCPP() const;
+		std::string WriteAConfHeader() const;
+		std::string WriteAConfCPP() const;
+		std::string WriteAlgoHeader();
+		std::string WriteAlgoCPP();
+		//std::string WriteAlgoCPP() const;
 		std::string SerializeAlgoNames() const;
 		std::string SerializeAlgoPaths() const;
 		std::string SerializeAlgoParam() const;

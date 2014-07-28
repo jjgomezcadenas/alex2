@@ -21,6 +21,19 @@ namespace alex {
     return s.str();
   }
 
+//--------------------------------------------------------------------
+  std::vector<std::string> SplitString(string str)
+//--------------------------------------------------------------------
+  {
+    std::istringstream buf(str);
+    std::istream_iterator<std::string> beg(buf), end;
+
+    std::vector<std::string> tokens(beg, end); // done!
+
+    // for(auto& s: tokens)
+    //     std::cout << '"' << s << '"' << '\n';
+    return tokens;
+  }
 
 
 } // namespace 

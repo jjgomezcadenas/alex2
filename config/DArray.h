@@ -26,7 +26,7 @@ namespace alex {
 			std::string DataType() const {return fDataType;}
 			int Dim() const {return fDim;}
 			std::string Value() const {return fValue;}
-
+			std::vector<std::string>  Split() ;
 			std::string Serialize() const ;
 	
 			void SetData(std::string name, std::string dataType, 

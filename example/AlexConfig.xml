@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AlexConfig>
+  <Algos>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/example</path>
+    <name>AlgoConfig.xml</name>
+  </Algos>
+  <DST>
+    <path>/Users/jjgomezcadenas/Development/NEXT/DATA</path>
+    <name>basic.dat</name>
+  </DST>
+  <HistoFile>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/test</path>
+    <name>exHistos.root</name>
+  </HistoFile>
+  <Events>
+    <runMax>1000</runMax>
+    <runDebug>10</runDebug>
+  </Events>
+  <Debug>
+    <level>DEBUG</level>
+  </Debug>
+</AlexConfig>

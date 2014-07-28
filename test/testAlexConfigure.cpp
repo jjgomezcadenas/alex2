@@ -35,29 +35,36 @@ int main(int argc, char **argv)
   klog << log4cpp::Priority::INFO 
         << " Init textAlexConfigure  " ;
 
-	AlexConfigure::Instance().Init("DEBUG","AlexConfig");
+	AlexConfigure::Instance().Init("INFO","AlexConfig");
 
 	klog << log4cpp::Priority::INFO 
         << " Parse AlexConfig file " ;
 
 	AlexConfigure::Instance().
-	ParseConfiguration("/Users/jjgomezcadenas/Development/devnext/alex2/xml/AlexConfig.xml");
-	klog << log4cpp::Priority::INFO << "SerializeHeader";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAConfHeader();
-	klog << log4cpp::Priority::INFO << "SerializeCPP";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAConfCPP();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoNames";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoNames();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoPaths";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoPaths();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoParam";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoParam();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoArray";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoArray();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoH1D";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoH1D();
-	klog << log4cpp::Priority::INFO << "SerializeAlgoH2D";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().SerializeAlgoH2D();
+	ParseConfiguration("/Users/jjgomezcadenas/Development/devnext/alex2/example/AlexConfig.xml");
+	
+	
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoNames";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoNames();
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoPaths";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoPaths();
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoParam";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoParam();
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoArray";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoArray();
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoH1D";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoH1D();
+	klog << log4cpp::Priority::DEBUG << "SerializeAlgoH2D";
+	klog << log4cpp::Priority::DEBUG << AlexConfigure::Instance().SerializeAlgoH2D();
+
+	klog << log4cpp::Priority::INFO << "Write AConf Header";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfHeader();
+	klog << log4cpp::Priority::INFO << "Write AConf CPP";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfCPP();
+	klog << log4cpp::Priority::INFO << "Write Algo Header";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoHeader();
+	klog << log4cpp::Priority::INFO << "Write Algo CPP";
+	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoCPP();
 	
   return 0;
  }

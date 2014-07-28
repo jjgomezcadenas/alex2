@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <alex/DArray.h>
+#include <alex/StringOperations.h>
 
 
 using std::string; 
@@ -41,6 +42,13 @@ namespace alex {
     s << "{Array: name = " << Name() << " Type = " << DataType()
         << " Dim = "<< Dim() <<  " Value = " << Value() <<"}"<<endl <<std::ends;
     return s.str();
+  }
+
+//--------------------------------------------------------------------
+  std::vector<std::string>  DArray::Split() 
+//--------------------------------------------------------------------
+  {
+  	return SplitString(Value());
   }
 
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AEx2>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>AEx2</value>
+  </Param>
+  <Param>
+    <name>fFileName</name>
+    <dataType>string</dataType>
+    <value>/Users/jjgomezcadenas/Development/NEXT/DATA/MagBox_Xe_10atm_00tesla.e2447.next</value>
+  </Param>
+  <Param>
+    <name>fNEvents</name>
+    <dataType>int</dataType>
+    <value>10</value>
+  </Param>
+  <Param>
+    <name>fBz</name>
+    <dataType>double</dataType>
+    <value>0.1</value>
+  </Param>
+  <Array>
+    <name>fBfield</name>
+    <dataType>double</dataType>
+    <dim>3</dim>
+    <value>0.0 0.0 0.1</value>
+  </Array>
+  <Array>
+    <name>fBVector</name>
+    <dataType>int</dataType>
+    <dim>3</dim>
+    <value>0 0 1</value>
+  </Array>
+  <H1D>
+    <name>fH1_Y</name>
+    <title>Y distribution</title>
+    <nbinsx>50</nbinsx>
+    <xlow>-10.0</xlow>
+    <xup>10.0</xup>
+  </H1D>
+  <H2D>
+    <name>fH2_YZ</name>
+    <title>Y vs Z distribution</title>
+    <nbinsx>10</nbinsx>
+    <nbinsy>10</nbinsy>
+    <xlow>-10.0</xlow>
+    <xup>10.0</xup>
+    <ylow>-10.</ylow>
+    <yup>10.0</yup>
+  </H2D>
+</AEx2>

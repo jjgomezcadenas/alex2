@@ -9,11 +9,14 @@
 #include <functional>
 #include <numeric>
 
+#include <iterator>
+
 
 namespace alex {
 
   std::string MergeStrings(std::string s1,std::string s2);
   std::string PathFromStrings(std::string path,std::string name);
+  std::vector<std::string> SplitString(std::string str);
 
 //--------------------------------------------------------------------
   template< typename T>
