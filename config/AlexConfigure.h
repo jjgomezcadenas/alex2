@@ -32,8 +32,9 @@ class AlexConf {
 		std::string WriteAConfHeader() const;
 		std::string WriteAConfCPP() const;
 		std::string WriteAlgoHeader();
+		std::vector<std::string> WriteAlgoHeaders();
 		std::string WriteAlgoCPP();
-		//std::string WriteAlgoCPP() const;
+		std::vector<std::string> AlgoNames() const {return fAlgoNames;}
 		std::string SerializeAlgoNames() const;
 		std::string SerializeAlgoPaths() const;
 		std::string SerializeAlgoParam() const;

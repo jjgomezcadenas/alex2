@@ -77,6 +77,8 @@ TARGET_LINK_LIBRARIES(alex ${LOG4CPP_LIBRARIES} ${IRENE_LIBRARIES} ${PAOLINA_LIB
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 ADD_SUBDIRECTORY(test)
+ADD_SUBDIRECTORY(exampleMain)
+ADD_SUBDIRECTORY(example)
 
 
 # Installation destinations (just for the lib, not the python module)
