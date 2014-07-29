@@ -8,7 +8,7 @@ AAConf::AAConf()
   fAlgoPathName.second="AlgoConfig.xml";
   fDstPathName.first="/Users/jjgomezcadenas/Development/NEXT/DATA";
   fDstPathName.second="basic.dat";
-  fHistoPathName.first="/Users/jjgomezcadenas/Development/devnext/alex-build/test";
+  fHistoPathName.first="/Users/jjgomezcadenas/Development/devnext/alex-build/exampleMain";
   fHistoPathName.second="exHistos.root";
   fEvents.first=1000;
   fEvents.second=10;

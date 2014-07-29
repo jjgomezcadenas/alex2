@@ -41,7 +41,6 @@ int main(int argc, char **argv)
 	string alexConf="AlexConfig.xml";
 	string aConfHeader="AConf.hh";
 	string aConfCpp="AConf.cxx";
-	string algoHeader="AExample.h";
 	string algoCpp="AExample.cxx";
   
   klog << log4cpp::Priority::INFO 
@@ -55,14 +54,14 @@ int main(int argc, char **argv)
 
 	AlexConfigure::Instance().ParseConfiguration(pathAlexConf);
 	
-	klog << log4cpp::Priority::INFO << "Write AConf Header";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfHeader();
-	klog << log4cpp::Priority::INFO << "Write AConf CPP";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfCPP();
-	klog << log4cpp::Priority::INFO << "Write Algo Header";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoHeader();
-	klog << log4cpp::Priority::INFO << "Write Algo CPP";
-	klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoCPP();
+	// klog << log4cpp::Priority::INFO << "Write AConf Header";
+	// klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfHeader();
+	// klog << log4cpp::Priority::INFO << "Write AConf CPP";
+	// klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAConfCPP();
+	// klog << log4cpp::Priority::INFO << "Write Algo Header";
+	// klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoHeader();
+	// klog << log4cpp::Priority::INFO << "Write Algo CPP";
+	// klog << log4cpp::Priority::INFO << AlexConfigure::Instance().WriteAlgoCPP();
 
 	{
   	string pathAConfHeader = PathFromStrings(pathToAux,aConfHeader);

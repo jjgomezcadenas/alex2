@@ -21,7 +21,8 @@
 
 #include <alex/Alex.h>
 #include "AEx1.hh"
-#include <alex/ToyData.h>
+#include "ExData.h"
+#include <alex/LogUtil.h>
 
 using std::string; 
 using std::cout;
@@ -37,7 +38,7 @@ namespace alex {
   bool AEx1::Init()
 //--------------------------------------------------------------------
   {
-  
+    SetDebugLevel("INFO");
     return true;
 
   }
@@ -45,12 +46,28 @@ namespace alex {
   bool AEx1::Execute()
 //--------------------------------------------------------------------
   {
-    IData* itoyData =alex::Alex::Instance().RetrieveData("toyData");
-    ToyData* toyData =dynamic_cast<ToyData*> (itoyData);
+    log4cpp::Category& klog = log4cpp::Category::getRoot();
+    klog << log4cpp::Priority::DEBUG 
+        << " in AEx1::Execute, now Retrieve Data " ;
+
+    IData* itoyData =alex::Alex::Instance().RetrieveData("ExData");
+
+    if (itoyData == NULL)
+    {
+      klog << log4cpp::Priority::ERROR << "Error retrieveing data";
+      exit(-1);
+    }
+    ExData* toyData =dynamic_cast<ExData*> (itoyData);
     TVector3 V3 = toyData->GetData();
+
+    klog << log4cpp::Priority::DEBUG 
+        << " V3[0] = " << V3[0]
+        << " V3[1] = " << V3[1]
+        << " V3[2] = " << V3[2];
+
     fH1_X->Fill(V3[0]);
     fH2_XY->Fill(V3[0],V3[1]);
-      return true;
+    return true;
   }
 //--------------------------------------------------------------------
   bool AEx1::End()

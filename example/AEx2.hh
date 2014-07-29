@@ -13,6 +13,8 @@
 namespace alex {
   class AEx2: public IAlgorithm {
   public:
+    AEx2();
+    ~AEx2(){}
     bool Init() ;
     bool Execute() ;
     bool End() ;

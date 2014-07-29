@@ -6,16 +6,16 @@ namespace alex {
 
   AEx1::AEx1()
   {
-   fName = AEx1;
-    fH1_X= new TH1F("fH1_X","X distribution",50,-4,4
-    fH2_XY= new TH2F("fH2_XY","X vs Y distribution",10,-4,4,10,-10,10
+   fName = "AEx1";
+    fH1_X= new TH1F("fH1_X","X distribution",50,-4,4);
+    fH2_XY= new TH2F("fH2_XY","X vs Y distribution",10,-4,4,10,-10,10);
   }
 
 
   AEx2::AEx2()
   {
-   fName = AEx2;
-   fFileName = /Users/jjgomezcadenas/Development/NEXT/DATA/MagBox_Xe_10atm_00tesla.e2447.next;
+   fName = "AEx2";
+   fFileName = "/Users/jjgomezcadenas/Development/NEXT/DATA/MagBox_Xe_10atm_00tesla.e2447.next";
    fNEvents = 10;
    fBz = 0.1;
    fBfield.reserve(3);
@@ -26,7 +26,7 @@ namespace alex {
    fBVector.push_back(0);
    fBVector.push_back(0);
    fBVector.push_back(1);
-    fH1_Y= new TH1F("fH1_Y","Y distribution",50,-10,10
-    fH2_YZ= new TH2F("fH2_YZ","Y vs Z distribution",10,-10,10,10,-10,10
+    fH1_Y= new TH1F("fH1_Y","Y distribution",50,-10,10);
+    fH2_YZ= new TH2F("fH2_YZ","Y vs Z distribution",10,-10,10,10,-10,10);
   }
 }

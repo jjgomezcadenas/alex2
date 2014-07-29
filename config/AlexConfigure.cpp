@@ -540,6 +540,8 @@ namespace alex {
       s<<"namespace alex {" << endl;
       s << "  class " << algoName << ": public IAlgorithm {" << endl;
       s << "  public:" << endl;
+      s << "    "<< algoName << "();" << endl;
+      s << "    ~"<< algoName << "(){}" << endl;
       s << "    bool Init() ;"<< endl;
       s << "    bool Execute() ;"<< endl;
       s << "    bool End() ;"<< endl;
@@ -554,7 +556,7 @@ namespace alex {
         else if(param.DataType()=="int")
           s << "    int "<< param.Name() << ";" <<endl;
         else
-          s << "    std::string "<< param.Name() << ";" <<endl;
+          s << "    std::string "<< param.Name() <<";" <<endl;
       }
 
       std::vector<alex::DArray> varray = fAlgoArray[algoName];
@@ -608,8 +610,11 @@ namespace alex {
       
       std::vector<alex::DParam> vparam = fAlgoParam[algoName];
       for (auto param : vparam)
-        s << "   "<< param.Name() << " = " <<param.Value() << ";" << endl;
-
+        if(param.DataType()=="string")
+          s << "   "<< param.Name() << " = " <<'"' <<param.Value() <<'"'<< ";" << endl;
+        else
+          s << "   "<< param.Name() << " = " <<param.Value() << ";" << endl;
+          
       std::vector<alex::DArray> varray = fAlgoArray[algoName];
       for (auto array : varray)
       {
@@ -626,7 +631,7 @@ namespace alex {
           '"'<<h1.Title() <<'"' <<"," <<
           h1.Nbinsx() <<"," <<
           h1.Xlow() <<"," <<
-          h1.Xup() << endl;
+          h1.Xup() << ");" << endl;
       }
 
       std::vector<alex::DH2> vh2 = fAlgoH2D[algoName];
@@ -639,7 +644,7 @@ namespace alex {
           h2.Xup() <<"," <<
           h2.Nbinsy() <<"," <<
           h2.Ylow() <<"," <<
-          h2.Yup() << endl;
+          h2.Yup()  << ");" << endl;
       }
       
       s << "  }" << endl;

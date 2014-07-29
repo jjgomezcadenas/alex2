@@ -9,7 +9,7 @@
     <name>basic.dat</name>
   </DST>
   <HistoFile>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/test</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/exampleMain</path>
     <name>exHistos.root</name>
   </HistoFile>
   <Events>
