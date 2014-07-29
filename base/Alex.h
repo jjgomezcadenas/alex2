@@ -14,14 +14,12 @@
 #include <map>
 #include <alex/SingletonTemplate.h>
 #include <alex/IAlgorithm.h>
- #include <alex/IData.h>
+#include <alex/IData.h>
 
-#include <alex/AConfigSvc.h>
 #include <alex/LogUtil.h>
 
 #include <TFile.h>
-#include <TH1F.h>
-#include <TH2F.h>
+
 
 
 namespace alex {
@@ -46,6 +44,7 @@ class AlexManager {
 		// {return fIData[name];} 
 
 		void InitHistoFile(std::string fileName);
+		void InitDstFile(std::string fileName);
 		void WriteHistoFile();
 		void CloseHistoFile();
 

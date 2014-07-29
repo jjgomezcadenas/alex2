@@ -8,12 +8,11 @@
 //  Copyright (c) 2014 NEXT Collaboration
 // ---------------------------------------------------------------------------- 
 
-#include <alex/Alex.h>
+#include <alex/ISvc.h>
 #include <alex/LogUtil.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <string>
 #include <sstream>
 #include <cstdio>
 #include <cstring>
@@ -27,73 +26,43 @@ using std::vector;
 namespace alex {
 
 //--------------------------------------------------------------------
-  void AlexManager::InitHistoFile(std::string fileName)
+  void IreneManager::InitDstFile(std::string fileName)
 //--------------------------------------------------------------------
   {
-    fHistoFile = new TFile(fileName.c_str(),"RECREATE");
+    fIfile = new TFile(fileName.c_str(), "READ");
+    fEvtTree = dynamic_cast<TTree*>(fIfile->Get("EVENT"));
+  }
+//--------------------------------------------------------------------
+  int IreneManager::DstEntries()
+//--------------------------------------------------------------------
+  {
+    return (int) fEvtTree->GetEntries();
   }
 
 //--------------------------------------------------------------------
-  void AlexManager::WriteHistoFile()
+  int IreneManager::DstGetEntry(int ivt) 
 //--------------------------------------------------------------------
   {
-    fHistoFile ->Write();
-  }
-
-//--------------------------------------------------------------------
-  void AlexManager::CloseHistoFile()
-//--------------------------------------------------------------------
-  {
-    fHistoFile ->Close();
+    return fEvtTree->GetEntry(ivt);
   }
 //--------------------------------------------------------------------
-  void AlexManager::Init(string debugLevel)
+  void IreneManager::Init(string debugLevel)
 //--------------------------------------------------------------------
   {
     SetDebugLevel(debugLevel);
 
   }
 //--------------------------------------------------------------------
-  void AlexManager::RegisterAlgorithm(IAlgorithm* algo )
+  void IreneManager::LoadEvent(const irene::Event* ievt)
 //--------------------------------------------------------------------
   {
-    fIAlgo.push_back(algo);
+    fIevt = ievt;
   }
 //--------------------------------------------------------------------
-  void AlexManager::InitAlgorithms()
+  const irene::Event& IreneManager::GetEvent()
 //--------------------------------------------------------------------
   {
-    for (auto algo : fIAlgo)
-      algo->Init();
-  }
-//--------------------------------------------------------------------  
-  void AlexManager::ExecuteAlgorithms()
-//--------------------------------------------------------------------
-  {
-    for (auto algo : fIAlgo)
-      algo->Execute();
-  }
-//--------------------------------------------------------------------
-  void AlexManager::EndAlgorithms()
-//--------------------------------------------------------------------
-  {
-    for (auto algo : fIAlgo)
-      algo->End();
-  }
-//--------------------------------------------------------------------
-  void AlexManager::ClearAlgorithms()
-//--------------------------------------------------------------------
-  {
-    for (auto algo : fIAlgo)
-      delete algo;
-  }
-
-//--------------------------------------------------------------------
-  void AlexManager::ClearData()
-//--------------------------------------------------------------------
-  {
-    for (auto& kv : fIData) 
-    delete kv.second ;
+    return *fIevt;
   }
 }
 
