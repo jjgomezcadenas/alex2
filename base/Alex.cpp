@@ -30,13 +30,17 @@ namespace alex {
   void AlexManager::InitHistoFile(std::string fileName)
 //--------------------------------------------------------------------
   {
+    fHistoFileName = fileName;
     fHistoFile = new TFile(fileName.c_str(),"RECREATE");
+    gFile->ls();
   }
 
 //--------------------------------------------------------------------
   void AlexManager::WriteHistoFile()
 //--------------------------------------------------------------------
   {
+    gFile = fHistoFile;
+    gFile->ls();
     fHistoFile ->Write();
   }
 

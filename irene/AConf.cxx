@@ -8,9 +8,9 @@ AAConf::AAConf()
   fAlgoPathName.second="AlgoConfig.xml";
   fDstPathName.first="/Users/jjgomezcadenas/Development/NEXT/DATA";
   fDstPathName.second="MagBox_Xe_10atm_00tesla.e2447.next";
-  fHistoPathName.first="/Users/jjgomezcadenas/Development/devnext/alex-build/ireneHistos";
+  fHistoPathName.first="/Users/jjgomezcadenas/Development/devnext/alex-build/ireneMain";
   fHistoPathName.second="iHistos.root";
   fEvents.first=10000;
   fEvents.second=10;
-  fDebug="DEBUG";
+  fDebug="INFO";
 }

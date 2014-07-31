@@ -9,7 +9,7 @@
     <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
   </DST>
   <HistoFile>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneHistos</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneMain</path>
     <name>iHistos.root</name>
   </HistoFile>
   <Events>
@@ -17,6 +17,6 @@
     <runDebug>10</runDebug>
   </Events>
   <Debug>
-    <level>DEBUG</level>
+    <level>INFO</level>
   </Debug>
 </AlexConfig>

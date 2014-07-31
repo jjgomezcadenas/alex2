@@ -47,12 +47,14 @@ class AlexManager {
 		void InitDstFile(std::string fileName);
 		void WriteHistoFile();
 		void CloseHistoFile();
+		TFile* fHistoFile;
 
 	private:
 		std::vector<IAlgorithm*> fIAlgo;
 		std::map<std::string,IData*> fIData;
 		
-		TFile* fHistoFile;
+		//TFile* fHistoFile;
+		std::string fHistoFileName;
 			
 	};
 

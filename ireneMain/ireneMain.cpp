@@ -46,27 +46,48 @@ int main(int argc, char **argv)
   log4cpp::Category& klog = log4cpp::Category::getRoot();
   
   auto aconf = AAConf();
-  
   klog << log4cpp::Priority::INFO 
         << " Init Alex with debug level " << aconf.DebugLevel();
-
   alex::Alex::Instance().Init(aconf.DebugLevel());
+
   //histogram file;
   string histoPath = PathFromStrings(aconf.HistoPath(),aconf.HistoName());
   klog << log4cpp::Priority::INFO 
         << " Init Histo file =" << histoPath;
-  Alex::Instance().InitHistoFile(histoPath);
+  
+  //Alex::Instance().InitHistoFile(histoPath);
+  TFile* fHistoFile = new TFile(histoPath.c_str(),"RECREATE");
+  
+	klog << log4cpp::Priority::INFO 
+        << " Instantiate and register algos " ;
 
-  // Instantiate irene Event
+//--------
+// This can be auto-generated
+    
+	auto iElectrons = new alex::IElectrons();
+  //auto aEx2 = new alex::AEx2();
+	
+	Alex::Instance().RegisterAlgorithm(iElectrons);
+  //alex::Alex::Instance().RegisterAlgorithm(aEx2);
+
+  //----
+
+	alex::Alex::Instance().InitAlgorithms();
+
+  gFile->ls();
+
+// Instantiate irene Event
   irene::Event* ievt = new irene::Event();
 
   //Get path
   string fp = PathFromStrings(aconf.DstPath(),aconf.DstName());
   klog << log4cpp::Priority::INFO 
         << " Open data file =" << fp;
-
   //ISvc::Instance().InitDst(fp,ievt);
   TFile* ifile = new TFile(fp.c_str(), "READ");
+
+  gFile->ls();
+
   TTree* fEvtTree = dynamic_cast<TTree*>(ifile->Get("EVENT"));
   fEvtTree->SetBranchAddress("EventBranch", &ievt);
 
@@ -82,21 +103,6 @@ int main(int argc, char **argv)
   klog << log4cpp::Priority::INFO << "number of events to run  = " 
   << nRun ;
   
-	klog << log4cpp::Priority::INFO 
-        << " Instantiate and register algos " ;
-
-//--------
-// This can be auto-generated
-	auto iElectrons = new alex::IElectrons();
-  //auto aEx2 = new alex::AEx2();
-	
-	Alex::Instance().RegisterAlgorithm(iElectrons);
-  //alex::Alex::Instance().RegisterAlgorithm(aEx2);
-
-  //----
-
-	alex::Alex::Instance().InitAlgorithms();
-
 	//-----------Event loop --------
 	int nb;
 	klog << log4cpp::Priority::INFO 
@@ -121,9 +127,14 @@ int main(int argc, char **argv)
   klog << log4cpp::Priority::INFO  << "Read " 
   << nev << " events" ;
 
-   alex::Alex::Instance().ClearAlgorithms();
-   alex::Alex::Instance().WriteHistoFile();
-   alex::Alex::Instance().CloseHistoFile();
+  // gFile->ls();
+  // gFile = fHistoFile;
+  // gFile->ls();
+
+  fHistoFile->Write();
+  //Alex::Instance().WriteHistoFile();
+  //Alex::Instance().CloseHistoFile();
+  //Alex::Instance().ClearAlgorithms();
 
    //------------
     //theApp->Run();
