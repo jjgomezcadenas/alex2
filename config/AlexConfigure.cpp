@@ -183,7 +183,6 @@ namespace alex {
         h2d = h2d->NextSiblingElement ("H2D") ;
         while (h2d != NULL)
         {
-          vector<DH2> h2Vector;
           DH2 h2 = ParseH2DElement(h2d);
           h2Vector.push_back(h2);
           h2d = h2d->NextSiblingElement ("H2D") ;

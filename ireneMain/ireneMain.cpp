@@ -3,6 +3,7 @@
 
 
 #include <alex/Alex.h>
+#include <alex/ISvc.h>
 #include <alex/StringOperations.h>
 
 #include <TApplication.h>
@@ -21,9 +22,10 @@
 #include <cstdio>
 #include <cstring>
 
-#include <example/IElectrons.hh> // generated
+#include <irene/IElectrons.hh> // generated
+#include <irene/AConf.hh> // generated
 // #include <example/AEx2.hh> // generated
-// #include <example/AConf.hh> // generated
+
 // #include <example/ExData.h>
 
 
@@ -63,17 +65,20 @@ int main(int argc, char **argv)
   klog << log4cpp::Priority::INFO 
         << " Open data file =" << fp;
 
-  ISvc::Instance().InitDstFile(fp);
-  // TFile* ifile = new TFile(fp.c_str(), "READ");
-  // TTree* fEvtTree = dynamic_cast<TTree*>(ifile->Get("EVENT"));
-  // fEvtTree->SetBranchAddress("EventBranch", &ievt);
+  //ISvc::Instance().InitDst(fp,ievt);
+  TFile* ifile = new TFile(fp.c_str(), "READ");
+  TTree* fEvtTree = dynamic_cast<TTree*>(ifile->Get("EVENT"));
+  fEvtTree->SetBranchAddress("EventBranch", &ievt);
 
+  // klog << log4cpp::Priority::INFO << "number of entries in Irene Tree = " 
+  // << ISvc::Instance().DstEntries();
   klog << log4cpp::Priority::INFO << "number of entries in Irene Tree = " 
-  << ISvc::Instance().DstEntries();
+  << fEvtTree->GetEntries();
   klog << log4cpp::Priority::INFO << "number of events required = " 
   << aconf.EventsToRun();
 
-  auto nRun = std::min(aconf.EventsToRun(), ISvc::Instance().DstEntries());
+  //auto nRun = std::min(aconf.EventsToRun(), ISvc::Instance().DstEntries());
+  auto nRun = std::min(aconf.EventsToRun(), (int) fEvtTree->GetEntries());
   klog << log4cpp::Priority::INFO << "number of events to run  = " 
   << nRun ;
   
@@ -97,22 +102,24 @@ int main(int argc, char **argv)
 	klog << log4cpp::Priority::INFO 
         << " Start loop " ;
 	
+  int nev =0;
   for (int ivt = 0; ivt < nRun; ivt++)
   {
-    nb = ISvc::Instance().DstGetEntry(ivt);
+    nb = fEvtTree->GetEntry();
+    //nb = ISvc::Instance().DstGetEntry(ivt);
     ISvc::Instance().LoadEvent(ievt);
     
     klog << log4cpp::Priority::DEBUG 
         << " Executing algos  " ;
     alex::Alex::Instance().ExecuteAlgorithms();
-
+    nev++;
   }
 
   klog << log4cpp::Priority::INFO 
         << " Ending...  " ;
   alex::Alex::Instance().EndAlgorithms();
   klog << log4cpp::Priority::INFO  << "Read " 
-  << nlines << " lines" ;
+  << nev << " events" ;
 
    alex::Alex::Instance().ClearAlgorithms();
    alex::Alex::Instance().WriteHistoFile();

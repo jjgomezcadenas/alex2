@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AlgoConfig>
+  <Algo>
+    <name>IElectrons</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/irene</path>
+  </Algo>
+  <!-- <Algo>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/example</path>
+    <name>AEx2</name>
+  </Algo> -->
+</AlgoConfig>

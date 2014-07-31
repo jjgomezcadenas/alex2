@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AlexConfig>
+  <Algos>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/irene</path>
+    <name>AlgoConfig.xml</name>
+  </Algos>
+  <DST>
+    <path>/Users/jjgomezcadenas/Development/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
+  </DST>
+  <HistoFile>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneHistos</path>
+    <name>iHistos.root</name>
+  </HistoFile>
+  <Events>
+    <runMax>10000</runMax>
+    <runDebug>10</runDebug>
+  </Events>
+  <Debug>
+    <level>DEBUG</level>
+  </Debug>
+</AlexConfig>

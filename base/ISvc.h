@@ -17,26 +17,39 @@
 #include <TTree.h>
 
 #include <irene/Event.h>
+#include <irene/Track.h>
+#include <irene/Particle.h>
+#include <TLorentzVector.h>
 
 
 namespace alex {
+typedef std::pair<TLorentzVector,double> IHit;
+typedef std::vector<std::pair<TLorentzVector,double> > IHits;
+typedef const irene::Particle* IParticle;
+typedef std::vector<const irene::Particle*> IParticles;
 
 class IreneManager {
 	public:
 		IreneManager(){};
 		virtual ~IreneManager(){};
 		void Init(std::string debugLevel);
-		void InitDstFile(std::string fileName);
+		void InitDst(std::string fileName,const irene::Event* ievt);
 		int DstEntries();
 		int DstGetEntry(int ivt);
 		void LoadEvent(const irene::Event* ievt);
 		const irene::Event& GetEvent();
 
+		IParticles GetElectrons() const {return fElectrons;}
+		int GetNumberOfElectrons() const {return fElectrons.size();}
+		std::pair<IParticle, IParticle> GetPMaxElectrons() ;
+
 	private:
+		void FetchElectrons();
 		
 		TFile* fIfile;
   	TTree* fEvtTree ;
   	const irene::Event* fIevt;
+  	IParticles fElectrons;
 			
 	};
 

@@ -74,12 +74,17 @@ SET_TARGET_PROPERTIES(alex PROPERTIES VERSION 1.1.0 SOVERSION 1)
 TARGET_LINK_LIBRARIES(alex ${LOG4CPP_LIBRARIES} ${IRENE_LIBRARIES} ${PAOLINA_LIBRARIES} 
 	${RECPACK_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${TINYXML2_LIBRARIES})
 
+add_executable (xConfigure config/xConfigure.cxx)
+target_link_libraries (xConfigure alex)
+
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
-ADD_SUBDIRECTORY(test)
-ADD_SUBDIRECTORY(exampleConf)
-ADD_SUBDIRECTORY(example)
-ADD_SUBDIRECTORY(exampleMain)
+ADD_SUBDIRECTORY(irene)
+ADD_SUBDIRECTORY(ireneMain)
+#ADD_SUBDIRECTORY(test)
+#ADD_SUBDIRECTORY(exampleConf)
+#ADD_SUBDIRECTORY(example)
+#ADD_SUBDIRECTORY(exampleMain)
 
 
 # Installation destinations (just for the lib, not the python module)
