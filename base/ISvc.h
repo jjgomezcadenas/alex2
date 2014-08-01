@@ -41,6 +41,8 @@ class IreneManager {
 
 		IParticles GetElectrons() const {return fElectrons;}
 		int GetNumberOfElectrons() const {return fElectrons.size();}
+		IParticles GetPrimaryElectrons() const {return fBetas;}
+		int GetNumberOfPrimaryElectrons() const {return fBetas.size();}
 		std::pair<IParticle, IParticle> GetPMaxElectrons() ;
 
 	private:
@@ -50,6 +52,7 @@ class IreneManager {
   	TTree* fEvtTree ;
   	const irene::Event* fIevt;
   	IParticles fElectrons;
+  	IParticles fBetas; //beta = primary electron
 			
 	};
 

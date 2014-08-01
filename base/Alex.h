@@ -43,18 +43,21 @@ class AlexManager {
 		// const IData* RetrieveData(std::string name) const
 		// {return fIData[name];} 
 
-		void InitHistoFile(std::string fileName);
-		void InitDstFile(std::string fileName);
-		void WriteHistoFile();
-		void CloseHistoFile();
-		TFile* fHistoFile;
+		//*---Tagged to delete: 
+		//--reason: handle root directly in main
+
+		// void InitHistoFile(std::string fileName);
+		// void InitDstFile(std::string fileName);
+		// void WriteHistoFile();
+		// void CloseHistoFile();
+	
 
 	private:
 		std::vector<IAlgorithm*> fIAlgo;
 		std::map<std::string,IData*> fIData;
 		
 		//TFile* fHistoFile;
-		std::string fHistoFileName;
+		//std::string fHistoFileName;
 			
 	};
 

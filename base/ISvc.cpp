@@ -75,12 +75,19 @@ namespace alex {
   void IreneManager::FetchElectrons() 
 //--------------------------------------------------------------------
   {
+    fElectrons.clear();
+    fBetas.clear();
     for (auto it = 0; it < fIevt->Tracks().size(); ++it)
     {  
       const irene::Particle* ip= fIevt->Tracks().at(it)->GetParticle();
     
-      if (ip->GetPDGcode() == 11) // This is an electrons
+      //if (ip->GetPDGcode() == 11 and ip->IsPrimary() == true) 
+      if (ip->GetPDGcode() == 11) 
+      {
         fElectrons.push_back(ip);
+        if (ip->IsPrimary() == true)
+          fBetas.push_back(ip);
+      }
     } 
   }
 //--------------------------------------------------------------------
@@ -94,7 +101,7 @@ namespace alex {
     double pmax = 0;
     int imax=-1;
     int i=0;
-    for(auto beta : fElectrons)
+    for(auto beta : fBetas)
     {
       if (beta->Momentum() > pmax)
       {
@@ -106,15 +113,15 @@ namespace alex {
 
     klog << log4cpp::Priority::DEBUG << " imax =" << imax << " pmaxx = " << pmax;
 
-    betas.first = fElectrons[imax];
-    if (GetNumberOfElectrons() <2 )
+    betas.first = fBetas.at(imax);
+    if (GetNumberOfPrimaryElectrons() <2 )
       betas.second = NULL;
     else
     {
       pmax = 0;
       int imax2=-1;
       i=-1;
-      for(auto beta : fElectrons)
+      for(auto beta : fBetas)
       {
         i++;
         if (i==imax) continue;
@@ -125,7 +132,7 @@ namespace alex {
         }
       }
       klog << log4cpp::Priority::DEBUG << " imax2 =" << imax2 << " pmax = " << pmax;
-      betas.second =fElectrons[imax2];
+      betas.second =fBetas.at(imax2);
     }
     return betas;
   }

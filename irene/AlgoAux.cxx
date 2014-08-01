@@ -6,9 +6,12 @@ namespace alex {
   IElectrons::IElectrons()
   {
    fName = "IElectrons";
-   PMAX = 2.9135;
+   fPMax = 2.9135;
+   fPMin = 0.25;
     fH1_nb= new TH1F("fH1_nb","Number of electrons",20,0,20);
+    fH1_npb= new TH1F("fH1_npb","Number of primary electrons",20,0,20);
     fH1_P= new TH1F("fH1_P","Inclusive electron momentum (MeV)",50,0,3);
+    fH1_PP= new TH1F("fH1_PP","Inclusive primary electron momentum (MeV)",50,0,3);
     fH1_PMax= new TH1F("fH1_PMax","PMax electron momentum (MeV)",50,0,3);
     fH1_TMax= new TH1F("fH1_TMax","PMax electron kinetic energy (MeV)",50,0,3);
     fH1_PMax2= new TH1F("fH1_PMax2","PMax2 electron momentum (MeV)",50,0,3);

@@ -61,44 +61,40 @@ int main(int argc, char **argv)
 	klog << log4cpp::Priority::INFO 
         << " Instantiate and register algos " ;
 
-//--------
-// This can be auto-generated
-    
-	auto iElectrons = new alex::IElectrons();
-  //auto aEx2 = new alex::AEx2();
-	
-	Alex::Instance().RegisterAlgorithm(iElectrons);
-  //alex::Alex::Instance().RegisterAlgorithm(aEx2);
+  // Algos must be initiated before we open the irene TFile, so that their pointers
+  // stay in the directory of the histogram file
+  //--------
 
-  //----
+  // This can be auto-generated
+    
+	 auto iElectrons = new alex::IElectrons();
+    //auto aEx2 = new alex::AEx2();
+	
+	 Alex::Instance().RegisterAlgorithm(iElectrons);
+    //alex::Alex::Instance().RegisterAlgorithm(aEx2);
+
+    //----
 
 	alex::Alex::Instance().InitAlgorithms();
 
-  gFile->ls();
-
-// Instantiate irene Event
+  //----
+  // Instantiate irene Event
   irene::Event* ievt = new irene::Event();
 
-  //Get path
+  //Get path, open DST file, set Tree
   string fp = PathFromStrings(aconf.DstPath(),aconf.DstName());
   klog << log4cpp::Priority::INFO 
-        << " Open data file =" << fp;
-  //ISvc::Instance().InitDst(fp,ievt);
+        << " Open DST file =" << fp;
+  
   TFile* ifile = new TFile(fp.c_str(), "READ");
-
-  gFile->ls();
-
   TTree* fEvtTree = dynamic_cast<TTree*>(ifile->Get("EVENT"));
   fEvtTree->SetBranchAddress("EventBranch", &ievt);
 
-  // klog << log4cpp::Priority::INFO << "number of entries in Irene Tree = " 
-  // << ISvc::Instance().DstEntries();
   klog << log4cpp::Priority::INFO << "number of entries in Irene Tree = " 
   << fEvtTree->GetEntries();
   klog << log4cpp::Priority::INFO << "number of events required = " 
   << aconf.EventsToRun();
 
-  //auto nRun = std::min(aconf.EventsToRun(), ISvc::Instance().DstEntries());
   auto nRun = std::min(aconf.EventsToRun(), (int) fEvtTree->GetEntries());
   klog << log4cpp::Priority::INFO << "number of events to run  = " 
   << nRun ;
@@ -111,10 +107,16 @@ int main(int argc, char **argv)
   int nev =0;
   for (int ivt = 0; ivt < nRun; ivt++)
   {
-    nb = fEvtTree->GetEntry();
+    nb = fEvtTree->GetEntry(ivt);
     //nb = ISvc::Instance().DstGetEntry(ivt);
     ISvc::Instance().LoadEvent(ievt);
     
+    if (ivt%aconf.EventsToDebug() ==0)
+    {
+      klog << log4cpp::Priority::INFO 
+          << " read event " << ivt << " nb = " << nb;
+    }
+
     klog << log4cpp::Priority::DEBUG 
         << " Executing algos  " ;
     alex::Alex::Instance().ExecuteAlgorithms();
@@ -132,6 +134,7 @@ int main(int argc, char **argv)
   // gFile->ls();
 
   fHistoFile->Write();
+  fHistoFile->Close();
   //Alex::Instance().WriteHistoFile();
   //Alex::Instance().CloseHistoFile();
   //Alex::Instance().ClearAlgorithms();

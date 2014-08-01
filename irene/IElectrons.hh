@@ -22,9 +22,12 @@ namespace alex {
     void SetName(std::string name) {fName = name;}
   private:
     std::string fName;
-    double PMAX;
+    double fPMax;
+    double fPMin;
     TH1F* fH1_nb;
+    TH1F* fH1_npb;
     TH1F* fH1_P;
+    TH1F* fH1_PP;
     TH1F* fH1_PMax;
     TH1F* fH1_TMax;
     TH1F* fH1_PMax2;

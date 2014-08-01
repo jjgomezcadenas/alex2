@@ -18,18 +18,31 @@ namespace alex {
 
 
 		klog << log4cpp::Priority::DEBUG << " GetElectrons()" ;
-  	IParticles betas = ISvc::Instance().GetElectrons();
+  	IParticles vBetas = ISvc::Instance().GetElectrons();
+    IParticles vPrimaryBetas = ISvc::Instance().GetPrimaryElectrons();
 
-  	auto nbetas = ISvc::Instance().GetNumberOfElectrons();
-  	klog << log4cpp::Priority::DEBUG << " GetNumberElectrons() = " << nbetas;
+  	auto nBetas = ISvc::Instance().GetNumberOfElectrons();
+  	klog << log4cpp::Priority::DEBUG << " GetNumberElectrons() = " << nBetas;
 
-  	fH1_nb->Fill(nbetas);
+  	fH1_nb->Fill(nBetas);
 
-  	for (auto beta : betas)
+  	for (auto beta : vBetas)
   	{
   		klog << log4cpp::Priority::DEBUG << " beta->Momentum() = " << beta->Momentum();
       fH1_P->Fill(beta->Momentum());
   	}
+
+    auto nPrimaryBetas = ISvc::Instance().GetNumberOfPrimaryElectrons();
+    klog << log4cpp::Priority::DEBUG << " GetNumberPrimaryElectrons() = " 
+    << nPrimaryBetas;
+
+    fH1_npb->Fill(nPrimaryBetas);
+
+    for (auto beta : vPrimaryBetas)
+    {
+      klog << log4cpp::Priority::DEBUG << " beta->Momentum() = " << beta->Momentum();
+      fH1_PP->Fill(beta->Momentum());
+    }
 
   	klog << log4cpp::Priority::DEBUG << " Calling GetPMaxElectrons()  = " ;
   	std::pair<IParticle,IParticle> bmax =ISvc::Instance().GetPMaxElectrons();
@@ -46,7 +59,7 @@ namespace alex {
   	fH1_TMax->Fill(TMax);
 
   	auto TMax2 =0.;
-  	if (ISvc::Instance().GetNumberOfElectrons() >1)
+  	if (ISvc::Instance().GetNumberOfPrimaryElectrons() >1)
   	{
   		fH1_PMax2->Fill(bmax.second->Momentum());
 
@@ -64,6 +77,10 @@ namespace alex {
   		
 
 		auto vf = bmax.first->GetDecayVertex();
+
+    klog << log4cpp::Priority::DEBUG << " decay vertex: X  = "
+    <<vf[0] << " Y = " << vf[1] << " Z = " << vf[2];
+
 		fH2_YZ->Fill(vf[1],vf[2]);
 		fH2_XZ->Fill(vf[0],vf[2]);
 		fH2_XY->Fill(vf[0],vf[1]);

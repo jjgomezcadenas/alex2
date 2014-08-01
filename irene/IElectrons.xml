@@ -6,9 +6,14 @@
     <value>IElectrons</value>
   </Param>
   <Param>
-    <name>PMAX</name>
+    <name>fPMax</name>
     <dataType>double</dataType>
     <value>2.9135</value>
+  </Param>
+  <Param>
+    <name>fPMin</name>
+    <dataType>double</dataType>
+    <value>0.25</value>
   </Param>
   <H1D>
     <name>fH1_nb</name>
@@ -18,8 +23,22 @@
     <xup>20.0</xup>
   </H1D>
   <H1D>
+    <name>fH1_npb</name>
+    <title>Number of primary electrons</title>
+    <nbinsx>20</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>20.0</xup>
+  </H1D>
+  <H1D>
     <name>fH1_P</name>
     <title>Inclusive electron momentum (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_PP</name>
+    <title>Inclusive primary electron momentum (MeV)</title>
     <nbinsx>50</nbinsx>
     <xlow>0.0</xlow>
     <xup>3.0</xup>

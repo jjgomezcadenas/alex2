@@ -4,13 +4,21 @@
     <path>/Users/jjgomezcadenas/Development/devnext/alex2/irene</path>
     <name>AlgoConfig.xml</name>
   </Algos>
-  <DST>
+  <!-- <DST>
     <path>/Users/jjgomezcadenas/Development/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
   </DST>
   <HistoFile>
     <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneMain</path>
-    <name>iHistos.root</name>
+    <name>MagBox_Xe_10atm_00tesla.e2447.histos.root</name>
+  </HistoFile> -->
+  <DST>
+    <path>/Users/jjgomezcadenas/Development/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.next</name>
+  </DST>
+  <HistoFile>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneMain</path>
+    <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root</name>
   </HistoFile>
   <Events>
     <runMax>10000</runMax>
