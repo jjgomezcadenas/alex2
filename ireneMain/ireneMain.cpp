@@ -22,12 +22,9 @@
 #include <cstdio>
 #include <cstring>
 
-#include <irene/IElectrons.hh> // generated
+#include <irene/AlgoHeaders.hh> 
+#include <irene/RegisterAlgosHeader.hh>
 #include <irene/AConf.hh> // generated
-// #include <example/AEx2.hh> // generated
-
-// #include <example/ExData.h>
-
 
 using namespace alex;
 using std::string; 
@@ -65,16 +62,8 @@ int main(int argc, char **argv)
   // stay in the directory of the histogram file
   //--------
 
-  // This can be auto-generated
-    
-	 auto iElectrons = new alex::IElectrons();
-    //auto aEx2 = new alex::AEx2();
-	
-	 Alex::Instance().RegisterAlgorithm(iElectrons);
-    //alex::Alex::Instance().RegisterAlgorithm(aEx2);
-
-    //----
-
+  
+  alex::RegisterAlgos();
 	alex::Alex::Instance().InitAlgorithms();
 
   //----

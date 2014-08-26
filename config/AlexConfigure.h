@@ -34,6 +34,9 @@ class AlexConf {
 		std::string WriteAlgoHeader();
 		std::vector<std::string> WriteAlgoHeaders();
 		std::string WriteAlgoCPP();
+		std::string WriteRegisterAlgos() const;
+		std::string WriteRegisterAlgosHeader() const;
+		std::string WriteAlgoHeaderFile() const;
 		std::vector<std::string> AlgoNames() const {return fAlgoNames;}
 		std::string SerializeAlgoNames() const;
 		std::string SerializeAlgoPaths() const;
