@@ -71,11 +71,18 @@ namespace alex {
       algo->Init();
   }
 //--------------------------------------------------------------------  
-  void AlexManager::ExecuteAlgorithms()
+  bool AlexManager::ExecuteAlgorithms()
 //--------------------------------------------------------------------
   {
     for (auto algo : fIAlgo)
-      algo->Execute();
+    {
+      bool test = algo->Execute();
+      if (test == false)
+      {
+        return false;
+      }
+    }
+    return true;
   }
 //--------------------------------------------------------------------
   void AlexManager::EndAlgorithms()

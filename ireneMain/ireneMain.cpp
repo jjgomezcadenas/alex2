@@ -94,6 +94,8 @@ int main(int argc, char **argv)
         << " Start loop " ;
 	
   int nev =0;
+  int npass = 0;
+  int nfail = 0;
   for (int ivt = 0; ivt < nRun; ivt++)
   {
     nb = fEvtTree->GetEntry(ivt);
@@ -108,8 +110,14 @@ int main(int argc, char **argv)
 
     klog << log4cpp::Priority::DEBUG 
         << " Executing algos  " ;
-    alex::Alex::Instance().ExecuteAlgorithms();
+
     nev++;
+    bool test = alex::Alex::Instance().ExecuteAlgorithms();
+    if (test == true)
+      npass++;
+    else
+      nfail++;
+    
   }
 
   klog << log4cpp::Priority::INFO 
@@ -117,6 +125,8 @@ int main(int argc, char **argv)
   alex::Alex::Instance().EndAlgorithms();
   klog << log4cpp::Priority::INFO  << "Read " 
   << nev << " events" ;
+  klog << log4cpp::Priority::INFO  << "Passed selection =" 
+  << npass << " Failed selection =" << nfail ;
 
   // gFile->ls();
   // gFile = fHistoFile;

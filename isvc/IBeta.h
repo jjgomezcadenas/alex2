@@ -1,38 +1,21 @@
-#ifndef ISVC_
-#define ISVC_
+#ifndef IBETA_
+#define IBETA_
 /*
- Irene Svc to provide access to irene (eg DST) to algos
+ IBETA represents the "beta" track in a bb event (or background)
+ eg, a "connected wire" which links to the true electron(s) in the event 
  JJGC, July, 2014.
 */
 
-#include <string>
-#include <vector>
-#include <utility>
-#include <memory>
-#include <map>
-#include <alex/SingletonTemplate.h>
-#include <alex/LogUtil.h>
 
-#include <TFile.h>
-#include <TTree.h>
-
-#include <irene/Event.h>
-#include <irene/Track.h>
-#include <irene/Particle.h>
-#include <TLorentzVector.h>
-
-
+#include "Hit.h"
+#
 namespace alex {
-typedef std::pair<TLorentzVector,double> IHit;
-typedef std::vector<std::pair<TLorentzVector,double> > IHits;
-typedef const irene::Particle* IParticle;
-typedef std::vector<const irene::Particle*> IParticles;
 
-class IreneManager {
+class IBeta {
 	public:
-		IreneManager(){};
-		virtual ~IreneManager(){};
-		void Init(std::string debugLevel);
+		IBeta(){};
+		~IBeta(){};
+		void AddHit(const Hit& hit);
 		void InitDst(std::string fileName,const irene::Event* ievt);
 		int DstEntries();
 		int DstGetEntry(int ivt);

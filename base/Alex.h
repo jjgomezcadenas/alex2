@@ -32,7 +32,7 @@ class AlexManager {
 
 		void RegisterAlgorithm(IAlgorithm* algo );
 		void InitAlgorithms();
-		void ExecuteAlgorithms();
+		bool ExecuteAlgorithms();
 		void EndAlgorithms();
 		void ClearAlgorithms();
 
