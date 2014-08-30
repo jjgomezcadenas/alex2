@@ -53,7 +53,7 @@ EXECUTE_PROCESS(
   COMMAND mkdir -p alex)
 
 
-FILE(GLOB alex_headers . util/*.h config/*.h base/*.h toy/*.h)
+FILE(GLOB alex_headers . util/*.h config/*.h base/*.h toy/*.h isvc/*.h)
 
 FOREACH(file ${alex_headers})
   EXECUTE_PROCESS(
@@ -68,7 +68,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
 					${LOG4CPP_INCLUDE_DIR} ${RECPACK_INCLUDES_DIR} ${CLHEP_INCLUDE_DIR})
 
 
-FILE(GLOB alex_src . util/*.cpp config/*.cpp base/*.cpp toy/*.cpp)
+FILE(GLOB alex_src . util/*.cpp config/*.cpp base/*.cpp isvc/*.cpp)
 
 # # Finally, create it!
 
@@ -82,7 +82,6 @@ TARGET_LINK_LIBRARIES(alex ${LOG4CPP_LIBRARIES} ${IRENE_LIBRARIES} ${PAOLINA_LIB
 MESSAGE("Creating xConfigure")
 add_executable (xConfigure config/xConfigure.cxx)
 target_link_libraries (xConfigure alex)
-
 
 
 MESSAGE("Executing xConfigure")

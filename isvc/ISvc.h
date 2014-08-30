@@ -54,6 +54,7 @@ class IreneManager {
   	IParticles fElectrons;
   	IParticles fBetas; //beta = primary electron
   	IHits fTrueHits;
+  	std::vector<const irene::Track*> fIreneTracks ; 
 			
 	};
 

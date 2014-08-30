@@ -64,6 +64,12 @@ namespace alex {
     klog << log4cpp::Priority::DEBUG << " IreneManager:: call FetchElectrons()" ;
     FetchElectrons();
     fIevt->FillHitVector(fTrueHits, "ACTIVE");
+    fIreneTracks = fIevt->Tracks();
+
+    for (auto track: fIreneTracks)
+    {
+      auto particle = track->GetParticle();
+    }
   }
 //--------------------------------------------------------------------
   const irene::Event& IreneManager::GetEvent()

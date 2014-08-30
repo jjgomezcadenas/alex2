@@ -1,4 +1,4 @@
-#ifndef HIXX_
+#ifndef HITXX_
 #define HITXX_
 /*
  A hit
@@ -18,7 +18,7 @@ class Hit {
 		double Edep() const {return fEne;}
 		TVector3 XYZ()const {return fXYZ;}
 		std::string Type() const {return fType;}
-		int Owner() const {return fOwner}
+		int Owner() const {return fOwner;}
 		void SetType(std::string type){fType=type;}
 		void SetOwner(int owner){fOwner=owner;}
 

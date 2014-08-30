@@ -14,33 +14,17 @@ namespace alex {
 class IBeta {
 	public:
 		IBeta(){};
-		~IBeta(){};
+		~IBeta();
 		void AddHit(const Hit& hit);
-		void InitDst(std::string fileName,const irene::Event* ievt);
-		int DstEntries();
-		int DstGetEntry(int ivt);
-		void LoadEvent(const irene::Event* ievt);
-		const irene::Event& GetEvent();
-
-		IParticles GetElectrons() const {return fElectrons;}
-		int GetNumberOfElectrons() const {return fElectrons.size();}
-		IParticles GetPrimaryElectrons() const {return fBetas;}
-		int GetNumberOfPrimaryElectrons() const {return fBetas.size();}
-		std::pair<IParticle, IParticle> GetPMaxElectrons() ;
+		void SetType(std::string type) {fType = type;}
+		std::vector<const Hit* > GetHit() const {return fHitVector;}
+		std::string GetType() const {return fType;}
 
 	private:
-		void FetchElectrons();
-		
-		TFile* fIfile;
-  	TTree* fEvtTree ;
-  	const irene::Event* fIevt;
-  	IParticles fElectrons;
-  	IParticles fBetas; //beta = primary electron
-  	IHits fTrueHits;
+		std::vector<const Hit*> fHitVector;
+		std::string fType;
 			
 	};
-
-	typedef SingletonTemplate<IreneManager> ISvc;   // Global declaration
 
 }
 #endif

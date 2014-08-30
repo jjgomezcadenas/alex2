@@ -14,9 +14,9 @@ namespace alex {
 	{
 		auto xyz =ihit.first;
 		fEne =ihit.second;
-		fXYZ.X()=xyz.X();
-		fXYZ.Y()=xyz.Y();
-		fXYZ.Z()=xyz.Z();
+		fXYZ(0)=xyz.X();
+		fXYZ(1)=xyz.Y();
+		fXYZ(2)=xyz.Z();
 	}
 	Hit::Hit(const Hit& hit)
 	{
