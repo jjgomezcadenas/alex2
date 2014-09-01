@@ -63,12 +63,23 @@ namespace alex {
 
     klog << log4cpp::Priority::DEBUG << " IreneManager:: call FetchElectrons()" ;
     FetchElectrons();
+    FetchPMaxElectrons();
+    fTrueHits.clear();
     fIevt->FillHitVector(fTrueHits, "ACTIVE");
     fIreneTracks = fIevt->Tracks();
 
     for (auto track: fIreneTracks)
     {
       auto particle = track->GetParticle();
+      if (particle->GetParticleID() == fBetasMax.first->GetParticleID())
+      {
+        fBetasMaxHits.first = track->GetHits();
+      }
+      else if (particle->GetParticleID() == fBetasMax.second->GetParticleID())
+      {
+
+        fBetasMaxHits.second = track->GetHits();
+      }
     }
   }
 //--------------------------------------------------------------------
@@ -98,13 +109,13 @@ namespace alex {
     } 
   }
 //--------------------------------------------------------------------
-  std::pair<IParticle, IParticle> IreneManager::GetPMaxElectrons() 
+  void IreneManager::FetchPMaxElectrons() 
 //--------------------------------------------------------------------
   {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::DEBUG << " IreneManager::GetPMaxElectrons()" ;
 
-    std::pair<IParticle, IParticle> betas;
+    
     double pmax = 0;
     int imax=-1;
     int i=0;
@@ -120,9 +131,9 @@ namespace alex {
 
     klog << log4cpp::Priority::DEBUG << " imax =" << imax << " pmaxx = " << pmax;
 
-    betas.first = fBetas.at(imax);
+    fBetasMax.first = fBetas.at(imax);
     if (GetNumberOfPrimaryElectrons() <2 )
-      betas.second = NULL;
+      fBetasMax.second = NULL;
     else
     {
       pmax = 0;
@@ -139,9 +150,8 @@ namespace alex {
         }
       }
       klog << log4cpp::Priority::DEBUG << " imax2 =" << imax2 << " pmax = " << pmax;
-      betas.second =fBetas.at(imax2);
+      fBetasMax.second =fBetas.at(imax2);
     }
-    return betas;
   }
 }
 

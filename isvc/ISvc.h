@@ -12,21 +12,15 @@
 #include <map>
 #include <alex/SingletonTemplate.h>
 #include <alex/LogUtil.h>
+#include "IDefs.h"
 
 #include <TFile.h>
 #include <TTree.h>
 
-#include <irene/Event.h>
-#include <irene/Track.h>
-#include <irene/Particle.h>
-#include <TLorentzVector.h>
+
 
 
 namespace alex {
-typedef std::pair<TLorentzVector,double> IHit;
-typedef std::vector<std::pair<TLorentzVector,double> > IHits;
-typedef const irene::Particle* IParticle;
-typedef std::vector<const irene::Particle*> IParticles;
 
 class IreneManager {
 	public:
@@ -43,10 +37,13 @@ class IreneManager {
 		int GetNumberOfElectrons() const {return fElectrons.size();}
 		IParticles GetPrimaryElectrons() const {return fBetas;}
 		int GetNumberOfPrimaryElectrons() const {return fBetas.size();}
-		std::pair<IParticle, IParticle> GetPMaxElectrons() ;
+		std::pair<IParticle, IParticle> GetPMaxElectrons() const {return fBetasMax;}
+		IHits GetTrueHits() const {return fTrueHits;}
+		std::pair<IHits, IHits> GetPMaxElectronsHits() const {return fBetasMaxHits;}
 
 	private:
 		void FetchElectrons();
+		void FetchPMaxElectrons();
 		
 		TFile* fIfile;
   	TTree* fEvtTree ;
@@ -55,6 +52,8 @@ class IreneManager {
   	IParticles fBetas; //beta = primary electron
   	IHits fTrueHits;
   	std::vector<const irene::Track*> fIreneTracks ; 
+  	std::pair<IParticle, IParticle> fBetasMax;
+  	std::pair<IHits, IHits> fBetasMaxHits;
 			
 	};
 

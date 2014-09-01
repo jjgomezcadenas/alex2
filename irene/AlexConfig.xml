@@ -25,6 +25,6 @@
     <runDebug>10</runDebug>
   </Events>
   <Debug>
-    <level>INFO</level>
+    <level>DEBUG</level>
   </Debug>
 </AlexConfig>

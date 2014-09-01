@@ -12,5 +12,5 @@ AAConf::AAConf()
   fHistoPathName.second="MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root";
   fEvents.first=10000;
   fEvents.second=10;
-  fDebug="INFO";
+  fDebug="DEBUG";
 }
