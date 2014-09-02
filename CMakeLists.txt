@@ -79,6 +79,7 @@ SET_TARGET_PROPERTIES(alex PROPERTIES VERSION 1.1.0 SOVERSION 1)
 TARGET_LINK_LIBRARIES(alex ${LOG4CPP_LIBRARIES} ${IRENE_LIBRARIES} ${PAOLINA_LIBRARIES} 
 	${RECPACK_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${TINYXML2_LIBRARIES})
 
+
 MESSAGE("Creating xConfigure")
 add_executable (xConfigure config/xConfigure.cxx)
 target_link_libraries (xConfigure alex)

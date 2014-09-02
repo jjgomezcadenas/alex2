@@ -47,20 +47,20 @@ int main(int argc, char **argv)
 	string algoHeader="AlgoHeaders.hh";
   
   klog << log4cpp::Priority::INFO 
-        << " path to Algos  " << pathToAlgos;
+        << " path to Algos=" << pathToAlgos;
   klog << log4cpp::Priority::INFO 
-        << " path to Main  " << pathToMain;
+        << " path to Main=" << pathToMain;
 	
   string pathAlexConf = PathFromStrings(pathToAlgos,alexConf);
   klog << log4cpp::Priority::INFO 
-        << " Parse AlexConfig file located at " << pathAlexConf;
+        << " Parse AlexConfig file located at=" << pathAlexConf;
 
 	AlexConfigure::Instance().ParseConfiguration(pathAlexConf);
 	
 	{
   	string pathAConfHeader = PathFromStrings(pathToAlgos,aConfHeader);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write AConf header file at " << pathAConfHeader;
+    	    << " Write AConf header file at=" << pathAConfHeader;
 		std::ofstream out(pathAConfHeader.c_str());
   	out << AlexConfigure::Instance().WriteAConfHeader();
   	out.close();
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 	{
   	string pathAConfCpp = PathFromStrings(pathToAlgos,aConfCpp);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write AConf cpp file at " << pathAConfCpp;
+    	    << " Write AConf cpp file at=" << pathAConfCpp;
 		std::ofstream out(pathAConfCpp.c_str());
   	out << AlexConfigure::Instance().WriteAConfCPP();
   	out.close();
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	{
   	string pathRegisterAlgos = PathFromStrings(pathToAlgos,registerAlgos);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write registerAlgo file at " << pathRegisterAlgos;
+    	    << " Write registerAlgo file at=" << pathRegisterAlgos;
 		std::ofstream out(pathRegisterAlgos.c_str());
   	out << AlexConfigure::Instance().WriteRegisterAlgos();
   	out.close();
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	{
   	string pathAlgoHeader = PathFromStrings(pathToAlgos,algoHeader);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write algoHeader file at " << pathAlgoHeader;
+    	    << " Write algoHeader file at=" << pathAlgoHeader;
 		std::ofstream out(pathAlgoHeader.c_str());
   	out << AlexConfigure::Instance().WriteAlgoHeaderFile();
   	out.close();
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
   {
     string pathRegisterAlgoHeader = PathFromStrings(pathToAlgos,registerAlgosHeader);
     klog << log4cpp::Priority::INFO 
-          << " Write Register algoHeader file at " << pathRegisterAlgoHeader;
+          << " Write Register algoHeader file at=" << pathRegisterAlgoHeader;
     std::ofstream out(pathRegisterAlgoHeader.c_str());
     out << AlexConfigure::Instance().WriteRegisterAlgosHeader();
     out.close();
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 		string algoHeader = MergeStrings(algoName,".hh");
   	string pathAlgoHeader = PathFromStrings(pathToAlgos,algoHeader);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write Algo header file at " << pathAlgoHeader;
+    	    << " Write Algo header file at=" << pathAlgoHeader;
 		std::ofstream out(pathAlgoHeader.c_str());
   	out << ah.at(i);
   	out.close();
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 	{
   	string pathAlgoCpp = PathFromStrings(pathToAlgos,algoCpp);
   	klog << log4cpp::Priority::INFO 
-    	    << " Write Algo cpp file at " << pathAlgoCpp;
+    	    << " Write Algo cpp file at=" << pathAlgoCpp;
 		std::ofstream out(pathAlgoCpp.c_str());
   	out << AlexConfigure::Instance().WriteAlgoCPP() ;
   	out.close();
