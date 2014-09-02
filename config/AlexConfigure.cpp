@@ -61,13 +61,13 @@ namespace alex {
     }
 
     XMLElement* rootElement = fDoc.RootElement();
-    klog << log4cpp::Priority::DEBUG << " rootElement " << rootElement->Name();
+    klog << log4cpp::Priority::DEBUG << " rootElement=" << rootElement->Name();
     string rootName = rootElement->Name();
 
     if (rootName !="AlexConfig")
     {
       klog << log4cpp::Priority::ERROR 
-      << "ParseConfiguration::expected root name AlexConfig, found = " 
+      << "ParseConfiguration::expected root name AlexConfig, found=" 
       << rootName;
       exit (EXIT_FAILURE);
     }
@@ -198,7 +198,7 @@ namespace alex {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     string xmlPath = PathFromStrings(fAlgosPathName.first,fAlgosPathName.second);
 
-    klog << log4cpp::Priority::DEBUG << "ParseAlgosConfiguration:: xmlPath ="
+    klog << log4cpp::Priority::DEBUG << "ParseAlgosConfiguration:: xmlPath="
          << xmlPath;
     
     //tinyxml2::XMLDocument doc;
@@ -719,16 +719,16 @@ namespace alex {
   {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
 
-    klog << log4cpp::Priority::DEBUG << " ParseStringPair:: tags.first  = " << tags.first;
+    klog << log4cpp::Priority::DEBUG << " ParseStringPair:: tags.first=" << tags.first;
     const XMLElement* elem = mom->FirstChildElement (tags.first.c_str()) ;
     string first = elem->GetText();
-    klog << log4cpp::Priority::DEBUG << " first = " << first;
+    klog << log4cpp::Priority::DEBUG << " first=" << first;
 
 
-    klog << log4cpp::Priority::DEBUG << " ParseStringPair:: tags.second  = " << tags.second;
+    klog << log4cpp::Priority::DEBUG << " ParseStringPair:: tags.second=" << tags.second;
     const XMLElement*  nextElem = mom->FirstChildElement (tags.second.c_str());
     string second = nextElem->GetText();
-    klog << log4cpp::Priority::DEBUG << " second = " << second;
+    klog << log4cpp::Priority::DEBUG << " second=" << second;
 
     std::pair<string,string> pathName;
     pathName.first = first;
