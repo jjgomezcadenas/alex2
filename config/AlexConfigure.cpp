@@ -75,6 +75,8 @@ namespace alex {
     const XMLElement* algoElement = rootElement->FirstChildElement ("Algos") ;
     fAlgosPathName =  ParseStringPair(algoElement,fStags);
 
+    klog << log4cpp::Priority::DEBUG << " fAlgosPathName.first=" << fAlgosPathName.first;
+
     const XMLElement* dstElement = rootElement->FirstChildElement ("DST") ;
     fDstPathName =  ParseStringPair(dstElement,fStags);
 
