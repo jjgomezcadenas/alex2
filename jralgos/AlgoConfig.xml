@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AlgoConfig>
+  <Algo>
+    <name>IElectrons</name>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/irene</path>
+  </Algo>
+  <!-- <Algo>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/example</path>
+    <name>AEx2</name>
+  </Algo> -->
+<Algo>
+    <name>AHits</name>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/irene</path>
+  </Algo>
+  <Algo>
+      <name>PElectrons</name>
+      <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/irene</path>
+  </Algo>
+</AlgoConfig>

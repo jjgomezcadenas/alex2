@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<AlexConfig>
+  <Algos>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/irene</path>
+    <name>AlgoConfig.xml</name>
+  </Algos>
+  <!-- <DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/ireneMain</path>
+    <name>MagBox_Xe_10atm_00tesla.e2447.histos.root</name>
+  </HistoFile> -->
+  <DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/ireneMain</path>
+    <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.0.histos.root</name>
+  </HistoFile>
+  <Events>
+    <runMax>10000</runMax>
+    <runDebug>10</runDebug>
+  </Events>
+  <Debug>
+    <level>DEBUG</level>
+  </Debug>
+</AlexConfig>
