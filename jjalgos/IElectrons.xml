@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<IElectrons>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>IElectrons</value>
+  </Param>
+  <Param>
+    <name>fPMax</name>
+    <dataType>double</dataType>
+    <value>2.9135</value>
+  </Param>
+  <Param>
+    <name>fPMin</name>
+    <dataType>double</dataType>
+    <value>0.25</value>
+  </Param>
+  <H1D>
+    <name>fH1_nb</name>
+    <title>Number of electrons</title>
+    <nbinsx>20</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>20.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_npb</name>
+    <title>Number of primary electrons</title>
+    <nbinsx>20</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>20.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_P</name>
+    <title>Inclusive electron momentum (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_PP</name>
+    <title>Inclusive primary electron momentum (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_PMax</name>
+    <title>PMax electron momentum (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_TMax</name>
+    <title>PMax electron kinetic energy (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_PMax2</name>
+    <title>PMax2 electron momentum (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_TMax2</name>
+    <title>PMax2 electron kinetic energy (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H1D>
+    <name>fH1_TMax12</name>
+    <title>Electron (1+2) kinetic energy (MeV)</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>3.0</xup>
+  </H1D>
+  <H2D>
+    <name>fH2_YZ</name>
+    <title>Electron decay vertex Y vs Z</title>
+    <nbinsx>20</nbinsx>
+    <nbinsy>20</nbinsy>
+    <xlow>-200.0</xlow>
+    <xup>200.0</xup>
+    <ylow>-200.</ylow>
+    <yup>200.0</yup>
+  </H2D>
+  <H2D>
+    <name>fH2_XZ</name>
+    <title>Electron decay vertex X vs Z</title>
+    <nbinsx>20</nbinsx>
+    <nbinsy>20</nbinsy>
+    <xlow>-200.0</xlow>
+    <xup>200.0</xup>
+    <ylow>-200.</ylow>
+    <yup>200.0</yup>
+  </H2D>
+  <H2D>
+    <name>fH2_XY</name>
+    <title>Electron decay vertex X vs Y</title>
+    <nbinsx>20</nbinsx>
+    <nbinsy>20</nbinsy>
+    <xlow>-200.0</xlow>
+    <xup>200.0</xup>
+    <ylow>-200.</ylow>
+    <yup>200.0</yup>
+  </H2D>
+</IElectrons>
