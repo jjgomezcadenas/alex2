@@ -20,6 +20,7 @@
 #include <alex/AlexConfigure.h>
 #include <alex/StringOperations.h>
 #include <alex/LogUtil.h>
+using std::stringstream;
 
 using namespace alex;
 using std::string; 
@@ -29,6 +30,7 @@ using std::ostream;
 using std::ifstream;
 using std::vector;
 
+
 int main(int argc, char **argv)
 {
 	
@@ -36,8 +38,21 @@ int main(int argc, char **argv)
 	log4cpp::Category& klog = log4cpp::Category::getRoot();
 	AlexConfigure::Instance().Init("DEBUG","AlexConfig");
 
-	string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/ireneMain/";
-	string pathToAlgos ="/Users/jjgomezcadenas/Development/devnext/alex2/irene/";
+  if( argc != 2)   
+  { 
+    cout <<" Usage: xConfigure <pathToMain> <pathToAlgos>" << endl;
+    return -1;
+  }
+
+  stringstream ss;
+  ss << argv[0];
+  string pathToMain;
+  ss << argv[1];
+  string pathToAlgos;
+
+	//string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/ireneMain/";
+	//string pathToAlgos ="/Users/jjgomezcadenas/Development/devnext/alex2/irene/";
+
 	string alexConf="AlexConfig.xml";
 	string aConfHeader="AConf.hh";
 	string aConfCpp="AConf.cxx";

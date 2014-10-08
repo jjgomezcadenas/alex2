@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <AlexConfig>
   <Algos>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex2/irene</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>
     <name>AlgoConfig.xml</name>
   </Algos>
   <!-- <DST>
@@ -17,7 +17,7 @@
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.next</name>
   </DST>
   <HistoFile>
-    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/ireneMain</path>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex-build/histos</path>
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root</name>
   </HistoFile>
   <Events>
