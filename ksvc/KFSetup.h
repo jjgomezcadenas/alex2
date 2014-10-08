@@ -67,6 +67,7 @@ namespace alex {
       double MinGoodNodeOrdering()const {return fMinGoodNodeOrdering;}
 
       void Info(ostream& s) const;
+      void Print() const;
   };
   
   ostream& operator << (ostream& s, const KFSetupManager& p);

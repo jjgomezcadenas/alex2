@@ -100,6 +100,27 @@ namespace alex {
 
   }
 
+  void KFSetupManager::Print() const
+  {
+    std::ostringstream s; 
+    s << std::endl;
+    s<<"{KFSetupManager: ";
+    s << "Gas=" << fGas << " Pressure(bar) =" 
+      << fPr  << " B (tesla) =" << fB/tesla << std::endl;
+    s << "X0 (cm) =" << fX0/cm << " dE/dx (keV/cm) = "
+     << fDeDx/(keV/cm) << std::endl;
+    s << "Max chi2 = " << fMaxChi2 << "}";
+    s << std::endl;
+    s<<"{KFSetupManager Verbosity: ";
+    s << "fitterVerbosity = " << fFitterVerbosity << std::endl;
+    s << "navigationVerbosity = " << fNavigationVerbosity << std::endl;
+    s << "modelVerbosity = " << fModelVerbosity << std::endl;
+    s << "matchingVerbosity = " << fMatchingVerbosity << std::endl;
+    s << "}";
+
+    std::cout << s.str() << std::endl;
+  }
+
   ostream& operator << (ostream& s, const KFSetupManager& p) 
   {
     p.Info(s);
