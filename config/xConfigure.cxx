@@ -38,19 +38,19 @@ int main(int argc, char **argv)
 	log4cpp::Category& klog = log4cpp::Category::getRoot();
 	AlexConfigure::Instance().Init("DEBUG","AlexConfig");
 
-  if( argc != 2)   
+  if( argc != 1)   
   { 
-    cout <<" Usage: xConfigure <pathToMain> <pathToAlgos>" << endl;
+    cout <<" Usage: xConfigure <pathToAlgos>" << endl;
     return -1;
   }
 
   stringstream ss;
   ss << argv[0];
-  string pathToMain;
-  ss << argv[1];
+  // string pathToMain;
+  // ss << argv[1];
   string pathToAlgos;
 
-	//string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/ireneMain/";
+	string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/ireneMain/";
 	//string pathToAlgos ="/Users/jjgomezcadenas/Development/devnext/alex2/irene/";
 
 	string alexConf="AlexConfig.xml";
