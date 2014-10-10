@@ -12,6 +12,7 @@
 #include <map>
 #include <alex/SingletonTemplate.h>
 #include <alex/LogUtil.h>
+#include <alex/IBeta.h>
 #include "IDefs.h"
 
 #include <TFile.h>
@@ -32,6 +33,8 @@ class IreneManager {
 		int DstGetEntry(int ivt);
 		void LoadEvent(const irene::Event* ievt);
 		const irene::Event& GetEvent();
+		void CreateTracks();
+                //int GetIMaxIBeta();
 
 		IParticles GetElectrons() const {return fElectrons;}
 		int GetNumberOfElectrons() const {return fElectrons.size();}
@@ -40,12 +43,17 @@ class IreneManager {
 		std::pair<IParticle, IParticle> GetPMaxElectrons() const {return fBetasMax;}
 		IHits GetTrueHits() const {return fTrueHits;}
 		std::pair<IHits, IHits> GetPMaxElectronsHits() const {return fBetasMaxHits;}
+		std::vector<const IBeta*> GetIBetas() const { return fIBetas; }
+                std::vector<double> GetMinDistList() const { return minDistList; }
 
 	private:
 		void FetchElectrons();
 		void FetchPMaxElectrons();
-		
-		TFile* fIfile;
+                double ComputeMinDist(IHits ihs1, IHits ihs2);
+		double ComputeMinDist(std::vector<const alex::Hit*> ihs1, IHit ih);
+
+	double fMaxDist;
+	TFile* fIfile;
   	TTree* fEvtTree ;
   	const irene::Event* fIevt;
   	IParticles fElectrons;
@@ -54,6 +62,8 @@ class IreneManager {
   	std::vector<const irene::Track*> fIreneTracks ; 
   	std::pair<IParticle, IParticle> fBetasMax;
   	std::pair<IHits, IHits> fBetasMaxHits;
+        std::vector<const IBeta*> fIBetas;
+        std::vector<double> minDistList;
 			
 	};
 

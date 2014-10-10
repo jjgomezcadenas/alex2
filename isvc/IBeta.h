@@ -16,6 +16,8 @@ class IBeta {
 		IBeta(){};
 		~IBeta();
 		void AddHit(const Hit& hit);
+		void AddHit(const IHit& hit);
+		void Clear();
 		void SetType(std::string type) {fType = type;}
 		std::vector<const Hit* > GetHit() const {return fHitVector;}
 		std::string GetType() const {return fType;}

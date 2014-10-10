@@ -16,6 +16,17 @@ namespace alex {
 		fHitVector.push_back(hitp);
 	}
 
+	void IBeta::AddHit(const IHit& hit)
+	{
+		auto hitp = new Hit(hit);
+		fHitVector.push_back(hitp);
+	}
+
+        void IBeta::Clear()
+        {
+                fHitVector.clear();
+        }
+
 	IBeta::~IBeta()
 	{
 		for(auto hit : fHitVector)
