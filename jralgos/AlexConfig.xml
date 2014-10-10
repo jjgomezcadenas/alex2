@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <AlexConfig>
   <Algos>
-    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/irene</path>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
     <name>AlgoConfig.xml</name>
   </Algos>
   <!-- <DST>
