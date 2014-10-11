@@ -54,9 +54,8 @@ int main(int argc, char **argv)
   string pathToAlgos;
   ss>>pathToAlgos;
 
-	string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/ireneMain/";
-	//string pathToAlgos ="/Users/jjgomezcadenas/Development/devnext/alex2/irene/";
-
+	string pathToMain ="/Users/jjgomezcadenas/Development/devnext/alex2/alexMain/";
+	
 	string alexConf="AlexConfig.xml";
 	string aConfHeader="AConf.hh";
 	string aConfCpp="AConf.cxx";
