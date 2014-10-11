@@ -8,6 +8,6 @@ include_directories (${ALEX_SOURCE_DIR})
 link_directories (${ALEX_SOURCE_DIR} ${ALEX_SOURCE_DIR}/irene) 
 
 add_executable (ireneMain ireneMain.cpp)
-#target_link_libraries (ireneMain alex ireneExample)
+target_link_libraries (ireneMain ireneExample alex)
 
 
