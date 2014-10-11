@@ -30,7 +30,6 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     SetDebugLevel(debugLevel);
-    fMaxDist = 21.;
   }
 //--------------------------------------------------------------------
   void IreneManager::InitDst(std::string fileName, const irene::Event* ievt)
@@ -156,9 +155,10 @@ namespace alex {
   }
 
 //
-//
+// maxDist: the maximum distance a hit can be from some hit in a track
+//  to still be considered part of that track
 //--------------------------------------------------------------------
-  void IreneManager::CreateTracks()
+  void IreneManager::CreateTracks(double maxDist)
 //--------------------------------------------------------------------
   {
     // Clear the current list of IBeta objects.
@@ -220,7 +220,7 @@ namespace alex {
         truehits.erase(truehits.begin()+i);
       }
       // Otherwise, if mindist is less than the chosen track separation, add to the current track.
-      else if(mindist < fMaxDist)
+      else if(mindist < maxDist)
       {
   
         // This hit lies in the curent track; add it.
@@ -253,9 +253,11 @@ namespace alex {
         current_track->AddHit(truehits[0]);
         truehits.erase(truehits.begin());
         i = 0;
-
       }
     }
+
+    // Push back the final track.
+    fIBetas.push_back(current_track);
   }
 
 /*
