@@ -20,12 +20,13 @@ class IBeta: public IBlob {
 		~IBeta();
 
 		void AddBlob(const IBlob& blob);
-		void ClearBlobs();
+		
 		void SetType(std::string type) {fType = type;}
 		std::vector<IBlob*> GetBlobs() const {return fBlobs;}
 		std::string GetType() const {return fType;}
 
 	private:
+		void ClearBlobs();
 		std::vector<IBlob*> fBlobs;
 		std::string fType;
 			

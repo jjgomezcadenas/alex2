@@ -18,10 +18,11 @@ class IBlob {
 		virtual ~IBlob();
 		void AddHit(const Hit& hit);
 		void AddHit(const IHit& hit);
-		void Clear();
+		
 		std::vector<const Hit* > GetHit() const {return fHitVector;}
 
 	private:
+		void Clear();
 		void DeleteHits();
 		std::vector<const Hit*> fHitVector;
 			
