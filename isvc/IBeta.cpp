@@ -9,30 +9,22 @@
 
 namespace alex {
 
-
-	void IBeta::AddHit(const Hit&  hit)
+	void IBeta::AddBlob(const IBlob&  blob)
 	{
-		auto hitp =new Hit(hit);
-		fHitVector.push_back(hitp);
+		auto iblob =new IBlob(blob);
+		fBlobs.push_back(iblob);
 	}
 
-	void IBeta::AddHit(const IHit& hit)
-	{
-		auto hitp = new Hit(hit);
-		fHitVector.push_back(hitp);
-	}
-
-        void IBeta::Clear()
-        {
-                fHitVector.clear();
-        }
+  void IBeta::ClearBlobs()
+  {
+    fBlobs.clear();
+  }
 
 	IBeta::~IBeta()
 	{
-		for(auto hit : fHitVector)
-    {
-      delete hit; 
-		}	
-		fHitVector.clear();	
+		for(auto iblob : fBlobs)
+			delete iblob; 
+
+		ClearBlobs();	
 	}
 }
