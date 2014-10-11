@@ -4,6 +4,9 @@
  IBLOB represents a blob at the end of the IBeta track.
  A blob is a set of hits 
  JJGC, JR, October, 2014.
+
+ Notice: the sorted hit vector should sort the hits of the blob in z
+ this implies that the first "true hit" from the electron track could be not the first
 */
 
 
@@ -20,11 +23,13 @@ class IBlob {
 		void AddHit(const IHit& hit);
 		
 		std::vector<const Hit* > GetHit() const {return fHitVector;}
+		std::vector<const Hit* > GetSortedHits() const {return fSortedHitVector;}
 
 	private:
 		void Clear();
 		void DeleteHits();
 		std::vector<const Hit*> fHitVector;
+		std::vector<const Hit*> fSortedHitVector;  //hits sorted (normally in z)
 			
 	};
 

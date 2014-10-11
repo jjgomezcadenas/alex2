@@ -5,6 +5,12 @@
  eg, a "connected wire" which links to the true electron(s) in the event
  An IBeta is derived from an IBlob (eg a collection of hits) 
  JJGC, July, 2014.
+
+ Notice that we derive from IBlob
+ std::vector<const Hit* > GetSortedHits() const {return fSortedHitVector;}
+
+ For an IBeta the GetSortedHits() should give us the collection of hits (sorted in z)
+ from which we will fit using kZ
 */
 
 

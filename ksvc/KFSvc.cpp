@@ -1,12 +1,15 @@
 // A simple class to define a Kalman Filter Setup
 // JJ, April 2014
 
-#include "KFSvcManager.h"
+#include "KFSvc.h"
 #include <iostream>
 #include <alex/KFSetup.h>
 #include <alex/LogUtil.h>
-#include <alex/ISvc.h>
+//#include <alex/ISvc.h>
+#include <alex/IBeta.h>
 #include <CLHEP/Units/SystemOfUnits.h>
+
+#define PMAX 2.9 
 
 using std::string;
 using std::endl; 
@@ -31,7 +34,6 @@ namespace alex {
     
     fModel = Model();
     fDim = ModelDim();
-    
     
     klog << log4cpp::Priority::INFO 
         << "--: model = " << fModel 
@@ -266,133 +268,56 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  RP::Trajectory KFSvcManager::CreateTrajectory() 
+  RP::Trajectory KFSvcManager::CreateTrajectory(const IBeta& ibeta, std::vector<double> measError) 
 //--------------------------------------------------------------------
   {
     
     log4cpp::Category& klog = log4cpp::Category::getRoot();
-    klog << log4cpp::Priority::INFO << "+++In KFSvcManager::Create Trajectory " ;
 
-    std::vector<const IBeta*> iBetas = ISvc::Instance().GetIBetas()
-
-    for(auto beta : iBetas)
-    {
-      if (not beta->GetType()=="2e")
-        continue;
-
-      
-    }
-
-    IHits sphits = isvc.SelectHits("Sparse");
-    IHits smhits = isvc.SelectHits("Smeared");
-    std::vector<double> sigma = isvc.MeasurementErrors();
-    std::vector<const irene::Particle*> vBeta = isvc.Electrons();
-
-    const irene::Particle* beta = vBeta[0];
-    auto betaTest = isvc.SelectBetaP(beta);    // it test= true then single electron
-
-    klog << log4cpp::Priority::INFO << "SelectBetaP --> " << betaTest;
-
+    std::vector<const Hit* > hits = ibeta->GetSortedHits();
 
     // destroy measurements in _meas container
     stc_tools::destroy(fMeas);
   
-    //reset the "true" trajectory
-    fSimTraj.reset();
-  
-    EVector vv(7,0);
     EMatrix M(3,3,1);
     EVector m(3,0);
-    EVector smear_m(3,0);
     EMatrix meas_cov(3,3,0);
     
     for (size_t i=0; i<3; ++i)
     {
-      meas_cov[i][i] = sigma[i];
+      meas_cov[i][i] = measError[i];
     }
 
     klog << log4cpp::Priority::DEBUG << "Cov Matrix --> " << meas_cov;
 
-    auto size = sphits.size();
-
-    if (size != smhits.size())
-    {
-      std::cout << "ERROR: sparse and smeared hits do not have the same size" << std::endl;
-      std::cout << "sphits.size() =" << sphits.size() << std::endl;
-      std::cout << "smhits.size() =" << smhits.size() << std::endl;
-      exit (EXIT_FAILURE);
-    }
+    auto size = hits.size();
 
     klog << log4cpp::Priority::DEBUG << " size of hits --> " << size;
 
-    for (size_t i=0; i<size; ++i)
+    for(auto hit : hits)
     {
-      auto sphit =sphits.at(i);
-      auto smhit =smhits.at(i); 
-      auto xyztSp = sphit.first;
-      auto xyztSm = smhit.first;
+      m[0]=hit->XYZ().X();
+      m[1]=hit->XYZ().Y();
+      m[2]=hit->XYZ().Z();
 
-      m[0]=xyztSp.X();
-      m[1]=xyztSp.Y();
-      m[2]=xyztSp.Z();
-
-      smear_m[0]=xyztSm.X();
-      smear_m[1]=xyztSm.Y();
-      smear_m[2]=xyztSm.Z();
-    
-      string type=RP::xyz;
-
-      klog << log4cpp::Priority::DEBUG << "+++true hit -> " << m;
-      klog << log4cpp::Priority::DEBUG << "+++smear hit -> " << smear_m;
       
-      // create a measurement
+      klog << log4cpp::Priority::DEBUG << "+++true hit -> " << m;
       klog << log4cpp::Priority::DEBUG << "Create a measurement " ;
-      Measurement* meas = new Measurement();    
+
+      Measurement* meas = new Measurement(); 
+      string type=RP::xyz;
+   
       meas->set_name(type);                         // the measurement type
-      meas->set_hv(HyperVector(smear_m,meas_cov,type));  // the HyperVector 
+      meas->set_hv(HyperVector(m,meas_cov,type));  // the HyperVector 
       meas->set_name(RP::setup_volume,"mother");          // the volume
         
-      // the true position of the measurement
+      // the  position of the measurement
       klog << log4cpp::Priority::DEBUG << "Create measurement plane " ;
       meas->set_position_hv(HyperVector(m,EMatrix(3,3,0),RP::xyz));
 
       //    Add the measurement to the vector
-      fMeas.push_back(meas); 
-    
-      // ------ Store true information for pulls -----------
-      if (betaTest == true) // we have a single electron of P=2.9 MeV
-      {
-        klog << log4cpp::Priority::DEBUG << "Storing true info " ;
-
-        State state;
-        TLorentzVector pos = beta->GetInitialVertex();
-        TLorentzVector mom = beta->GetInitialMomentum();
-        double q = beta->GetCharge();
-
-        EVector v(fDim,0);
-        for (int k=0;k<3;k++)
-          v[k]=pos[k];
-    
-        v[3]=mom[0]/mom[2];
-        v[4]=mom[1]/mom[2];
-
-        klog << log4cpp::Priority::DEBUG << "model " << fModel << " dim " << fDim ;
-        klog << log4cpp::Priority::DEBUG << " state vector " << v ;
-
-        if (fKfs->Model() == "helix") 
-          v[5]=q/(mom.Vect().Mag());
-    
-        state.set_hv(HyperVector(v,EMatrix(fDim,fDim,0),RP::slopes_curv_z));
-
-        // create the node
-        klog << log4cpp::Priority::DEBUG << " create the node "  ;
-        Node* node = new Node();
-        node->set_measurement(*meas);
-        node->set_state(state);
-        fSimTraj.nodes().push_back(node); 
-      }
-       
-   }
+      fMeas.push_back(meas);
+    }
     
     // add the measurements to the trajectory
     klog << log4cpp::Priority::INFO << " Measurement vector created "  ;
@@ -405,58 +330,41 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  void KFSvcManager::SeedState(const ISvc& isvc, 
-                        const Trajectory& traj, State& state) 
+  RP:: State KFSvcManager::SeedState(vector<double> vGuess, vector<double> pGuess) 
 //--------------------------------------------------------------------
   {
+    
+    State state
+    // vGuess is a guess of the position
+    //pGuess is a guess of the momentum
+
     log4cpp::Category& klog = log4cpp::Category::getRoot();
-    std::vector<const irene::Particle*> vBeta = isvc.Electrons();
-
-    const irene::Particle* beta = vBeta[0];
-    //auto betaTest = isvc.SelectBetaP(beta);
-
+    
     EVector v(fDim,0);
-    EMatrix C(fDim,fDim,0);
+    EMatrix C(fDim,fDim,0);   
 
-    klog << log4cpp::Priority::INFO << " ++KFSvcManager::SeedState --> " ;
-    klog << log4cpp::Priority::INFO << " beta --> " 
-          << isvc.PrintElectron(beta);
-
-    const RecObject& meas = traj.nodes()[0]->measurement();
-    const EVector& m = meas.vector();
-
-    klog << log4cpp::Priority::INFO << " first measurement --> " 
-          << m;
-
-    TLorentzVector ul = beta->GetInitialMomentum();
-    EVector u(3,0);
-    u[0] = ul.X();
-    u[1] = ul.Y();
-    u[2] = ul.Z();
-
-    klog << log4cpp::Priority::INFO << " Momentum vector --> " 
-          << u;
-
-    v[0] = m[0];   // a guess of the x position
-    v[1] = m[1];   // a guess of the y position
-    v[2] = m[2];  // a guess of the z position  
-    v[3] = u[0]/u[2];  // a guess of dx/dz (use truth for the moment)
-    v[4] = u[1]/u[2];  // a guess of dy/dz (use truth for the moment)
+    v[0] = vGuess[0];   // a guess of the x position
+    v[1] = vGuess[1];   // a guess of the y position
+    v[2] = vGuess[2];  // a guess of the z position  
+    v[3] = pGuess[0]/pGuess[2];  // a guess of dx/dz 
+    v[4] = pGuess[1]/pGuess[2];  // a guess of dy/dz 
 
     klog << log4cpp::Priority::INFO << " Initial state --> " 
           << v;
 
-    if (fKfs->Model() =="helix")
+    double qoverp=-1./PMAX;
+
+    if (KFSetup::Instance().Model() =="helix")
     {
-      v[5]=-1./PMAX;  // assume forward fit!
+      v[5]=qoverp;  // assume forward fit!
+      C[5][5]= 0.1;  // not a large error like the others, momentum "known"
     }
-  else
+    else
     {
     // For the Straight line model q/p is a fix parameter use for MS computation 
     
-    double qoverp=-1./PMAX;
     klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
-    state.set_hv(RP::qoverp,HyperVector(qoverp,0));
+    fSetup.set_hv(RP::qoverp,HyperVector(qoverp,0));
     }
 
     // give a large diagonal covariance matrix
@@ -466,9 +374,6 @@ namespace alex {
 
     klog << log4cpp::Priority::INFO << " Cov matrix --> " << C ;
 
-    if (fKfs->Model() =="helix")
-      C[5][5]= 0.1;
-  
     // Set the main HyperVector
     klog << log4cpp::Priority::INFO << " Set the main HyperVector --> "  ;
     state.set_hv(HyperVector(v,C));
@@ -489,31 +394,29 @@ namespace alex {
       state.set_name(RP::representation,RP::slopes_curv_z);
     else
       state.set_name(RP::representation,RP::slopes_z);
+
+    return state;
   }
 
 //--------------------------------------------------------------------
-  bool KFSvcManager::Fit(const ISvc& isvc) 
+  bool KFSvcManager::Fit(const IBeta& ibeta, std::vector<double> measError,
+                        vector<double> vGuess, vector<double> pGuess) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::INFO << "In KFSvcManager::Fit --Creating Trajectory " ;
-    auto traj = CreateTrajectory(isvc) ;
+    auto traj = CreateTrajectory(ibeta,measError) ;
 
     klog << log4cpp::Priority::INFO << " Creating seed state "  ;
-    State seed;
-    SeedState(isvc,traj,seed); 
+    auto seed = SeedState(vGuess,pGuess); 
                         
       
-      // fit the trajectory provided a seed state
+    // fit the trajectory provided a seed state
 
     klog << log4cpp::Priority::INFO << " Fitting "  ;
-      bool status = fRPMan.fitting_svc().fit(seed,traj);
-      return status;
+    bool status = fRPMan.fitting_svc().fit(seed,traj);
+    return status;
 
-      // compute the pulls
-      //      compute_pulls(_sim_traj,traj);
-
-      //fill_histos(traj);
       
   }
 //--------------------------------------------------------------------
