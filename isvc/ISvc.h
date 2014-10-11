@@ -33,7 +33,7 @@ class IreneManager {
 		int DstGetEntry(int ivt);
 		void LoadEvent(const irene::Event* ievt);
 		const irene::Event& GetEvent();
-		void CreateTracks();
+		void CreateTracks(double maxDist);
                 //int GetIMaxIBeta();
 
 		IParticles GetElectrons() const {return fElectrons;}
@@ -52,7 +52,6 @@ class IreneManager {
                 double ComputeMinDist(IHits ihs1, IHits ihs2);
 		double ComputeMinDist(std::vector<const alex::Hit*> ihs1, IHit ih);
 
-	double fMaxDist;
 	TFile* fIfile;
   	TTree* fEvtTree ;
   	const irene::Event* fIevt;

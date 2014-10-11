@@ -16,4 +16,9 @@
       <name>PElectrons</name>
       <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
   </Algo>
+  <Algo>
+      <name>BlobRadius</name>
+      <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
+  </Algo>
+
 </AlgoConfig>
