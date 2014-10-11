@@ -44,7 +44,7 @@ class IreneManager {
 		IHits GetTrueHits() const {return fTrueHits;}
 		std::pair<IHits, IHits> GetPMaxElectronsHits() const {return fBetasMaxHits;}
 		std::vector<const IBeta*> GetIBetas() const { return fIBetas; }
-                std::vector<double> GetMinDistList() const { return minDistList; }
+        std::vector<double> GetMinDistList() const { return minDistList; }
 
 	private:
 		void FetchElectrons();

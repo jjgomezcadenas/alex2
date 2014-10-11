@@ -22,9 +22,9 @@
 #include <cstdio>
 #include <cstring>
 
-#include <irene/AlgoHeaders.hh> 
-#include <irene/RegisterAlgosHeader.hh>
-#include <irene/AConf.hh> // generated
+#include <AlgoHeaders.hh> 
+#include <RegisterAlgosHeader.hh>
+#include <AConf.hh> // generated
 
 using namespace alex;
 using std::string; 
