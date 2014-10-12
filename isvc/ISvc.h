@@ -66,7 +66,7 @@ class IreneManager {
 			
 	};
 
-	typedef SingletonTemplate<IreneManager> ISvc;   // Global declaration
+	typedef alex::SingletonTemplate<IreneManager> ISvc;   // Global declaration
 
 }
 #endif

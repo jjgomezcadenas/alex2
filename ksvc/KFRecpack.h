@@ -137,6 +137,38 @@ A Measurements and a measurement vector: They are RecObjects
 typedef RecObject Measurement;
 
 typedef std::vector<Measurement*> measurement_vector;
+
+
+
+-----------
+Regarding which info can  be retrieved from nodes as a result of the
+kalman filtering:
+
+different state hypervector values and residuals are stored with the
+corresponding names:
+
+E.g. to retrieve predicted dynamic vector and matrix from prediction step:
+// get the state
+State& state = node.state();
+const HyperVector& hv_P = state.hv(RP::predicted);
+const EVector& x_P = hv_P.vector();
+const EMatrix& C_P = hv_P.matrix();
+
+// Retrieve predicted residual
+const HyperVector resHV_P = node.residuals().hv(predicted_name);
+const EVector& r_P = resHV_P.vector();
+const EMatrix& R_P = resHV_P.matrix();
+
+node.quality(predicted_name,chi2); //or resHV_P.chi2()
+
+available names:
+RP:predicted, RP::filtered
+RP::smoothed (default)
+
+RP::predicted_back and RP::weighted when using back filtering isntead of
+smoothing
+
+
   
 */
 

@@ -71,7 +71,7 @@ namespace alex {
   };
   
   ostream& operator << (ostream& s, const KFSetupManager& p);
-  typedef SingletonTemplate<KFSetupManager> KFSetup;   // Global declaration
+  typedef alex::SingletonTemplate<KFSetupManager> KFSetup;   // Global declaration
 }
 
 #endif

@@ -1,3 +1,4 @@
+/* -*- mode: c++ -*- */
 #ifndef KFSVC_
 #define KFSVC_
 /*
@@ -6,17 +7,20 @@
 
  JJGC, October, 2014.
 */
+#include <alex/SingletonTemplate.h>
 
 #include <alex/KFRecpack.h>
+
 #include <string>
 #include <vector>
 #include <utility>
 #include <memory>
-#include <alex/SingletonTemplate.h>
-#include <alex/Hit.h>
+
 
 
 namespace alex {
+
+  class Hit;
     
   class KFSvcManager {
 	
@@ -31,7 +35,7 @@ namespace alex {
       RP::State SeedState(std::vector<double> v0, std::vector<double> p0) ;
 
       bool FitTrajectory(RP::Trajectory traj,RP::State seed);
-    
+     
       std::string Model() const;
       int ModelDim() const ;
 
@@ -42,7 +46,7 @@ namespace alex {
       RP::measurement_vector MeasurementVector() const {return fMeas;}
       
  			
-    protected:
+  //   protected:
 
       void InitializeManagerGeometry();
       void SetVerbosity();
@@ -68,6 +72,6 @@ namespace alex {
       RP::measurement_vector fMeas;
 			
 	};
-  typedef SingletonTemplate<KFSetupManager> KFSvc; 
+  typedef alex::SingletonTemplate<KFSvcManager> KFSvc; 
 }
 #endif

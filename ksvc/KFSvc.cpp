@@ -1,10 +1,12 @@
 // A simple class to define a Kalman Filter Setup
 // JJ, April 2014
 
-#include "KFSvc.h"
+#include <alex/KFSvc.h>
 #include <iostream>
 #include <alex/KFSetup.h>
 #include <alex/LogUtil.h>
+#include <alex/Hit.h>
+
 #include <CLHEP/Units/SystemOfUnits.h>
 
 #define PMAX 2.9 
@@ -349,7 +351,7 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     
-    State state
+    State state;
     // v0 is a guess of the position
     //p0 is a guess of the momentum
 
@@ -379,7 +381,7 @@ namespace alex {
     // For the Straight line model q/p is a fix parameter use for MS computation 
     
     klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
-    fSetup.set_hv(RP::qoverp,HyperVector(qoverp,0));
+    state.set_hv(RP::qoverp,HyperVector(qoverp,0));
     }
 
     // give a large diagonal covariance matrix
@@ -394,7 +396,7 @@ namespace alex {
     state.set_hv(HyperVector(v,C));
 
     // Set the sense HyperVector (1=increasing z)
-    double sense=u[2]/fabs(u[2]); // use truth for the moment
+    double sense=p0[2]/fabs(p0[2]); 
 
     klog << log4cpp::Priority::INFO << " Set the sense HyperVector --> " << sense ;
     state.set_hv(RP::sense,HyperVector(sense,0));
@@ -414,7 +416,7 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  bool KFSvcManager::Fit(RP::Trajectory traj,RP::State seed ) 
+  bool KFSvcManager::FitTrajectory(RP::Trajectory traj,RP::State seed ) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
