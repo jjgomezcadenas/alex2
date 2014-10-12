@@ -47,8 +47,11 @@ namespace alex {
     IHits trkSecond = electronhits.second;
 
     // Get the locations of the blob seeds (end of both tracks).
-    TLorentzVector cblob1 = trkFirst[trkFirst.size()-1].first;
-    TLorentzVector cblob2 = trkSecond[trkSecond.size()-1].first;
+    TLorentzVector cblob1;
+    TLorentzVector cblob2;
+    cblob1 = trkFirst[trkFirst.size()-1].first;
+    if(ISvc::Instance().GetNumberOfPrimaryElectrons() >= 2) cblob2 = trkSecond[trkSecond.size()-1].first;
+    else cblob2 = trkFirst[0].first;
     
     // Fill the number of tracks histogram.
     fH1_ntrck->Fill(iBetas.size());
