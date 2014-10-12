@@ -4,27 +4,16 @@
  KFSvc: Manages Kalman Filter
  
 
- JJGC, April, 2014.
+ JJGC, October, 2014.
 */
 
-#include <recpack/RecPackManager.h>
-#include <recpack/string_tools.h>
-#include <recpack/stc_tools.h>
-#include <recpack/ERandom.h>
-#include <recpack/HelixEquation.h>
-#include <recpack/LogSpiralEquation.h>
-#include <recpack/ParticleState.h>
-#include <recpack/RayTool.h>
-#include <recpack/EGeo.h>
-#include <recpack/Definitions.h>
-#include <recpack/Trajectory.h>
-#include <recpack/KalmanFitter.h>
+#include <alex/KFRecpack.h>
 #include <string>
 #include <vector>
 #include <utility>
 #include <memory>
 #include <alex/SingletonTemplate.h>
-
+#include <alex/Hit.h>
 
 
 namespace alex {
@@ -35,18 +24,27 @@ namespace alex {
 		  KFSvcManager(){};
       virtual ~KFSvcManager(){};
       void Init();
-		  bool Fit();
-      RP::Trajectory CreateTrajectory() ;
-      void SeedState(const Trajectory& traj, State& state) ;
+		  
+      RP::Trajectory CreateTrajectory(std::vector<const Hit* > hits, 
+                                      std::vector<double> hitErrors) ;
+
+      RP::State SeedState(std::vector<double> v0, std::vector<double> p0) ;
+
+      bool FitTrajectory(RP::Trajectory traj,RP::State seed);
     
       std::string Model() const;
       int ModelDim() const ;
-      
+
+      double X0() const {return fX0;}
+      double dEdX() const {return fDedx;}
+      RP::EVector BField() const {return fBField;}
+      RP::EMatrix MeasurementCovariance() const {return fCov; }
+      RP::measurement_vector MeasurementVector() const {return fMeas;}
       
  			
     protected:
 
-      void CreateSetup();
+      void InitializeManagerGeometry();
       void SetVerbosity();
 
       std::string fModel;        // model for this setup 
@@ -68,7 +66,6 @@ namespace alex {
       RP::EVector zaxis;
   
       RP::measurement_vector fMeas;
-      RP::Trajectory fSimTraj;
 			
 	};
   typedef SingletonTemplate<KFSetupManager> KFSvc; 

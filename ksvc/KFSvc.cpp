@@ -5,8 +5,6 @@
 #include <iostream>
 #include <alex/KFSetup.h>
 #include <alex/LogUtil.h>
-//#include <alex/ISvc.h>
-#include <alex/IBeta.h>
 #include <CLHEP/Units/SystemOfUnits.h>
 
 #define PMAX 2.9 
@@ -42,35 +40,51 @@ namespace alex {
     klog << log4cpp::Priority::DEBUG
         << "Select the model, fitter and rep";
 
+    // select the model
     fRPMan.model_svc().select_model(fModel);
+
+    // select the Kalman Filter as fitting algorithm
     fRPMan.fitting_svc().select_fitter(RP::kalman);
+
+    //select the default representation
     RP::rep().set_default_rep_name(RP::pos_dir_curv);
+
+     // default fitting representation (should be selected before trying to retrieve a fitter)
     fRPMan.fitting_svc().set_fitting_representation(RP::slopes_curv_z);
 
     klog << log4cpp::Priority::DEBUG
         << "Select the max chi2, max number outliers & extrap failures";
 
+    // set the maximum local chi2 allowed
     fRPMan.fitting_svc().retrieve_fitter<KalmanFitter>(RP::kalman,fModel).
-    set_max_local_chi2ndf(KFSetup::Instance().MaxChi2());  
+    set_max_local_chi2ndf(KFSetup::Instance().MaxChi2()); 
+
+    // set the maximum number of outliers allowed 
     fRPMan.fitting_svc().retrieve_fitter<KalmanFitter>(RP::kalman,fModel).
     set_number_allowed_outliers(KFSetup::Instance().MaxOutliers());
+
+    // set the maximum number of consecutive extrapolation failures when predicting in the Kalman Filter
     fRPMan.fitting_svc().retrieve_fitter<KalmanFitter>(RP::kalman,fModel).
     set_max_consecutive_extrap_failures(KFSetup::Instance().MaxExtrapFailures());
 
     klog << log4cpp::Priority::DEBUG
         << "Init geometrical limits";
+
+    // initialize geometrical limits
     fRPMan.geometry_svc().set_zero_length(1e-3 * mm);
     fRPMan.geometry_svc().set_infinite_length(1e12 * mm);
 
     // minimum distance between nodes to check the node ordering. 
     // Specially  for P0D which can have clusters at the same layer with different z positions
-    fRPMan.matching_svc().set_min_distance_node_ordering(fKfs->MinDistanceNodeOrdering());
+    fRPMan.matching_svc().set_min_distance_node_ordering(KFSetup::Instance().MinDistanceNodeOrdering());
 
     // minimum number of nodes to be check for good ordering
     fRPMan.matching_svc().set_min_good_node_ordering(KFSetup::Instance().MinGoodNodeOrdering());
 
     klog << log4cpp::Priority::DEBUG
         << "Enable MS, disable energy loss fluctuations, enable energy loss correction";
+
+    // enable multiple scattering by default
     fRPMan.model_svc().enable_noiser(fModel, RP::ms, true);
 
     // disable energy loss fluctuations by default
@@ -92,22 +106,24 @@ namespace alex {
     fRPMan.geometry_svc().set_status("ready",false);
 
     klog << log4cpp::Priority::DEBUG
-        << "Create the setup";
-    CreateSetup();
+        << "Initialize Manager Geometry";
+
+    InitializeManagerGeometry();
 
    klog << log4cpp::Priority::DEBUG
-        << "Setup Created";
+        << "Set Verbosity();";
+
     SetVerbosity();
 
   }
 //--------------------------------------------------------------------
-  void KFSvcManager::CreateSetup()
+  void KFSvcManager::InitializeManagerGeometry()
 //--------------------------------------------------------------------
   {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     
     klog << log4cpp::Priority::DEBUG
-        << "Create CreateKFSetup";
+        << "Initialize Manager Geometry";
 
      // box dimensions
     double S = 100*m;
@@ -149,7 +165,7 @@ namespace alex {
 
     if (KFSetup::Instance().X0() != 0) 
     {
-      double fX0 = KFSetup::Instance().X0(); // Data member, Recpack weird stuff   
+      fX0 = KFSetup::Instance().X0(); // Data member, Recpack weird stuff   
       fSetup.set_volume_property("mother",RP::X0,fX0); 
     }
 
@@ -163,6 +179,7 @@ namespace alex {
     // 4. add the setup to the geometry service
     klog << log4cpp::Priority::DEBUG
         << "Add the setup to the geometry service";
+
     fRPMan.geometry_svc().add_setup("main",fSetup);
 
     // 5. select the setup to be used by the geometry service
@@ -171,16 +188,15 @@ namespace alex {
      // navigation strategy (the navigator needs the setup)
     klog << log4cpp::Priority::DEBUG
         << "Navigation strategy";
+
     fRPMan.navigation_svc().navigator(fModel).set_unique_surface(true);
 
     // The geometry is initialized for this manager
     fRPMan.geometry_svc().set_status("ready",true);
 
     klog << log4cpp::Priority::INFO 
-        << "Recpack Setup: " << fSetup;
+        << "Manager Geometry: " << fSetup;
   
-    klog << log4cpp::Priority::INFO 
-        << "Dump completed: " ;
   }
 //--------------------------------------------------------------------
   void KFSvcManager::SetVerbosity() 
@@ -268,27 +284,25 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  RP::Trajectory KFSvcManager::CreateTrajectory(const IBeta& ibeta, std::vector<double> measError) 
+  RP::Trajectory KFSvcManager::CreateTrajectory(std::vector<const Hit* > hits, 
+                                                std::vector<double> hitErrors) 
 //--------------------------------------------------------------------
   {
     
     log4cpp::Category& klog = log4cpp::Category::getRoot();
 
-    std::vector<const Hit* > hits = ibeta->GetSortedHits();
-
-    // destroy measurements in _meas container
+    // destroy measurements in fMeas container
     stc_tools::destroy(fMeas);
   
-    EMatrix M(3,3,1);
     EVector m(3,0);
-    EMatrix meas_cov(3,3,0);
+    fCov = EMatrix(3,3,0);
     
     for (size_t i=0; i<3; ++i)
     {
-      meas_cov[i][i] = measError[i];
+      fCov[i][i] = hitErrors[i];
     }
 
-    klog << log4cpp::Priority::DEBUG << "Cov Matrix --> " << meas_cov;
+    klog << log4cpp::Priority::DEBUG << "Cov Matrix --> " << fCov;
 
     auto size = hits.size();
 
@@ -299,20 +313,20 @@ namespace alex {
       m[0]=hit->XYZ().X();
       m[1]=hit->XYZ().Y();
       m[2]=hit->XYZ().Z();
-
-      
-      klog << log4cpp::Priority::DEBUG << "+++true hit -> " << m;
+ 
+      klog << log4cpp::Priority::DEBUG << "+++hit x = " << m[0] << " y = " << m[1] << " z = " << m[2];
       klog << log4cpp::Priority::DEBUG << "Create a measurement " ;
 
       Measurement* meas = new Measurement(); 
       string type=RP::xyz;
    
       meas->set_name(type);                         // the measurement type
-      meas->set_hv(HyperVector(m,meas_cov,type));  // the HyperVector 
+      meas->set_hv(HyperVector(m,fCov,type));  // the HyperVector 
       meas->set_name(RP::setup_volume,"mother");          // the volume
         
       // the  position of the measurement
       klog << log4cpp::Priority::DEBUG << "Create measurement plane " ;
+
       meas->set_position_hv(HyperVector(m,EMatrix(3,3,0),RP::xyz));
 
       //    Add the measurement to the vector
@@ -321,6 +335,7 @@ namespace alex {
     
     // add the measurements to the trajectory
     klog << log4cpp::Priority::INFO << " Measurement vector created "  ;
+    
     Trajectory trj;
     trj.add_constituents(fMeas);  
 
@@ -330,24 +345,24 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  RP:: State KFSvcManager::SeedState(vector<double> vGuess, vector<double> pGuess) 
+  RP::State KFSvcManager::SeedState(std::vector<double> v0, std::vector<double> p0) 
 //--------------------------------------------------------------------
   {
     
     State state
-    // vGuess is a guess of the position
-    //pGuess is a guess of the momentum
+    // v0 is a guess of the position
+    //p0 is a guess of the momentum
 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     
     EVector v(fDim,0);
     EMatrix C(fDim,fDim,0);   
 
-    v[0] = vGuess[0];   // a guess of the x position
-    v[1] = vGuess[1];   // a guess of the y position
-    v[2] = vGuess[2];  // a guess of the z position  
-    v[3] = pGuess[0]/pGuess[2];  // a guess of dx/dz 
-    v[4] = pGuess[1]/pGuess[2];  // a guess of dy/dz 
+    v[0] = v0[0];   // a guess of the x position
+    v[1] = v0[1];   // a guess of the y position
+    v[2] = v0[2];  // a guess of the z position  
+    v[3] = p0[0]/p0[2];  // a guess of dx/dz 
+    v[4] = p0[1]/p0[2];  // a guess of dy/dz 
 
     klog << log4cpp::Priority::INFO << " Initial state --> " 
           << v;
@@ -390,7 +405,7 @@ namespace alex {
 
   // Set the representation (x,y,z dx/dz, dy/dz, q/p)
     klog << log4cpp::Priority::INFO << " Set the representation --> "  ;
-    if (fKfs->Model() =="helix")
+    if (KFSetup::Instance().Model() =="helix")
       state.set_name(RP::representation,RP::slopes_curv_z);
     else
       state.set_name(RP::representation,RP::slopes_z);
@@ -399,24 +414,15 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  bool KFSvcManager::Fit(const IBeta& ibeta, std::vector<double> measError,
-                        vector<double> vGuess, vector<double> pGuess) 
+  bool KFSvcManager::Fit(RP::Trajectory traj,RP::State seed ) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
-    klog << log4cpp::Priority::INFO << "In KFSvcManager::Fit --Creating Trajectory " ;
-    auto traj = CreateTrajectory(ibeta,measError) ;
+    klog << log4cpp::Priority::INFO << "In KFSvcManager::Fitting -- " ;
+    
 
-    klog << log4cpp::Priority::INFO << " Creating seed state "  ;
-    auto seed = SeedState(vGuess,pGuess); 
-                        
-      
-    // fit the trajectory provided a seed state
-
-    klog << log4cpp::Priority::INFO << " Fitting "  ;
     bool status = fRPMan.fitting_svc().fit(seed,traj);
     return status;
-
       
   }
 //--------------------------------------------------------------------
