@@ -14,6 +14,7 @@ namespace alex {
 		std::vector<const Hit* > ihits =iblob.GetHit();		
 		for(auto hit : ihits)
 			this->AddHit(*hit);
+		fBlob = new Hit(*(iblob.GetBlob()));
 	}
 
 	void IBlob::AddHit(const Hit&  hit)
@@ -28,6 +29,11 @@ namespace alex {
 		fHitVector.push_back(hitp);
 	}
 
+	void IBlob::CreateBlob(double x, double y, double z, double E)
+	{
+		fBlob = new Hit(x, y, z, E);
+
+	}
   void IBlob::Clear()
   {
     fHitVector.clear();
@@ -43,5 +49,6 @@ namespace alex {
 	IBlob::~IBlob()
 	{
 		DeleteHits();	
+		delete fBlob;
 	}
 }

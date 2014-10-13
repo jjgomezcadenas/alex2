@@ -21,15 +21,16 @@ class IBlob {
 		virtual ~IBlob();
 		void AddHit(const Hit& hit);
 		void AddHit(const IHit& hit);
+		void CreateBlob(double x, double y, double z, double E);
 		
 		std::vector<const Hit* > GetHit() const {return fHitVector;}
-		std::vector<const Hit* > GetSortedHits() const {return fSortedHitVector;}
+		const Hit* GetBlob() const {return fBlob;}
 
 	private:
 		void Clear();
 		void DeleteHits();
 		std::vector<const Hit*> fHitVector;
-		std::vector<const Hit*> fSortedHitVector;  //hits sorted (normally in z)
+		Hit* fBlob;
 			
 	};
 

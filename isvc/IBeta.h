@@ -17,7 +17,7 @@
 #include "IBlob.h"
 
 // fType values:
-// "2e", "1e", "gamma"
+// "LT = long track (> 200 hits) ", "ST = (> 50 < 200) ", "PH= photon < 50"
 namespace alex {
 
 class IBeta: public IBlob {
