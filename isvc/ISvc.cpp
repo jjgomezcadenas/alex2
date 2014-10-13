@@ -75,7 +75,7 @@ namespace alex {
       {
         fBetasMaxHits.first = track->GetHits();
       }
-      else if (particle->GetParticleID() == fBetasMax.second->GetParticleID())
+      else if (GetNumberOfPrimaryElectrons() >= 2 && particle->GetParticleID() == fBetasMax.second->GetParticleID())
       {
 
         fBetasMaxHits.second = track->GetHits();
@@ -180,7 +180,9 @@ namespace alex {
     // Add all the hits from the most and second-most energetic
     //  electrons as the seed.
     for(int i = 0; i < electronhits.first.size(); i++) current_track->AddHit(electronhits.first[i]);
-    for(int i = 0; i < electronhits.second.size(); i++) current_track->AddHit(electronhits.second[i]);
+    if(GetNumberOfPrimaryElectrons() >= 2) {
+      for(int i = 0; i < electronhits.second.size(); i++) current_track->AddHit(electronhits.second[i]);
+    }
 
     // First loop over all hits and calculate the minimum distance to the primary track.
     for(int i = 0; i < truehits.size(); i++)

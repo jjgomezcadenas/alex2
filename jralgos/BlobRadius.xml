@@ -15,13 +15,13 @@
   <Param>
     <name>fRadMin</name>
     <dataType>double</dataType>
-    <value>1.0</value>
+    <value>20.0</value>
   </Param>
 
   <Param>
     <name>fRadMax</name>
     <dataType>double</dataType>
-    <value>100.0</value>
+    <value>20.1</value>
   </Param>
 
   <Param>
