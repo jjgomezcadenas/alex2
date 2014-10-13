@@ -9,22 +9,17 @@
 
 namespace alex {
 
-	void IBeta::AddBlob(const IBlob&  blob)
+	IBeta::IBeta(const IBeta& ibeta)
 	{
-		auto iblob =new IBlob(blob);
-		fBlobs.push_back(iblob);
+		fType = ibeta.GetType();
+		fMcType =ibeta.GetMCType();
+		fV0 = ibeta.GetV0(); 
+		fVx =ibeta.GetVX();
 	}
+	void IBeta::SetVX(TVector3 V1, TVector3 V2) 
+		{
+			fVx.first = V1;
+			fVx.second = V2;
+		}	
 
-  void IBeta::ClearBlobs()
-  {
-    fBlobs.clear();
-  }
-
-	IBeta::~IBeta()
-	{
-		for(auto iblob : fBlobs)
-			delete iblob; 
-
-		ClearBlobs();	
-	}
 }
