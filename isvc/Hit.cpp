@@ -25,6 +25,14 @@ namespace alex {
 		fType = hit.Type();
 		fOwner = hit.Owner();
 	}
-		
+	
+	Hit::Hit(double x, double y, double z, double E)
+	{
+		fEne = E;
+		fXYZ = TVector3(x,y,z);
+		fType = "BLOB";
+		fOwner = 0;
+
+	}	
 
 }

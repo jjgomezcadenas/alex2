@@ -13,6 +13,7 @@ class Hit {
 	public:
 		Hit(const IHit&  ihit);
 		Hit(const Hit& hit);
+		Hit(double x, double y, double z, double E);
 		~Hit(){};
 
 		double Edep() const {return fEne;}
