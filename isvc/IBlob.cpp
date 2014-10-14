@@ -37,7 +37,15 @@ namespace alex {
   {
     for(auto hit : fHitVector)
     	delete hit; 
-		fHitVector.clear();	
+    fHitVector.clear();	
+  }
+
+  double IBlob::GetEnergy() const
+  {
+    double e = 0.;
+    for(auto hit : fHitVector)
+      e += hit->Edep();
+    return e;
   }
 
 	IBlob::~IBlob()

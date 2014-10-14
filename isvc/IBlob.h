@@ -21,7 +21,8 @@ class IBlob {
 		virtual ~IBlob();
 		void AddHit(const Hit& hit);
 		void AddHit(const IHit& hit);
-		
+	        double GetEnergy() const;
+	
 		std::vector<const Hit* > GetHit() const {return fHitVector;}
 		std::vector<const Hit* > GetSortedHits() const {return fSortedHitVector;}
 
