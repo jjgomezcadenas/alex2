@@ -32,19 +32,27 @@ namespace alex {
 		auto photon =new IBeta(phot);
 		fPhotons.push_back(photon);
 	}
+
+        void RBeta::ReverseEffHits()
+	{
+		std::cout << "Reversing: " << fEffHit[0]->XYZ().X() << " and " << fEffHit[fEffHit.size()-1]->XYZ().X() << std::endl;
+		std::reverse(fEffHit.begin(),fEffHit.end());
+		std::cout << "Now: " << fEffHit[0]->XYZ().X() << " and " << fEffHit[fEffHit.size()-1]->XYZ().X() << std::endl;
+	}
+
 	RBeta::~RBeta()
 	{
 		for(auto iblob : fBlobs)
-			delete iblob; 
+		  delete iblob; 
 
 		for(auto hit : fCoreHit)
-    	delete hit;
+                  delete hit;
 
-    for(auto hit : fEffHit)
-    	delete hit;
+                for(auto hit : fEffHit)
+                  delete hit;
 
-    for(auto phot : fPhotons)
-    	delete phot;
+                for(auto phot : fPhotons)
+                  delete phot;
 
 		fCoreHit.clear();
 		fEffHit.clear();	

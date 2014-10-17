@@ -9,6 +9,11 @@
 
 namespace alex {
 
+	IBlob::IBlob()
+	{
+		fBlob = new Hit(0.,0.,0.,0.);
+	}
+
 	IBlob::IBlob(const IBlob&  iblob)
 	{
 		std::vector<const Hit* > ihits =iblob.GetHit();		
@@ -27,6 +32,18 @@ namespace alex {
 	{
 		auto hitp = new Hit(hit);
 		fHitVector.push_back(hitp);
+	}
+
+	void IBlob::InsertHit(const Hit& hit, int i)
+	{
+		auto hitp = new Hit(hit);
+		fHitVector.insert(fHitVector.begin() + i, hitp);
+	}
+
+	void IBlob::InsertHit(const IHit& hit, int i)
+	{
+		auto hitp = new Hit(hit);
+		fHitVector.insert(fHitVector.begin() + i, hitp);
 	}
 
 	void IBlob::CreateBlob(double x, double y, double z, double E)

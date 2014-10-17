@@ -21,6 +21,8 @@ class RBeta: public IBeta {
 		void AddCoreHit(const Hit& hit);
 		void AddEffHit(const Hit& hit);
 		void AddPhoton(const IBeta& photon);
+
+                void ReverseEffHits();
 		
 		std::vector<const IBlob*> GetBlobs() const {return fBlobs;}
 		std::vector<const IBeta*> GetPhotons() const {return fPhotons;}

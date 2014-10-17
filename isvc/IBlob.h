@@ -15,11 +15,13 @@ namespace alex {
 
 class IBlob {
       public:
-              IBlob(){};
+              IBlob();
               IBlob(const IBlob&  iblob);
               virtual ~IBlob();
               void AddHit(const Hit& hit);
               void AddHit(const IHit& hit);
+              void InsertHit(const Hit& hit, int i);
+              void InsertHit(const IHit& hit, int i);
               double GetEnergy() const;
        
               void CreateBlob(double x, double y, double z, double E);
