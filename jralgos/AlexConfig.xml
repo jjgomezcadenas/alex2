@@ -21,7 +21,7 @@
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root</name>
   </HistoFile>
   <Events>
-    <runMax>1000</runMax>
+    <runMax>5</runMax>
     <runDebug>10</runDebug>
   </Events>
   <Debug>

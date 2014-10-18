@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<NSelectIBetas>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>NSelectIBetas</value>
+  </Param>
+  
+  <!-- Set to 0 to skip selection cut, set to 1 to apply selection cut -->
+  <Param>
+    <name>fSelect</name>
+    <dataType>int</dataType>
+    <value>1</value>
+  </Param>
+
+  <!-- Set to the maximum number of IBetas in an event to which the cut is applied -->
+  <Param>
+    <name>fMaxIBetas</name>
+    <dataType>int</dataType>
+    <value>2</value>
+  </Param>
+
+</NSelectIBetas>
