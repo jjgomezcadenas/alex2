@@ -21,6 +21,13 @@ using std::pair;
 using namespace Recpack;
 using namespace CLHEP;
 
+/*
+A Kalman Fitter manager is selected by the KFSvc. The fit model can be
+either sline (straight line) or helix. The geometrical representation is hard-wired
+assuming planes perpendicular to z axis. This, in turn, hardwires the fittin representation
+to RP::slopes_z (for sline) or RP::slopes_curv_z (for helix) 
+*/
+
 namespace alex {
 
 
@@ -34,10 +41,12 @@ namespace alex {
     
     fModel = Model();
     fDim = ModelDim();
+    fKFRep = KFRep();
     
     klog << log4cpp::Priority::INFO 
         << "--: model = " << fModel 
-        << " dimension = " << fDim;
+        << " dimension = " << fDim
+        << " representation = " << fKFRep;
     
     klog << log4cpp::Priority::DEBUG
         << "Select the model, fitter and rep";
@@ -52,7 +61,7 @@ namespace alex {
     RP::rep().set_default_rep_name(RP::pos_dir_curv);
 
      // default fitting representation (should be selected before trying to retrieve a fitter)
-    fRPMan.fitting_svc().set_fitting_representation(RP::slopes_curv_z);
+    fRPMan.fitting_svc().set_fitting_representation(fKFRep);
 
     klog << log4cpp::Priority::DEBUG
         << "Select the max chi2, max number outliers & extrap failures";
@@ -76,12 +85,14 @@ namespace alex {
     fRPMan.geometry_svc().set_zero_length(1e-3 * mm);
     fRPMan.geometry_svc().set_infinite_length(1e12 * mm);
 
-    // minimum distance between nodes to check the node ordering. 
-    // Specially  for P0D which can have clusters at the same layer with different z positions
-    fRPMan.matching_svc().set_min_distance_node_ordering(KFSetup::Instance().MinDistanceNodeOrdering());
+    // // minimum distance between nodes to check the node ordering. 
+    // // Specially  for P0D which can have clusters at the same layer with different z positions
+    // fRPMan.matching_svc().set_min_distance_node_ordering(
+    //   KFSetup::Instance().MinDistanceNodeOrdering());
 
-    // minimum number of nodes to be check for good ordering
-    fRPMan.matching_svc().set_min_good_node_ordering(KFSetup::Instance().MinGoodNodeOrdering());
+    // // minimum number of nodes to be check for good ordering
+    // fRPMan.matching_svc().set_min_good_node_ordering(
+    //   KFSetup::Instance().MinGoodNodeOrdering());
 
     klog << log4cpp::Priority::DEBUG
         << "Enable MS, disable energy loss fluctuations, enable energy loss correction";
@@ -89,14 +100,14 @@ namespace alex {
     // enable multiple scattering by default
     fRPMan.model_svc().enable_noiser(fModel, RP::ms, true);
 
-    // disable energy loss fluctuations by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, false);
+    // enable energy loss fluctuations by default
+    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, true);
 
-    // disable electron energy loss fluctuations (bremsstrahlung) by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, false);
+    // enable electron energy loss fluctuations (bremsstrahlung) by default
+    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, true);
 
-    // disable electron energy loss correction (bremsstrahlung) by default
-    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, false);
+    // enable electron energy loss correction (bremsstrahlung) by default
+    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, true);
 
     // enable energy loss correction by default
     fRPMan.model_svc().enable_correction(fModel, RP::eloss, true);
@@ -286,7 +297,7 @@ namespace alex {
   }
 
 //--------------------------------------------------------------------
-  RP::Trajectory KFSvcManager::CreateTrajectory(std::vector<const Hit* > hits, 
+  RP::Trajectory* KFSvcManager::CreateTrajectory(std::vector<const Hit* > hits, 
                                                 std::vector<double> hitErrors) 
 //--------------------------------------------------------------------
   {
@@ -316,7 +327,8 @@ namespace alex {
       m[1]=hit->XYZ().Y();
       m[2]=hit->XYZ().Z();
  
-      klog << log4cpp::Priority::DEBUG << "+++hit x = " << m[0] << " y = " << m[1] << " z = " << m[2];
+      klog << log4cpp::Priority::DEBUG << "+++hit x = " << m[0] 
+      << " y = " << m[1] << " z = " << m[2];
       klog << log4cpp::Priority::DEBUG << "Create a measurement " ;
 
       Measurement* meas = new Measurement(); 
@@ -338,20 +350,20 @@ namespace alex {
     // add the measurements to the trajectory
     klog << log4cpp::Priority::INFO << " Measurement vector created "  ;
     
-    Trajectory trj;
-    trj.add_constituents(fMeas);  
+    Trajectory* trj = new Trajectory();
+    trj->add_constituents(fMeas);  
 
-    klog << log4cpp::Priority::INFO << " Trajectory --> " << trj ;
+    klog << log4cpp::Priority::INFO << " Trajectory --> " << *trj ;
 
     return trj;
   }
 
 //--------------------------------------------------------------------
-  RP::State KFSvcManager::SeedState(std::vector<double> v0, std::vector<double> p0) 
+  RP::State* KFSvcManager::SeedState(std::vector<double> v0, std::vector<double> p0) 
 //--------------------------------------------------------------------
   {
     
-    State state;
+    State* state = new State();
     // v0 is a guess of the position
     //p0 is a guess of the momentum
 
@@ -381,7 +393,7 @@ namespace alex {
     // For the Straight line model q/p is a fix parameter use for MS computation 
     
     klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
-    state.set_hv(RP::qoverp,HyperVector(qoverp,0));
+    state->set_hv(RP::qoverp,HyperVector(qoverp,0));
     }
 
     // give a large diagonal covariance matrix
@@ -393,30 +405,30 @@ namespace alex {
 
     // Set the main HyperVector
     klog << log4cpp::Priority::INFO << " Set the main HyperVector --> "  ;
-    state.set_hv(HyperVector(v,C));
+    state->set_hv(HyperVector(v,C));
 
     // Set the sense HyperVector (1=increasing z)
     double sense=p0[2]/fabs(p0[2]); 
 
     klog << log4cpp::Priority::INFO << " Set the sense HyperVector --> " << sense ;
-    state.set_hv(RP::sense,HyperVector(sense,0));
+    state->set_hv(RP::sense,HyperVector(sense,0));
 
     // Set the model name
     klog << log4cpp::Priority::INFO << " Set the model name --> " << fModel ;
-    state.set_name(fModel);
+    state->set_name(fModel);
 
   // Set the representation (x,y,z dx/dz, dy/dz, q/p)
     klog << log4cpp::Priority::INFO << " Set the representation --> "  ;
     if (KFSetup::Instance().Model() =="helix")
-      state.set_name(RP::representation,RP::slopes_curv_z);
+      state->set_name(RP::representation,RP::slopes_curv_z);
     else
-      state.set_name(RP::representation,RP::slopes_z);
+      state->set_name(RP::representation,RP::slopes_z);
 
     return state;
   }
 
 //--------------------------------------------------------------------
-  bool KFSvcManager::FitTrajectory(RP::Trajectory traj,RP::State seed ) 
+  bool KFSvcManager::FitTrajectory(RP::Trajectory& traj, RP::State& seed ) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
@@ -466,5 +478,27 @@ namespace alex {
       exit (EXIT_FAILURE);
     }
     return model;
+  }
+  //--------------------------------------------------------------------
+  string KFSvcManager::KFRep() const 
+ //--------------------------------------------------------------------
+  {
+    string kfrep;
+
+    if (KFSetup::Instance().Model() =="helix")
+    {
+      kfrep =  RP::slopes_curv_z ;        // (x,y,z,ux,uy,q/p)
+    } 
+    else if (KFSetup::Instance().Model() =="sline")
+    {
+      kfrep =  RP::slopes_z ;        // (x,y,z,ux,uy)
+    }
+    else
+    {
+      std::cout << "ERROR: model unknown" << std::endl;
+      exit (EXIT_FAILURE);
+    }
+    
+    return kfrep;
   }
 }

@@ -11,8 +11,7 @@ namespace alex {
     klog << log4cpp::Priority::DEBUG << " KalmanSetup::Execute" ;
 
     KFSetup::Instance().Init(gas, model, Pr, B);
-    KFSetup::Instance().SetFitParameters (maxChi2, maxOutliers, maxExtrapFailures,
-                                          minDistanceNodeOrdering, minGoodNodeOrdering  );
+    KFSetup::Instance().SetFitParameters (maxChi2, maxOutliers, maxExtrapFailures);
     KFSetup::Instance().SetVerbosity(fitterVerbosity,navigationVerbosity,modelVerbosity,
                                      matchingVerbosity);
 

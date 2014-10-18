@@ -168,7 +168,27 @@ RP::smoothed (default)
 RP::predicted_back and RP::weighted when using back filtering isntead of
 smoothing
 
+add_projector(RP::pos, new ComponentProjector(RP::pos_dir_curv, 0,1,2));
+    add_projector(RP::dir, new ComponentProjector(RP::pos_dir_curv, 3,4,5));
+    add_projector(RP::curv, new ComponentProjector(RP::pos_dir_curv, 6) );
+    add_projector(RP::pos_dir, new ComponentProjector(RP::pos_dir_curv, 0,1,2,3,4,5) );
+    add_projector(RP::pos_dir_curv, new ComponentProjector(RP::pos_dir_curv, 0,1,2,3,4,5,6) );
 
+    add_projector(RP::slope, new ComponentProjector(RP::slopes_curv, 3,4) );
+    add_projector(RP::pos_slope, new ComponentProjector(RP::slopes_curv, 0,1,2,3,4) );
+    add_projector(RP::slopes_curv,   new ComponentProjector(RP::slopes_curv,   0,1,2,3,4,5) );
+    add_projector(RP::slopes_curv_x, new ComponentProjector(RP::slopes_curv_x, 0,1,2,3,4,5) );
+    add_projector(RP::slopes_curv_y, new ComponentProjector(RP::slopes_curv_y, 0,1,2,3,4,5) );
+    add_projector(RP::slopes_curv_z, new ComponentProjector(RP::slopes_curv_z, 0,1,2,3,4,5) );
+
+    add_projector(RP::xyz, new ComponentProjector(RP::pos_dir_curv, 0,1,2) );
+    add_projector(RP::xy, new ComponentProjector(RP::pos_dir_curv, 0,1) );
+    add_projector(RP::xz, new ComponentProjector(RP::pos_dir_curv, 0,2) );
+    add_projector(RP::yz, new ComponentProjector(RP::pos_dir_curv, 1,2) );
+    add_projector(RP::x, new ComponentProjector(RP::pos_dir_curv, 0) );
+    add_projector(RP::y, new ComponentProjector(RP::pos_dir_curv, 1) );
+    add_projector(RP::z, new ComponentProjector(RP::pos_dir_curv, 2) );
+    add_projector(RP::time, new ComponentProjector(RP::pos_dir_curv_time, 7) );
   
 */
 

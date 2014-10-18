@@ -17,6 +17,7 @@ namespace alex {
       fModel = model ;
       fPr = Pr;
       fB = B*tesla;
+
     
       if (fGas == "Xe")
       {
@@ -53,18 +54,18 @@ namespace alex {
       klog.info("Model =%s, B (tesla) = %7.1f \n", fModel.c_str(),fB/tesla);
    }
 
-  void KFSetupManager::SetFitParameters (double maxChi2,double maxOutliers, double maxExtrapFailures,
-                                  double minDistanceNodeOrdering, double minGoodNodeOrdering)
+  void KFSetupManager::SetFitParameters (double maxChi2,double maxOutliers, 
+                                         double maxExtrapFailures)
   {
     fMaxChi2 = maxChi2;
     fMaxOutliers = maxOutliers;  
     fMaxExtrapFailures = maxExtrapFailures; 
-    fMinDistanceNodeOrdering = minDistanceNodeOrdering; 
-    fMinGoodNodeOrdering = minGoodNodeOrdering;
+    //fMinDistanceNodeOrdering = minDistanceNodeOrdering; 
+    ///fMinGoodNodeOrdering = minGoodNodeOrdering;
 
   }
-  void KFSetupManager::SetVerbosity(string fitterVerbosity,string navigationVerbosity,string modelVerbosity,
-                 string matchingVerbosity)
+  void KFSetupManager::SetVerbosity(string fitterVerbosity,string navigationVerbosity,
+                                    string modelVerbosity,string matchingVerbosity)
   {
     fFitterVerbosity = fitterVerbosity;
     fNavigationVerbosity = navigationVerbosity;

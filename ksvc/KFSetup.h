@@ -18,15 +18,16 @@ namespace alex {
       KFSetupManager(){};
       virtual ~KFSetupManager(){};
       void Init(string gas, string model, double Pr, double B);
-      void SetFitParameters (double maxChi2,double maxOutliers, double maxExtrapFailures,
-                            double minDistanceNodeOrdering, double minGoodNodeOrdering  );
+      void SetFitParameters (double maxChi2,double maxOutliers, double maxExtrapFailures);
+                             
+                             
       void SetVerbosity(string fitterVerbosity,string navigationVerbosity,string modelVerbosity,
                  string matchingVerbosity);
 
     private:
       string fGas;  // gas type (Xe, H2, etc)
       string fModel; // helix, sline, etc.
-
+      
       //verbosity levels
       string fFitterVerbosity;
       string fNavigationVerbosity;
@@ -38,8 +39,8 @@ namespace alex {
       double fMaxChi2 ;  // max local chi2/ndf allowed in fit
       double fMaxOutliers ;  // max number of outliers
       double fMaxExtrapFailures; //max number of extrap failures
-      double fMinDistanceNodeOrdering ;// minimum distance between nodes to check the node ordering. 
-      double fMinGoodNodeOrdering ; // minimum number of nodes to be check for good ordering
+      //double fMinDistanceNodeOrdering ;// minimum distance between nodes to check the node ordering. 
+      //double fMinGoodNodeOrdering ; // minimum number of nodes to be check for good ordering
       double fRho1B ; //density of gas at 1 bar
       double fDeDx1B ;      // ionization (mip) at 1 bar
       double fX01B ;    // radiation lenght at 1 bar
@@ -52,6 +53,7 @@ namespace alex {
     
       string Gas()const {return fGas;}
       string Model()const {return fModel;}
+    
       double Pressure() const {return fPr;}
       double B() const {return fB;}
     
@@ -63,8 +65,8 @@ namespace alex {
       double MaxChi2()const {return fMaxChi2;}
       double MaxOutliers()const {return fMaxOutliers;}
       double MaxExtrapFailures()const {return fMaxExtrapFailures;}
-      double MinDistanceNodeOrdering()const {return fMinDistanceNodeOrdering;}
-      double MinGoodNodeOrdering()const {return fMinGoodNodeOrdering;}
+      //double MinDistanceNodeOrdering()const {return fMinDistanceNodeOrdering;}
+      //double MinGoodNodeOrdering()const {return fMinGoodNodeOrdering;}
 
       void Info(ostream& s) const;
       void Print() const;

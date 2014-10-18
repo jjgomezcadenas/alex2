@@ -29,15 +29,17 @@ namespace alex {
       virtual ~KFSvcManager(){};
       void Init();
 		  
-      RP::Trajectory CreateTrajectory(std::vector<const Hit* > hits, 
+      RP::Trajectory* CreateTrajectory(std::vector<const Hit* > hits, 
                                       std::vector<double> hitErrors) ;
 
-      RP::State SeedState(std::vector<double> v0, std::vector<double> p0) ;
+      RP::State* SeedState(std::vector<double> v0, std::vector<double> p0) ;
 
-      bool FitTrajectory(RP::Trajectory traj,RP::State seed);
+      bool FitTrajectory(RP::Trajectory& traj, RP::State& seed);
      
       std::string Model() const;
+      std::string FitRep() const;
       int ModelDim() const ;
+      std::string KFRep() const ;
 
       double X0() const {return fX0;}
       double dEdX() const {return fDedx;}
@@ -52,6 +54,8 @@ namespace alex {
       void SetVerbosity();
 
       std::string fModel;        // model for this setup 
+      std::string fKFRep;      
+                                 
       int fDim;                  // dimension for this setup 
 
       double fX0;                // radiation length for this setup
