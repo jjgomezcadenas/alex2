@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<NConstructIBetas>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>NConstructIBetas</value>
+  </Param>
+  
+  <Param>
+    <name>fCoreDist</name>
+    <dataType>double</dataType>
+    <value>1.</value>
+  </Param>
+
+  <Param>
+    <name>fSparseWidth</name>
+    <dataType>int</dataType>
+    <value>5</value>
+  </Param>
+
+  <Param>
+    <name>fBlobRadius</name>
+    <dataType>double</dataType>
+    <value>20.</value>
+  </Param>
+
+  <H1D>
+    <name>fH1_nIBetas</name>
+    <title>Number of IBetas</title>
+    <nbinsx>10.</nbinsx>
+    <xlow>0.</xlow>
+    <xup>10.</xup>
+  </H1D>
+</NConstructIBetas>

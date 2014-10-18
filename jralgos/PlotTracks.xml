@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<PlotTracks>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>PlotTracks</value>
+  </Param>
+  
+  <Param>
+    <name>fEvent</name>
+    <dataType>int</dataType>
+    <value>0</value>
+  </Param>
+
+  <Param>
+    <name>fEvtPlot</name>
+    <dataType>int</dataType>
+    <value>22</value>
+  </Param>
+ 
+  <Param>
+    <name>fMaxDist</name>
+    <dataType>double</dataType>
+    <value>15.</value>
+  </Param>
+
+  <Param>
+    <name>fCoreDist</name>
+    <dataType>double</dataType>
+    <value>1.</value>
+  </Param>
+
+  <Param>
+    <name>fBlobRadius</name>
+    <dataType>double</dataType>
+    <value>20.0</value>
+  </Param>
+
+  <Param>
+    <name>fSparseWidth</name>
+    <dataType>int</dataType>
+    <value>5</value>
+  </Param>
+
+ <!-- <Param>
+    <name>fPMax</name>
+    <dataType>double</dataType>
+    <value>2.9135</value>
+  </Param>
+  <Param>
+    <name>fPMin</name>
+    <dataType>double</dataType>
+    <value>0.25</value>
+  </Param> -->
+  <H1D>
+    <name>fH1_betaEMax</name>
+    <title>Energy for IBeta object with max number of hits</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>2.5</xup>
+  </H1D>
+
+  <H2D>
+    <name>fH2_xyCore</name>
+    <title>Core track hits</title>
+    <nbinsx>500</nbinsx>
+    <nbinsy>500</nbinsy>
+    <xlow>-250.0</xlow>
+    <xup>250.0</xup>
+    <ylow>-250.0</ylow>
+    <yup>250.0</yup>
+  </H2D>
+
+  <H2D>
+    <name>fH2_xyMainTrack</name>
+    <title>Main track</title>
+    <nbinsx>500</nbinsx>
+    <nbinsy>500</nbinsy>
+    <xlow>-250.0</xlow>
+    <xup>250.0</xup>
+    <ylow>-250.0</ylow>
+    <yup>250.0</yup>
+  </H2D>
+
+  <H2D>
+    <name>fH2_xyEffHits</name>
+    <title>Effective hits</title>
+    <nbinsx>500</nbinsx>
+    <nbinsy>500</nbinsy>
+    <xlow>-250.0</xlow>
+    <xup>250.0</xup>
+    <ylow>-250.0</ylow>
+    <yup>250.0</yup>
+  </H2D>
+
+  <H2D>
+    <name>fH2_xyAllHits</name>
+    <title>All hits</title>
+    <nbinsx>500</nbinsx>
+    <nbinsy>500</nbinsy>
+    <xlow>-250.0</xlow>
+    <xup>250.0</xup>
+    <ylow>-250.0</ylow>
+    <yup>250.0</yup>
+  </H2D>
+
+</PlotTracks>

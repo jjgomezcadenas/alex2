@@ -82,7 +82,38 @@
     <xup>500.0</xup>
   </H1D>
 
-  
+  <H1D>
+    <name>fH1_betaNHitsMax</name>
+    <title>Number of hits for IBeta object with max number of hits</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>500.0</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_betaNHits</name>
+    <title>Number of hits for IBeta objects that do not have the max number of hits</title>
+    <nbinsx>50</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>500.0</xup>
+  </H1D> 
+
+  <H1D>
+    <name>fH1_betaEMax</name>
+    <title>Energy for IBeta object with max number of hits</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>2.5</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_betaE</name>
+    <title>Energy for IBeta objects that do not contain the max number of hits</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.0</xlow>
+    <xup>2.5</xup>
+  </H1D>
+
   <H2D>
     <name>fH2_nth_2e</name>
     <title>True hits of two electrons</title>
