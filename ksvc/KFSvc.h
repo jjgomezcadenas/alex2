@@ -16,6 +16,9 @@
 #include <utility>
 #include <memory>
 
+#define PMAX 2.9
+#define QMAX 2.468
+
 
 
 namespace alex {
@@ -45,7 +48,7 @@ namespace alex {
       double dEdX() const {return fDedx;}
       RP::EVector BField() const {return fBField;}
       RP::EMatrix MeasurementCovariance() const {return fCov; }
-      RP::measurement_vector MeasurementVector() const {return fMeas;}
+      //RP::measurement_vector MeasurementVector() const {return fMeas;}
       
  			
   //   protected:
@@ -73,7 +76,7 @@ namespace alex {
       RP::EVector yaxis;
       RP::EVector zaxis;
   
-      RP::measurement_vector fMeas;
+      //RP::measurement_vector fMeas;
 			
 	};
   typedef alex::SingletonTemplate<KFSvcManager> KFSvc; 

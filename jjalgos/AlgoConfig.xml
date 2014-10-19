@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <AlgoConfig>
+<Algo>
+    <name>NConstructIBetas</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>
+  </Algo>
+  <Algo>
+    <name>NSelectIBetas</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>
+  </Algo>
+  <Algo>
+    <name>NConstructRBetas</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>
+  </Algo>
+  <Algo>
+    <name>NDrawEffHits</name>
+    <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>
+  </Algo>
   <Algo>
     <name>KalmanSetup</name>
     <path>/Users/jjgomezcadenas/Development/devnext/alex2/jjalgos</path>

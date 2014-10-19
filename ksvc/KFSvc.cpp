@@ -7,9 +7,7 @@
 #include <alex/LogUtil.h>
 #include <alex/Hit.h>
 
-#include <CLHEP/Units/SystemOfUnits.h>
-
-#define PMAX 2.9 
+#include <CLHEP/Units/SystemOfUnits.h> 
 
 using std::string;
 using std::endl; 
@@ -304,9 +302,9 @@ namespace alex {
     
     log4cpp::Category& klog = log4cpp::Category::getRoot();
 
-    // destroy measurements in fMeas container
-    stc_tools::destroy(fMeas);
+    klog << log4cpp::Priority::DEBUG << " In CreateTrajectory --> " ;
   
+    klog << log4cpp::Priority::DEBUG << "Cov Matrix --> " ;
     EVector m(3,0);
     fCov = EMatrix(3,3,0);
     
@@ -317,9 +315,15 @@ namespace alex {
 
     klog << log4cpp::Priority::DEBUG << "Cov Matrix --> " << fCov;
 
+    // destroy measurements in fMeas container
+    //stc_tools::destroy(fMeas);
+
+    RP::measurement_vector fMeas;
+
     auto size = hits.size();
 
     klog << log4cpp::Priority::DEBUG << " size of hits --> " << size;
+    klog << log4cpp::Priority::DEBUG << " fill measurement vector --> " << size;
 
     for(auto hit : hits)
     {

@@ -10,7 +10,7 @@ AAConf::AAConf()
   fDstPathName.second="MagBox_Xe_10atm_00tesla.Xe136_bb0nu.next";
   fHistoPathName.first="/Users/jjgomezcadenas/Development/devnext/alex-build/alexMain";
   fHistoPathName.second="MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root";
-  fEvents.first=10000;
+  fEvents.first=10;
   fEvents.second=10;
   fDebug="DEBUG";
 }

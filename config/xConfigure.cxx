@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	AlexConfigure::Instance().Init("DEBUG","AlexConfig");
 
   cout << "argc = " << argc << endl;
-  cout << "argv[0] = " << argv[1] << endl;
+  //cout << "argv[0] = " << argv[1] << endl;
 
   if( argc != 2)   
   { 
