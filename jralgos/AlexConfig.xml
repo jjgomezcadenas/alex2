@@ -4,24 +4,24 @@
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
     <name>AlgoConfig.xml</name>
   </Algos>
-  <!-- <DST>
+  <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.histos.root</name>
-  </HistoFile> -->
-  <DST>
+  </HistoFile>
+  <!-- <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root</name>
-  </HistoFile>
+  </HistoFile> -->
   <Events>
-    <runMax>5</runMax>
+    <runMax>10</runMax>
     <runDebug>10</runDebug>
   </Events>
   <Debug>

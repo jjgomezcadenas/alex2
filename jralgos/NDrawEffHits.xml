@@ -9,7 +9,7 @@
   <Param>
     <name>fDraw</name>
     <dataType>int</dataType>
-    <value>1</value>
+    <value>0</value>
   </Param>
 
 </NDrawEffHits>

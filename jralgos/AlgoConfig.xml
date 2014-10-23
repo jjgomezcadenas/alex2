@@ -16,6 +16,10 @@
     <name>NDrawEffHits</name>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
   </Algo>
+  <Algo>
+    <name>KalmanSetup</name>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
+  </Algo>
   <!--<Algo>
     <name>IElectrons</name>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
