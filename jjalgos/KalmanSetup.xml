@@ -40,7 +40,7 @@
     <dataType>double</dataType>
     <value>10</value>
   </Param>
-  <!-- <Param>
+  <Param>
     <name>minDistanceNodeOrdering</name>
     <dataType>double</dataType>
     <value>5</value>
@@ -49,7 +49,7 @@
     <name>minGoodNodeOrdering</name>
     <dataType>double</dataType>
     <value>2</value>
-  </Param> -->
+  </Param>
   <Param>
     <name>fitterVerbosity</name>
     <dataType>string</dataType>

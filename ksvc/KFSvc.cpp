@@ -99,16 +99,16 @@ namespace alex {
     fRPMan.model_svc().enable_noiser(fModel, RP::ms, true);
 
     // enable energy loss fluctuations by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, true);
+    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, false);
 
     // enable electron energy loss fluctuations (bremsstrahlung) by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, true);
+    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, false);
 
     // enable electron energy loss correction (bremsstrahlung) by default
-    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, true);
+    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, false);
 
     // enable energy loss correction by default
-    fRPMan.model_svc().enable_correction(fModel, RP::eloss, true);
+    fRPMan.model_svc().enable_correction(fModel, RP::eloss, false);
 
     // By default no preselected length sign is used when intersecting a surface
     fRPMan.model_svc().model(fModel).intersector().set_length_sign(0);
