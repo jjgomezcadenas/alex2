@@ -16,16 +16,16 @@ import logging
 # Frequently modified parameters:
 # -------------------------------------------------------------------------------------------------------
 
-rev_trk = False;  # Set to true to fit reverse tracks and false to fit forward tracks (for kftrackfit.py only)
+rev_trk = True;  # Set to true to fit reverse tracks and false to fit forward tracks (for kftrackfit.py only)
 
 # Output directories
 dat_outdir = "/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain/out";    # output directory for tracks
 
 run_name = "set";   # name assigned to this run; will be used in naming the output files
-num_tracks = 10;     # number of tracks to generate and/or fit
+num_tracks = 865;     # number of tracks to generate and/or fit
 
 chi2_low = 1.0e-5;     # lower chi2 boundary for certain chi2 analyses
-chi2_outlier = 100./2;     # upper chi2 boundary for chi2 profile and other analyses
+chi2_outlier = 30.;     # upper chi2 boundary for chi2 profile and other analyses
 cfxy_low = 1.0e-5;     # similar to chi2_low but for for cfxy
 cfxy_outlier = 10000.; # similar to chi2_outlier but for cfxy
 

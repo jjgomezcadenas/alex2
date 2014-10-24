@@ -21,14 +21,19 @@ from abc import ABCMeta, abstractmethod
 # Two main directories: the fit and plot directories.
 fnb_trk = "{0}/{1}/trk".format(dat_outdir,run_name);
 fnb_plt = "{0}/{1}/plt".format(dat_outdir,run_name);
+
+if(rev_trk):
+  trk_name = "{0}_r".format(run_name);
+else:
+  trk_name = "{0}_f".format(run_name);
     
-if(not os.path.isdir(fnb_trk) and not plt_smearedHits): 
+if(not os.path.isdir(fnb_trk)): 
     print "ERROR: attempting to plot original hits and track directory {0} not available".format(fnb_trk);
     sys.exit();
 
-if(not os.path.isdir("{0}/{1}/trk".format(dat_outdir,run_name))):
-    os.mkdir("{0}/{1}/trk".format(dat_outdir,run_name));
-    print "Creating plot directory {0}/{1}/plt...".format(dat_outdir,run_name);
+if(not os.path.isdir(fnb_plt)):
+    os.mkdir(fnb_plt);
+    print "Creating plot directory {0}...".format(fnb_plt);
 
 # Keep a running list of the values of chi2.
 chi2_totlist = [];
@@ -44,7 +49,7 @@ for ntrk in range(num_tracks):
 
     # Read in the track.
     # xM yM zM xP yP zP chi2P xF yF zF chi2F
-    trktbl = np.loadtxt("{0}/{1}_{2}.dat".format(fnb_trk,run_name,ntrk));
+    trktbl = np.loadtxt("{0}/{1}{2}.dat".format(fnb_trk,trk_name,ntrk));
     trk_node = trktbl[:,0];
     trk_xM = trktbl[:,1];
     trk_yM = trktbl[:,2];
@@ -106,7 +111,7 @@ for ntrk in range(num_tracks):
 
         # Print the 3D plot.
         if(plt_3dprint):
-            fn_plt = "{0}/plt3d_{1}_{2}.pdf".format(fnb_plt,run_name,ntrk);
+            fn_plt = "{0}/plt3d_{1}_{2}.pdf".format(fnb_plt,trk_name,ntrk);
             plt.savefig(fn_plt, bbox_inches='tight');
         
         # Make the plot.
@@ -165,7 +170,7 @@ for ntrk in range(num_tracks):
 
         # Show and/or print the plot.
         if(plt_print):
-            fn_plt = "{0}/plt_{1}_{2}.pdf".format(fnb_plt,run_name,ntrk);
+            fn_plt = "{0}/plt_{1}_{2}.pdf".format(fnb_plt,trk_name,ntrk);
             plt.savefig(fn_plt, bbox_inches='tight');
         if(plt_show):
             plt.show();
@@ -183,7 +188,7 @@ if(plt_chi2):
     
     # Show and/or print the plot.
     if(plt_print):
-        fn_plt = "{0}/chi2_{1}.pdf".format(fnb_plt,run_name);
+        fn_plt = "{0}/chi2_{1}.pdf".format(fnb_plt,trk_name);
         plt.savefig(fn_plt, bbox_inches='tight');
     if(plt_show):
         plt.show();
