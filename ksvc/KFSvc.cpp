@@ -83,14 +83,12 @@ namespace alex {
     fRPMan.geometry_svc().set_zero_length(1e-3 * mm);
     fRPMan.geometry_svc().set_infinite_length(1e12 * mm);
 
-    // // minimum distance between nodes to check the node ordering. 
-    // // Specially  for P0D which can have clusters at the same layer with different z positions
-    // fRPMan.matching_svc().set_min_distance_node_ordering(
-    //   KFSetup::Instance().MinDistanceNodeOrdering());
+    // minimum distance between nodes to check the node ordering. 
+    // Specially  for P0D which can have clusters at the same layer with different z positions
+    fRPMan.matching_svc().set_min_distance_node_ordering(KFSetup::Instance().MinDistanceNodeOrdering());
 
-    // // minimum number of nodes to be check for good ordering
-    // fRPMan.matching_svc().set_min_good_node_ordering(
-    //   KFSetup::Instance().MinGoodNodeOrdering());
+    // minimum number of nodes to be check for good ordering
+    fRPMan.matching_svc().set_min_good_node_ordering(KFSetup::Instance().MinGoodNodeOrdering());
 
     klog << log4cpp::Priority::DEBUG
         << "Enable MS, disable energy loss fluctuations, enable energy loss correction";
@@ -99,7 +97,7 @@ namespace alex {
     fRPMan.model_svc().enable_noiser(fModel, RP::ms, true);
 
     // enable energy loss fluctuations by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, false);
+    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, true);
 
     // enable electron energy loss fluctuations (bremsstrahlung) by default
     fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, false);
@@ -108,7 +106,7 @@ namespace alex {
     fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, false);
 
     // enable energy loss correction by default
-    fRPMan.model_svc().enable_correction(fModel, RP::eloss, false);
+    fRPMan.model_svc().enable_correction(fModel, RP::eloss, true);
 
     // By default no preselected length sign is used when intersecting a surface
     fRPMan.model_svc().model(fModel).intersector().set_length_sign(0);
@@ -403,7 +401,7 @@ namespace alex {
     // give a large diagonal covariance matrix
     C[0][0]= C[1][1]=100.*cm;
     C[2][2]= EGeo::zero_cov()/2.; // no error on Z since planes are perpendicular to z
-    C[3][3]= C[4][4]=1;
+    C[3][3]= C[4][4]=100;
 
     klog << log4cpp::Priority::INFO << " Cov matrix --> " << C ;
 
@@ -427,6 +425,9 @@ namespace alex {
       state->set_name(RP::representation,RP::slopes_curv_z);
     else
       state->set_name(RP::representation,RP::slopes_z);
+
+    // Set the particle type to electron.
+    state->set_name(RP::PID, "Electron");
 
     return state;
   }

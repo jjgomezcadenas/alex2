@@ -16,9 +16,9 @@
 #include <utility>
 #include <memory>
 
-#define PMAX 2.9
-#define QMAX 2.468
-
+#define PMAX 2.914
+#define QMAX 2.447
+#define MELEC 0.511
 
 
 namespace alex {
