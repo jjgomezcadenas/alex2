@@ -44,10 +44,14 @@ namespace alex {
     klog << log4cpp::Priority::DEBUG << " KalmanSetup::Execute" ;
 
     RBeta* rBeta = ISvc::Instance().GetRBeta();
-    std::vector<const Hit*> effHits = rBeta->GetEffHits();
+    //std::vector<const Hit*> effHits = rBeta->GetEffHits();
 
-    ISvc::Instance().CreateKFObjects(QMAX,1,true,true);
+    bool forwardFit = true;
+    if(fForwardFit == 0) forwardFit = false;
 
+    ISvc::Instance().CreateKFObjects(QMAX+MELEC,1,true,forwardFit);
+
+    std::vector<const Hit*> effHits = ISvc::Instance().GetKFHits();
     std::vector<double> hitErrors = ISvc::Instance().GetKFMErrors();
     std::vector<double> v0 = ISvc::Instance().GetKFv0();
     std::vector<double> p0 = ISvc::Instance().GetKFp0();
@@ -85,12 +89,53 @@ namespace alex {
     // Get the list of nodes:
 
     klog << log4cpp::Priority::DEBUG << " Get the list of nodes and loop over them " ;
+
+    // Print a file analogous to that for a ToyMC particle.
+    char tempStr[200];
+
+    if(forwardFit) {
+      sprintf(tempStr,"mkdir -p %s/%s/toyMC/%s",outPath.c_str(),runName.c_str(),runName.c_str());
+      system(tempStr);
+      sprintf(tempStr,"%s/%s/toyMC/%s/%s_%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),runName.c_str(),fEvent);
+    }
+    else {
+      sprintf(tempStr,"mkdir -p %s/%s/toyMC/%s/rev",outPath.c_str(),runName.c_str(),runName.c_str());
+      system(tempStr);
+      sprintf(tempStr,"%s/%s/toyMC/%s/rev/%s_%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),runName.c_str(),fEvent);
+    }
+    std::ofstream toyMCf(tempStr);
+    toyMCf << "# x0 y0 zi zf ux uy uz E deltaE deltaX\n";
+
+    double Epart = QMAX;
+    for(int i = 0; i < (int) effHits.size()-1; i++) {
+      double x = effHits[i]->XYZ().X(); double x1 = effHits[i+1]->XYZ().X();
+      double y = effHits[i]->XYZ().Y(); double y1 = effHits[i+1]->XYZ().Y();
+      double zi = effHits[i]->XYZ().Z();
+      double zf = effHits[i+1]->XYZ().Z();
+
+      double ux = (x1 - x);
+      double uy = (y1 - y);
+      double uz = (zf - zi);
+      double deltaX = sqrt(ux*ux + uy*uy + uz*uz);
+      ux /= deltaX; uy /= deltaX; uz /= deltaX;
+
+      double deltaE = effHits[i]->Edep();
+
+      toyMCf << x << " " << y << " " << zi << " " << zf << " " << ux << " " << uy << " " << uz << " " 
+             << Epart << " " << deltaE << " " << deltaX << "\n";
+
+      Epart -= deltaE; 
+    }
+    toyMCf.close();
     
     // Open the output file for this event.
-    char tempStr[200];
     sprintf(tempStr,"mkdir -p %s/%s/trk",outPath.c_str(),runName.c_str());
     system(tempStr);
-    sprintf(tempStr,"%s/%s/trk/set_%i.dat",outPath.c_str(),runName.c_str(),fEvent);
+
+    if(forwardFit)
+      sprintf(tempStr,"%s/%s/trk/set_f%i.dat",outPath.c_str(),runName.c_str(),fEvent);
+    else
+      sprintf(tempStr,"%s/%s/trk/set_r%i.dat",outPath.c_str(),runName.c_str(),fEvent);
     std::ofstream outf(tempStr);
     outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F\n";
 
@@ -172,9 +217,17 @@ namespace alex {
 
         xF = x_F[0]; yF = x_F[1]; zF = x_F[2]; chi2F = tchi2_F;
 
-        klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2 ;
+        klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2_F ;
 
-        // Fill the histograms.
+        // Compute the pulls.
+        //std::cout << "Pulling with hv_F = " << hv_F << " and pos = " << node->measurement().position_hv() << std::endl;
+        //HyperVector residual = hv_F - node->measurement().position_hv();
+        EVector pull = resHV_F.pull();
+      
+        // Fill the histograms. 
+        if(tchi2_F < 20)
+          fH1_xpull->Fill(pull[0]);   
+
         fH1_filteredChi2->Fill(inode,tchi2_F);
         //fH2_filteredPosition->Fill(x_F[0],x_F[1]);     
       }

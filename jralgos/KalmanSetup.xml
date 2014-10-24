@@ -11,6 +11,11 @@
     <value>0</value>
   </Param>
   <Param>
+    <name>fForwardFit</name>
+    <dataType>int</dataType>
+    <value>0</value>
+  </Param>
+  <Param>
     <name>gas</name>
     <dataType>string</dataType>
     <value>Xe</value>
@@ -33,7 +38,7 @@
   <Param>
     <name>maxChi2</name>
     <dataType>double</dataType>
-    <value>200</value>
+    <value>3000</value>
   </Param>
   <Param>
     <name>maxOutliers</name>
@@ -45,16 +50,16 @@
     <dataType>double</dataType>
     <value>100</value>
   </Param>
-  <!-- <Param>
+  <Param>
     <name>minDistanceNodeOrdering</name>
     <dataType>double</dataType>
-    <value>5</value>
+    <value>1</value>
   </Param>
   <Param>
     <name>minGoodNodeOrdering</name>
     <dataType>double</dataType>
-    <value>2</value>
-  </Param> -->
+    <value>20</value>
+  </Param>
   <Param>
     <name>fitterVerbosity</name>
     <dataType>string</dataType>
@@ -133,5 +138,13 @@
     <nbinsx>50</nbinsx>
     <xlow>0.</xlow>
     <xup>50.0</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_xpull</name>
+    <title>x-coordinate pull</title>
+    <nbinsx>100</nbinsx>
+    <xlow>-10.0</xlow>
+    <xup>10.0</xup>
   </H1D>
 </KalmanSetup>

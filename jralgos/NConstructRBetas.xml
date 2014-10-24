@@ -24,11 +24,4 @@
     <value>20.</value>
   </Param>
 
-  <H1D>
-    <name>fH1_nIBetas</name>
-    <title>Number of IBetas</title>
-    <nbinsx>10.</nbinsx>
-    <xlow>0.</xlow>
-    <xup>10.</xup>
-  </H1D>
 </NConstructIBetas>
