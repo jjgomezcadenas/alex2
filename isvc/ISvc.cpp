@@ -501,6 +501,7 @@ namespace alex {
 
     // Reverse the effective hits if it turned out that blob2 was actually more energetic.
     if(eBlob2 > eBlob1) {
+      std::cout << log4cpp::Priority::DEBUG << " *** Reversing eff. hits because eBlob2 > eBlob1" << std::endl;
       fRBeta->ReverseEffHits();
     }
  
@@ -648,14 +649,17 @@ namespace alex {
       }
     }
 
-    // Reverse the hits if necessary.
+    // Save the list of hits, reversing the hits if necessary.
     if(forwardFit) {
-      std::reverse(updatedHits.begin(), updatedHits.end());
-    }
 
-    // Save the list of hits.
-    for(int h = 0; h < (int) updatedHits.size(); h++) {
-      fKFHits.push_back(updatedHits[h]);
+      // Reverse the hits, so that the least energetic blob is recorded first.
+      for(int h = (int) updatedHits.size()-1; h >= 0; h--)
+        fKFHits.push_back(updatedHits[h]);
+    }
+    else {
+    
+      for(int h = 0; h < (int) updatedHits.size(); h++)
+        fKFHits.push_back(updatedHits[h]);
     }
 
     // ------------------------------------------------------------------------------------
@@ -666,6 +670,9 @@ namespace alex {
     fKFv0.push_back(fKFHits[0]->XYZ().X());
     fKFv0.push_back(fKFHits[0]->XYZ().Y());
     fKFv0.push_back(fKFHits[0]->XYZ().Z());
+
+    klog << log4cpp::Priority::DEBUG << " Initial position guess: (" << fKFv0[0] 
+         << ", " << fKFv0[1] << ", " << fKFv0[2] << ")\n";
     
     // Use the first two hits to guess the momentum direction.
     double dx0 = (fKFHits[1]->XYZ().X() - fKFHits[0]->XYZ().X());
@@ -677,6 +684,9 @@ namespace alex {
     fKFp0.push_back(pmag*dx0/mag);
     fKFp0.push_back(pmag*dy0/mag);
     fKFp0.push_back(pmag*dz0/mag);
+
+    klog << log4cpp::Priority::DEBUG << " Initial momentum guess: (" << fKFp0[0]
+         << ", " << fKFp0[1] << ", " << fKFp0[2] << ")\n";
 
     // ------------------------------------------------------------------------------------
     // Set measurement errors.
