@@ -30,6 +30,7 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     SetDebugLevel(debugLevel);
+    fRandom = new TRandom2();
   }
 //--------------------------------------------------------------------
   void IreneManager::InitDst(std::string fileName, const irene::Event* ievt)
@@ -499,11 +500,11 @@ namespace alex {
     fRBeta->AddBlob(*blob1);
     fRBeta->AddBlob(*blob2); 
 
-    // Reverse the effective hits if it turned out that blob2 was actually more energetic.
-    if(eBlob2 > eBlob1) {
-      std::cout << log4cpp::Priority::DEBUG << " *** Reversing eff. hits because eBlob2 > eBlob1" << std::endl;
-      fRBeta->ReverseEffHits();
-    }
+//    // Reverse the effective hits if it turned out that blob2 was actually more energetic. (THIS SHOULD ONLY BE DONE FOR "DATA")
+//    if(eBlob2 > eBlob1) {
+//      std::cout << log4cpp::Priority::DEBUG << " *** Reversing eff. hits because eBlob2 > eBlob1" << std::endl;
+//      fRBeta->ReverseEffHits();
+//    }
  
     /* NOTE: this is not trivial as the effective hits can't be easily modified after created.
     // Add all photons to their closest effective hit.
@@ -608,11 +609,19 @@ namespace alex {
     // Create the list of properly ordered effective hits.
     // ------------------------------------------------------------------------------------
 
-    // Create a copy of the effective hits from the rBeta object.
+    // Create a copy of the effective hits from the rBeta object and smear them.
     std::vector<const Hit*> effHits = fRBeta->GetEffHits();
     std::vector<Hit*> updatedHits;
     for(int h = 0; h < (int) effHits.size(); h++) {
-      Hit * hit = new Hit(*(effHits[h]));
+
+      // Smear the x and y.
+      double hx = fRandom->Gaus(effHits[h]->XYZ().X(),errXY);
+      double hy = fRandom->Gaus(effHits[h]->XYZ().Y(),errXY);
+      double hz = effHits[h]->XYZ().Z();
+      double he = effHits[h]->Edep();
+
+      // Create and add a new hit.
+      Hit * hit = new Hit(hx, hy, hz, he);
       updatedHits.push_back(hit);
     }
    

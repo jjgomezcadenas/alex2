@@ -18,7 +18,7 @@
 
 #include <TFile.h>
 #include <TTree.h>
-
+#include <TRandom2.h>
 
 
 
@@ -60,6 +60,7 @@ class IreneManager {
                 double ComputeMinDist(IHits ihs1, IHits ihs2);
 		double ComputeMinDist(std::vector<const alex::Hit*> ihs1, IHit ih, int& imin, int& iside);
 
+        TRandom2* fRandom;
 	TFile* fIfile;
   	TTree* fEvtTree;
         RBeta* fRBeta;
