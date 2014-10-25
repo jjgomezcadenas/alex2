@@ -6,11 +6,11 @@
   </Algos>
   <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
-    <name>MagBox_Xe_10atm_00tesla.e2447.next</name>
+    <name>MagBox_Xe_10atm_00tesla.e2447.0.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
-    <name>MagBox_Xe_10atm_00tesla.e2447.histos.root</name>
+    <name>MagBox_Xe_10atm_00tesla.e2447.histos.0.root</name>
   </HistoFile>
   <!-- <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
@@ -21,7 +21,7 @@
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.histos.root</name>
   </HistoFile> -->
   <Events>
-    <runMax>10</runMax>
+    <runMax>10000</runMax>
     <runDebug>10</runDebug>
   </Events>
   <Debug>

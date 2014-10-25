@@ -49,7 +49,7 @@ namespace alex {
     bool forwardFit = true;
     if(fForwardFit == 0) forwardFit = false;
 
-    ISvc::Instance().CreateKFObjects(QMAX+MELEC,1,true,forwardFit);
+    ISvc::Instance().CreateKFObjects(QMAX+MELEC,1.,true,forwardFit);
 
     std::vector<const Hit*> effHits = ISvc::Instance().GetKFHits();
     std::vector<double> hitErrors = ISvc::Instance().GetKFMErrors();

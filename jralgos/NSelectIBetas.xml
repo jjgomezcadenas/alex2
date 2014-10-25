@@ -17,7 +17,7 @@
   <Param>
     <name>fMaxIBetas</name>
     <dataType>int</dataType>
-    <value>2</value>
+    <value>1</value>
   </Param>
 
 </NSelectIBetas>
