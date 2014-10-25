@@ -100,10 +100,10 @@ namespace alex {
     fRPMan.model_svc().enable_noiser(fModel, RP::eloss, true);
 
     // enable electron energy loss fluctuations (bremsstrahlung) by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, false);
+    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, true);
 
     // enable electron energy loss correction (bremsstrahlung) by default
-    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, false);
+    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, true);
 
     // enable energy loss correction by default
     fRPMan.model_svc().enable_correction(fModel, RP::eloss, true);
