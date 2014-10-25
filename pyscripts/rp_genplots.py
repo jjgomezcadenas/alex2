@@ -137,7 +137,7 @@ fig.set_figwidth(7.5);
 plt.plot(prof_kon, fprof_chi2, '-', color='black', label='Forward fit');
 plt.plot(prof_kon, rprof_chi2, '--', color='black', label='Reverse fit');
 #plt.title("chi2 profile: $\chi^2$ limit = {0}".format(chi2_outlier));
-lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
+lnd = plt.legend(loc=4,frameon=False,handletextpad=0);
 plt.xlabel("Fraction of track fit");
 plt.ylabel("$\chi^{2}$ local average");
 plt.savefig("{0}/fit_profiles.pdf".format(plt_base), bbox_inches='tight');
