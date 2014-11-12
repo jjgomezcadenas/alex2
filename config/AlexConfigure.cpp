@@ -8,6 +8,7 @@
 //  Copyright (c) 2014 NEXT Collaboration
 // ---------------------------------------------------------------------------- 
 
+#include <alex/ISvc.h>
 #include <alex/AlexConfigure.h>
 #include <alex/LogUtil.h>
 #include <alex/StringOperations.h>
