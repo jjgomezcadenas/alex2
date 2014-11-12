@@ -10,6 +10,7 @@
 #include <alex/SingletonTemplate.h>
 
 #include <alex/KFRecpack.h>
+#include <alex/KFSurfaceMaker.h>
 
 #include <string>
 #include <vector>
@@ -28,7 +29,7 @@ namespace alex {
   class KFSvcManager {
 	
     public:
-		  KFSvcManager(){};
+      KFSvcManager(){};
       virtual ~KFSvcManager(){};
       void Init();
 		  

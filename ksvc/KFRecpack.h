@@ -19,7 +19,8 @@
 #include <recpack/Definitions.h>
 #include <recpack/Trajectory.h>
 #include <recpack/KalmanFitter.h>
-
+#include <recpack/MatchingSvc.h>
+#include <recpack/ISurfaceMaker.h>
 
 /*
 RECPACK
