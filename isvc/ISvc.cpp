@@ -171,19 +171,34 @@ namespace alex {
     // Get the hits corresponding to the tracks produced by the electrons with the most
     //  and second-most momentum. 
     std::pair<IHits, IHits> electronhits = ISvc::Instance().GetPMaxElectronsHits();
- 
+
     // Get all hits.
     IHits truehits = ISvc::Instance().GetTrueHits();
-    
+
+    // Checksum for all hits.
+    double echeck = 0.;
+    for(int i = 0; i < (int) truehits.size(); i++) {
+      echeck += truehits[i].second;
+    } 
+    std::cout << "TOTAL energy in all hits is = " << echeck << std::endl;   
+ 
     // Create the IBeta object for the primary track.
     IBeta * current_track = new IBeta();
 
     // Add all the hits from the most and second-most energetic
     //  electrons as the seed.
-    for(int i = (int) (electronhits.first.size()-1); i > 0; i--) current_track->AddHit(electronhits.first[i]);
-    if(GetNumberOfPrimaryElectrons() >= 2) {
-      for(int i = 0; i < (int) electronhits.second.size(); i++) current_track->AddHit(electronhits.second[i]);
+    echeck = 0.;
+    for(int i = (int) (electronhits.first.size()-1); i > 0; i--) {
+      current_track->AddHit(electronhits.first[i]);
+      echeck += electronhits.first[i].second;
     }
+    if(GetNumberOfPrimaryElectrons() >= 2) {
+      for(int i = 0; i < (int) electronhits.second.size(); i++) {
+        current_track->AddHit(electronhits.second[i]);
+        echeck += electronhits.second[i].second;
+      }
+    }
+    std::cout << "SUM of deltaE in most and second-most energetic electrons = " << echeck << std::endl;
 
     // Find the blob centers.
     IHits trkFirst = electronhits.first;
@@ -300,6 +315,8 @@ namespace alex {
   void IreneManager::CreateRTracks(double coreDist, int sparseWidth, double blobRadius)
 //--------------------------------------------------------------------
   {
+    double echeck = 0.;
+
     // Get the hits corresponding to the tracks produced by the electrons with the most
     //  and second-most momentum. 
     std::pair<IHits, IHits> electronhits = ISvc::Instance().GetPMaxElectronsHits();
@@ -315,6 +332,7 @@ namespace alex {
     // Create the RBeta object and copy all hits in the main track.
     fRBeta = new RBeta();
     //double zminCore = 0., zmaxCore = 0.;    // save the minimum and maximum core z-coordinate for later use
+    echeck = 0.;
     for(int i = 0; i < (int) trackHits.size(); i++) {
 
       // Add this hit to the RBeta.
@@ -334,7 +352,9 @@ namespace alex {
         photonHit.second = trackHits[i]->Edep();
         photonHits.push_back(photonHit);
       }
+      echeck += trackHits[i]->Edep();
     }
+    std::cout << "Total trackHits energy = " << echeck << std::endl;
 
     // -------------------------------------------------------------------------------------------------------
     // Create the photon tracks from the photon hits.
@@ -423,7 +443,7 @@ namespace alex {
     // -----------------------------------------------------------------------------
 
     // Sparse the hits.
-    int ihit = 0;
+    int ihit = 0; echeck = 0.;
     std::vector<const Hit*> coreHits = fRBeta->GetCoreHits(); 
     while(ihit < (int) coreHits.size()) {
 
@@ -433,10 +453,10 @@ namespace alex {
       // Create an effective (sparsed) hit.
       double xeff = 0., yeff = 0., zeff = 0., eeff = 0.;
       while(sp < (int) coreHits.size() && sp < (ihit+sparseWidth)) {
-        double ecore = coreHits[ihit]->Edep();
-        xeff += coreHits[ihit]->XYZ().X()*ecore;
-        yeff += coreHits[ihit]->XYZ().Y()*ecore;
-        zeff += coreHits[ihit]->XYZ().Z()*ecore;
+        double ecore = coreHits[sp]->Edep();
+        xeff += coreHits[sp]->XYZ().X()*ecore;
+        yeff += coreHits[sp]->XYZ().Y()*ecore;
+        zeff += coreHits[sp]->XYZ().Z()*ecore;
         eeff += ecore;
         sp++;
       }
@@ -450,7 +470,10 @@ namespace alex {
       // Create the effective hit and store it in the RBeta object.
       Hit * heff = new Hit(xeff,yeff,zeff,eeff);
       fRBeta->AddEffHit(*heff);
+
+      echeck += eeff;
     }
+    std::cout << "Total energy in sparsed hits = " << echeck << std::endl;
 
     // -----------------------------------------------------------------------------
     // Compute the blobs from the effective hits.
@@ -675,10 +698,13 @@ namespace alex {
     // Compute the guesses for the initial position and momentum.
     // ------------------------------------------------------------------------------------
     
-    // Initially use the location of the first hit as the position guess.
-    fKFv0.push_back(fKFHits[0]->XYZ().X());
-    fKFv0.push_back(fKFHits[0]->XYZ().Y());
-    fKFv0.push_back(fKFHits[0]->XYZ().Z());
+    // Use the location of the first hit as the position guess.
+    double x0 = fKFHits[0]->XYZ().X();
+    double y0 = fKFHits[0]->XYZ().Y();
+    double z0 = fKFHits[0]->XYZ().Z();
+    fKFv0.push_back(x0);
+    fKFv0.push_back(y0);
+    fKFv0.push_back(z0);
 
     klog << log4cpp::Priority::DEBUG << " Initial position guess: (" << fKFv0[0] 
          << ", " << fKFv0[1] << ", " << fKFv0[2] << ")\n";
@@ -694,6 +720,19 @@ namespace alex {
     fKFp0.push_back(pmag*dy0/mag);
     fKFp0.push_back(pmag*dz0/mag);
 
+    /*// Perform a fit to the first few hits to guess the initial position.
+    int nfit = 4;
+    if(nfit > fKFHits.size()) {
+      std::cout << "WARNING: not enough hits for initial direction fit with " << nfit << " points" << std::endl;
+    }
+    TArrayD fitData(3*nfit);
+    for(int f = 0; f < nfit && f < (int) fKFHits.size(); f++) {
+      fitData[3*f] = fKFHits[f]->XYZ().X() - x0;
+      fitData[3*f+1] = fKFHits[f]->XYZ().Y() - y0;
+      fitData[3*f+2] = fKFHits[f]->XYZ().Z() - z0;
+    }
+    TMatrixD fitMatrix(3,f,fitData.GetArray());*/
+
     klog << log4cpp::Priority::DEBUG << " Initial momentum guess: (" << fKFp0[0]
          << ", " << fKFp0[1] << ", " << fKFp0[2] << ")\n";
 
@@ -702,7 +741,8 @@ namespace alex {
     // ------------------------------------------------------------------------------------
     fKFMErrors.push_back(errXY);
     fKFMErrors.push_back(errXY);
-    fKFMErrors.push_back(0.);
+    fKFMErrors.push_back(errXY);
+    //fKFMErrors.push_back(0.);
 
   }
 
