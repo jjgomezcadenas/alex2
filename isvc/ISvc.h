@@ -54,11 +54,20 @@ class IreneManager {
                 std::vector<double> GetKFv0() const { return fKFv0; }
                 std::vector<double> GetKFp0() const { return fKFp0; }
 
+                void SetStartEvent(int sevt) { startEvt = sevt; }
+                int GetStartEvent() const { return startEvt; }
+
+                void SetEvtNum(int sevt) { evtNum = sevt; }
+                int GetEvtNum() const { return evtNum; }
+
 	private:
 		void FetchElectrons();
 		void FetchPMaxElectrons();
                 double ComputeMinDist(IHits ihs1, IHits ihs2);
 		double ComputeMinDist(std::vector<const alex::Hit*> ihs1, IHit ih, int& imin, int& iside);
+
+        int startEvt;
+        int evtNum;
 
         TRandom2* fRandom;
 	TFile* fIfile;
