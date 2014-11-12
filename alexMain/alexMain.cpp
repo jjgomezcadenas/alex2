@@ -36,10 +36,19 @@ using std::vector;
 
 int main(int argc, char **argv)
 {
-	// to display histos online
+
+  // Get the event arguments.
+  int evtStart = 0, evtEnd = -1;
+  if(argc == 3) {
+    evtStart = atoi(argv[1]);
+    evtEnd = atoi(argv[2]);
+    std::cout << "Processing events [" << evtStart << ", " << evtEnd << ")" << std::endl;
+  }
+
+  // to display histos online
   //TApplication* theApp = new TApplication("App", &argc, argv);
 
-	InitLogger();
+  InitLogger();
   log4cpp::Category& klog = log4cpp::Category::getRoot();
   
   auto aconf = AAConf();
@@ -47,16 +56,17 @@ int main(int argc, char **argv)
         << " Init Alex with debug level " << aconf.DebugLevel();
   alex::Alex::Instance().Init(aconf.DebugLevel());
 
-  //histogram file;
-  string histoPath = PathFromStrings(aconf.HistoPath(),aconf.HistoName());
+  //histogram file
+  char namePrefix[22];
+  sprintf(namePrefix, "%i_", evtStart);
+  string histoPath = PathFromStrings(aconf.HistoPath(), namePrefix + aconf.HistoName());
   klog << log4cpp::Priority::INFO 
         << " Init Histo file =" << histoPath;
   
   //Alex::Instance().InitHistoFile(histoPath);
   TFile* fHistoFile = new TFile(histoPath.c_str(),"RECREATE");
-  
-	klog << log4cpp::Priority::INFO 
-        << " Instantiate and register algos " ;
+  klog << log4cpp::Priority::INFO 
+       << " Instantiate and register algos " ;
 
   // Algos must be initiated before we open the irene TFile, so that their pointers
   // stay in the directory of the histogram file
@@ -64,7 +74,7 @@ int main(int argc, char **argv)
 
   
   alex::RegisterAlgos();
-	alex::Alex::Instance().InitAlgorithms();
+  alex::Alex::Instance().InitAlgorithms();
 
   //----
   // Instantiate irene Event
@@ -84,24 +94,27 @@ int main(int argc, char **argv)
   klog << log4cpp::Priority::INFO << "number of events required = " 
   << aconf.EventsToRun();
 
-  auto nRun = std::min(aconf.EventsToRun(), (int) fEvtTree->GetEntries());
+  if(evtEnd < evtStart) evtEnd = std::min(aconf.EventsToRun(), (int) fEvtTree->GetEntries());
+  else evtEnd = std::min(evtEnd, (int) fEvtTree->GetEntries());
   klog << log4cpp::Priority::INFO << "number of events to run  = " 
-  << nRun ;
+  << (evtEnd - evtStart);
   
-	//-----------Event loop --------
-	int nb;
-	klog << log4cpp::Priority::INFO 
-        << " Start loop " ;
+  //-----------Event loop --------
+  ISvc::Instance().SetStartEvent(evtStart);
+  int nb;
+  klog << log4cpp::Priority::INFO 
+       << " Start loop " ;
 	
   int nev =0;
   int npass = 0;
   int nfail = 0;
-  for (int ivt = 0; ivt < nRun; ivt++)
+  for(int ivt = evtStart; ivt < evtEnd; ivt++)
   {
     nb = fEvtTree->GetEntry(ivt);
     //nb = ISvc::Instance().DstGetEntry(ivt);
     ISvc::Instance().LoadEvent(ievt);
-    
+    ISvc::Instance().SetEvtNum(ivt);
+ 
     if (ivt%aconf.EventsToDebug() ==0)
     {
       klog << log4cpp::Priority::INFO 
