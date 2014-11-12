@@ -43,6 +43,16 @@ namespace alex {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::DEBUG << " KalmanSetup::Execute" ;
 
+    // Get the event number for this event.
+    fEvent = ISvc::Instance().GetEvtNum();
+
+    // Compute the total energy in the event.
+    double etot = 0.;
+    IHits truehits = ISvc::Instance().GetTrueHits();
+    for(int h = 0; h < (int) truehits.size(); h++) {
+      etot += truehits[h].second;
+    } 
+
     RBeta* rBeta = ISvc::Instance().GetRBeta();
     //std::vector<const Hit*> effHits = rBeta->GetEffHits();
 
@@ -57,11 +67,17 @@ namespace alex {
     std::vector<double> p0 = ISvc::Instance().GetKFp0();
 
     // Add the obtained effective hits to a histogram.
+    double eeff = 0.;
     for(int i = 0; i < (int) effHits.size(); i++) {
-      double x = effHits[i]->XYZ().X();
-      double y = effHits[i]->XYZ().Y();
-      fH2_xyMeasured->Fill(x,y,i);
+      eeff += effHits[i]->Edep();
+      //double x = effHits[i]->XYZ().X();
+      //double y = effHits[i]->XYZ().Y();
+      //fH2_xyMeasured->Fill(x,y,i);
     }
+
+    fH1_energy->Fill(eeff);
+    fH1_ediff->Fill(etot-eeff);
+    fH1_momentum->Fill(sqrt((etot + 0.511)*(etot + 0.511) - 0.511*0.511));
 
     string input ;
 
@@ -133,11 +149,11 @@ namespace alex {
     system(tempStr);
 
     if(forwardFit)
-      sprintf(tempStr,"%s/%s/trk/set_f%i.dat",outPath.c_str(),runName.c_str(),fEvent);
+      sprintf(tempStr,"%s/%s/trk/%s_f%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),fEvent);
     else
-      sprintf(tempStr,"%s/%s/trk/set_r%i.dat",outPath.c_str(),runName.c_str(),fEvent);
+      sprintf(tempStr,"%s/%s/trk/%s_r%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),fEvent);
     std::ofstream outf(tempStr);
-    outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F\n";
+    outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F qoverp deltaE\n";
 
     const std::vector<Node*> tnodes =  trj->nodes();
 
@@ -149,12 +165,16 @@ namespace alex {
       double xM = -1.e9, yM = -1.e9, zM = -1.e9;
       double xP = -1.e9, yP = -1.e9, zP = -1.e9, chi2P = -1.e9;
       double xF = -1.e9, yF = -1.e9, zF = -1.e9, chi2F = -1.e9;
+      double eM = -1.e9;
+      double Estate = 0.;
+      double varqoverp = -1.e9;
 
       // Get the measured values from the effective hits.
       if(inode < (int) effHits.size()) {
         xM = effHits[inode]->XYZ().X();
         yM = effHits[inode]->XYZ().Y();
         zM = effHits[inode]->XYZ().Z();
+        eM = effHits[inode]->Edep();
       }
       else {
         std::cout << "WARNING: attempting to access measurement beyond size of eff. hits.";
@@ -162,89 +182,97 @@ namespace alex {
 
       // get the state X and C
 
-      State state = node->state();
-      //klog << log4cpp::Priority::DEBUG << " *** AVAILABLE KEYS INCLUDE: " << state.hvmap() ;
-      const HyperVector hv_P = state.hv(RP::predicted);  //predicted
-      const EVector x_P = hv_P.vector();  // vector state
-      const EMatrix C_P = hv_P.matrix();  //cov matrix
+      if(node->status(RP::fitted)) {
 
-      // Retrieve predicted residual
-      /*
-      available names:
-      RP:predicted, RP::filtered
-      RP::smoothed (default)
-      */
-      HyperVector resHV_P = node->residuals().hv(RP::predicted); 
-      const EVector r_P = resHV_P.vector();
-      const EMatrix R_P = resHV_P.matrix();
-      double tchi2 = resHV_P.chi2();
+        State state = node->state();
+        //klog << log4cpp::Priority::DEBUG << " *** AVAILABLE KEYS INCLUDE: " << state.hvmap() ;
+        const HyperVector hv_P = state.hv(RP::predicted);  //predicted 
+        const EVector x_P = hv_P.vector();  // vector state
+        const EMatrix C_P = hv_P.matrix();  //cov matrix
 
-      klog << log4cpp::Priority::DEBUG << " For node " << inode;
-      klog << log4cpp::Priority::DEBUG 
-      << " X_P[0] " << x_P[0]
-      << " X_P[1] " << x_P[1]
-      << " X_P[2] " << x_P[2]
-      << " X_P[3] " << x_P[3]
-      << " X_P[4] " << x_P[4];
- 
-      xP = x_P[0]; yP = x_P[1]; zP = x_P[2]; chi2P = tchi2;
+        // get the q/p
+      
+        const HyperVector hv_qoverp = state.hv("qoverp");
+        const EVector qop_vec = hv_qoverp.vector();
+        varqoverp = qop_vec[0];
 
-      klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2 ;
-
-      // Fill the histograms for position and chi2.
-      fH1_predictedChi2->Fill(inode,tchi2);
-      //fH2_predictedPosition->Fill(x_P[0],x_P[1]);
-
-      // Retrieve filtered residual if present for this node.
-      if(state.hvmap().has_key(RP::filtered)) {
-
-        const HyperVector hv_F = state.hv(RP::filtered);  //filtered
-        const EVector x_F = hv_F.vector();  // vector state
-        const EMatrix C_F = hv_F.matrix();  //cov matrix
-
-        HyperVector resHV_F = node->residuals().hv(RP::filtered); 
-        const EVector r_F = resHV_F.vector();
-        const EMatrix R_F = resHV_F.matrix();
-        double tchi2_F = resHV_F.chi2();
+        // Retrieve predicted residual
+        /*
+        available names:
+        RP:predicted, RP::filtered
+        RP::smoothed (default)
+        */
+        HyperVector resHV_P = node->residuals().hv(RP::predicted); 
+        const EVector r_P = resHV_P.vector();
+        const EMatrix R_P = resHV_P.matrix();
+        double tchi2 = resHV_P.chi2();
 
         klog << log4cpp::Priority::DEBUG << " For node " << inode;
         klog << log4cpp::Priority::DEBUG 
-        << " X_F[0] " << x_F[0]
-        << " X_F[1] " << x_F[1]
-        << " X_F[2] " << x_F[2]
-        << " X_F[3] " << x_F[3]
-        << " X_F[4] " << x_F[4];
+             << " X_P[0] " << x_P[0]
+             << " X_P[1] " << x_P[1]
+             << " X_P[2] " << x_P[2]
+             << " X_P[3] " << x_P[3]
+             << " X_P[4] " << x_P[4];
+ 
+        xP = x_P[0]; yP = x_P[1]; zP = x_P[2]; chi2P = tchi2;
 
-        xF = x_F[0]; yF = x_F[1]; zF = x_F[2]; chi2F = tchi2_F;
+        klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2 ;
 
-        klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2_F ;
+        // Fill the histograms for position and chi2.
+        fH1_predictedChi2->Fill(inode,tchi2);
+        //fH2_predictedPosition->Fill(x_P[0],x_P[1]);
 
-        // Compute the pulls.
-        //std::cout << "Pulling with hv_F = " << hv_F << " and pos = " << node->measurement().position_hv() << std::endl;
-        //HyperVector residual = hv_F - node->measurement().position_hv();
-        EVector pull = resHV_F.pull();
+        // Retrieve filtered residual if present for this node.
+        if(state.hvmap().has_key(RP::filtered)) {
+
+          const HyperVector hv_F = state.hv(RP::filtered);  //filtered
+          const EVector x_F = hv_F.vector();  // vector state
+          const EMatrix C_F = hv_F.matrix();  //cov matrix
+
+          HyperVector resHV_F = node->residuals().hv(RP::filtered); 
+          const EVector r_F = resHV_F.vector();
+          const EMatrix R_F = resHV_F.matrix();
+          double tchi2_F = resHV_F.chi2();
+
+          klog << log4cpp::Priority::DEBUG << " For node " << inode;
+          klog << log4cpp::Priority::DEBUG 
+          << " X_F[0] " << x_F[0]
+          << " X_F[1] " << x_F[1]
+          << " X_F[2] " << x_F[2]
+          << " X_F[3] " << x_F[3]
+          << " X_F[4] " << x_F[4];
+
+          xF = x_F[0]; yF = x_F[1]; zF = x_F[2]; chi2F = tchi2_F;
+
+          klog << log4cpp::Priority::DEBUG<< " chi2 = " << tchi2_F ;
+
+          // Compute the pulls.
+          //std::cout << "Pulling with hv_F = " << hv_F << " and pos = " << node->measurement().position_hv() << std::endl;
+          //HyperVector residual = hv_F - node->measurement().position_hv();
+          EVector pull = resHV_F.pull();
       
-        // Fill the histograms. 
-        if(tchi2_F < 20)
-          fH1_xpull->Fill(pull[0]);   
+          // Fill the histograms. 
+          if(tchi2_F < 20)
+            fH1_xpull->Fill(pull[0]);   
 
-        fH1_filteredChi2->Fill(inode,tchi2_F);
-        //fH2_filteredPosition->Fill(x_F[0],x_F[1]);     
+          fH1_filteredChi2->Fill(inode,tchi2_F);
+          //fH2_filteredPosition->Fill(x_F[0],x_F[1]);     
+        }
       }
 
       // Output the information to file.
       outf << inode << " "
            << xM << " " << yM << " " << zM << " " 
            << xP << " " << yP << " " << zP << " " << chi2P << " "
-           << xF << " " << yF << " " << zF << " " << chi2F << "\n";
+           << xF << " " << yF << " " << zF << " " << chi2F << " "
+           << varqoverp << " " << eM << "\n";
 
       inode++;
     }
 
     // Close the output file.
     outf.close();
-
-    fEvent++;
 
     //getline(cin, input);
     delete trj;
