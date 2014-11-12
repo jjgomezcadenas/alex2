@@ -56,7 +56,7 @@ namespace alex {
     fRPMan.fitting_svc().select_fitter(RP::kalman);
 
     //select the default representation
-    RP::rep().set_default_rep_name(RP::pos_dir_curv);
+    //RP::rep().set_default_rep_name(RP::pos_dir_curv);
 
      // default fitting representation (should be selected before trying to retrieve a fitter)
     fRPMan.fitting_svc().set_fitting_representation(fKFRep);
@@ -97,16 +97,16 @@ namespace alex {
     fRPMan.model_svc().enable_noiser(fModel, RP::ms, true);
 
     // enable energy loss fluctuations by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, true);
+    fRPMan.model_svc().enable_noiser(fModel, RP::eloss, false);
 
     // enable electron energy loss fluctuations (bremsstrahlung) by default
-    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, true);
+    fRPMan.model_svc().enable_noiser(fModel, RP::electron_eloss, false);
 
     // enable electron energy loss correction (bremsstrahlung) by default
-    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, true);
+    fRPMan.model_svc().enable_correction(fModel, RP::brem_eloss, false);
 
     // enable energy loss correction by default
-    fRPMan.model_svc().enable_correction(fModel, RP::eloss, true);
+    fRPMan.model_svc().enable_correction(fModel, RP::eloss, false);
 
     // By default no preselected length sign is used when intersecting a surface
     fRPMan.model_svc().model(fModel).intersector().set_length_sign(0);
@@ -119,7 +119,14 @@ namespace alex {
 
     InitializeManagerGeometry();
 
-   klog << log4cpp::Priority::DEBUG
+    klog << log4cpp::Priority::DEBUG
+         << "Set up the surface maker";
+
+    // Set up the surface maker
+    fRPMan.matching_svc().add_surface_maker("global",new KFSurfaceMaker(&(fRPMan.matching_svc()), &(fRPMan.geometry_svc().setup())));
+    fRPMan.matching_svc().select_surface_maker("global");
+
+    klog << log4cpp::Priority::DEBUG
         << "Set Verbosity();";
 
     SetVerbosity();
@@ -165,9 +172,10 @@ namespace alex {
 
     // 3. Define its properties
 
-    klog << log4cpp::Priority::DEBUG
-        << "Use surfaces normal to Z";
-    fSetup.set_volume_property("mother",RP::SurfNormal,zaxis); //DATA MEMBER!!!
+    //klog << log4cpp::Priority::DEBUG
+    //    << "Use surfaces normal to Z";
+    //fSetup.set_volume_property("mother",RP::SurfNormal,zaxis); //DATA MEMBER!!!
+    //fSetup.set_volume_property("mother",RP::SurfNormal,xaxis);
 
     if (KFSetup::Instance().Model() =="helix") 
       fSetup.set_volume_property("mother",RP::BField,fBField);
@@ -263,7 +271,7 @@ namespace alex {
     fRPMan.navigation_svc().inspector(RP::Nel).set_verbosity(level1);     
     fRPMan.navigation_svc().inspector(RP::elossMap).set_verbosity(level1);     
     fRPMan.navigation_svc().inspector(RP::BFieldMap).set_verbosity(level1);     
-    fRPMan.model_svc().model(modelname).intersector("plane").set_verbosity(level1);
+    fRPMan.model_svc().model(modelname).intersector("plane").set_verbosity(level4);
     fRPMan.model_svc().model(modelname).intersector("numerical").set_verbosity(level1);
 
     klog << log4cpp::Priority::DEBUG 
@@ -338,6 +346,7 @@ namespace alex {
    
       meas->set_name(type);                         // the measurement type
       meas->set_hv(HyperVector(m,fCov,type));  // the HyperVector 
+      meas->set_deposited_energy(hit->Edep()); // the deposited energy
       meas->set_name(RP::setup_volume,"mother");          // the volume
         
       // the  position of the measurement
@@ -385,22 +394,24 @@ namespace alex {
 
     double qoverp=-1./PMAX;
 
-    if (KFSetup::Instance().Model() =="helix")
-    {
-      v[5]=qoverp;  // assume forward fit!
-      C[5][5]= 0.1;  // not a large error like the others, momentum "known"
-    }
-    else
-    {
-    // For the Straight line model q/p is a fix parameter use for MS computation 
+    //if (KFSetup::Instance().Model() =="helix")
+    //{
+    //  v[5]=qoverp;  // assume forward fit!
+    //  C[5][5]= 0.1;  // not a large error like the others, momentum "known"
+    //}
+    //else
+    //{
+      // For the Straight line model q/p is a fix parameter use for MS computation 
     
-    klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
-    state->set_hv(RP::qoverp,HyperVector(qoverp,0));
-    }
+      klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
+      state->set_hv(RP::qoverp,HyperVector(qoverp,0));
+      std::cout << "qoverp hypervector is " << state->hv(RP::qoverp).vector()[0] << std::endl;
+    //}
 
     // give a large diagonal covariance matrix
     C[0][0]= C[1][1]=100.*cm;
     C[2][2]= EGeo::zero_cov()/2.; // no error on Z since planes are perpendicular to z
+    //C[0][0] = C[1][1] = C[2][2] = 100.*cm;
     C[3][3]= C[4][4]=100;
 
     klog << log4cpp::Priority::INFO << " Cov matrix --> " << C ;
@@ -421,10 +432,11 @@ namespace alex {
 
   // Set the representation (x,y,z dx/dz, dy/dz, q/p)
     klog << log4cpp::Priority::INFO << " Set the representation --> "  ;
-    if (KFSetup::Instance().Model() =="helix")
-      state->set_name(RP::representation,RP::slopes_curv_z);
-    else
+    //if (KFSetup::Instance().Model() =="helix")
+    //  state->set_name(RP::representation,RP::slopes_curv_z);
+    //else
       state->set_name(RP::representation,RP::slopes_z);
+      //state->set_name(RP::representation,RP::slopes_z);
 
     // Set the particle type to electron.
     state->set_name(RP::PID, "Electron");
@@ -449,19 +461,19 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     int dim;
-    if (KFSetup::Instance().Model() =="helix")
-    {
-      dim = 6;                     // dimension of the state vector for this model
-    } 
-    else if (KFSetup::Instance().Model() =="sline")
-    {
+    //if (KFSetup::Instance().Model() =="helix")
+    //{
+    //  dim = 6;                     // dimension of the state vector for this model
+    //} 
+    //else if (KFSetup::Instance().Model() =="sline")
+    //{
       dim = 5; 
-    }
-    else
-    {
-      std::cout << "ERROR: model unknown" << std::endl;
-      exit (EXIT_FAILURE);
-    }
+    //}
+    //else
+    //{
+    //  std::cout << "ERROR: model unknown" << std::endl;
+    //  exit (EXIT_FAILURE);
+    //}
     return dim;
   }
 //--------------------------------------------------------------------
@@ -490,19 +502,20 @@ namespace alex {
   {
     string kfrep;
 
-    if (KFSetup::Instance().Model() =="helix")
-    {
-      kfrep =  RP::slopes_curv_z ;        // (x,y,z,ux,uy,q/p)
-    } 
-    else if (KFSetup::Instance().Model() =="sline")
-    {
-      kfrep =  RP::slopes_z ;        // (x,y,z,ux,uy)
-    }
-    else
-    {
-      std::cout << "ERROR: model unknown" << std::endl;
-      exit (EXIT_FAILURE);
-    }
+    //if (KFSetup::Instance().Model() =="helix")
+    //{
+    //  kfrep =  RP::slopes_curv_z ;        // (x,y,z,ux,uy,q/p)
+    //} 
+    //else if (KFSetup::Instance().Model() =="sline")
+    //{
+      kfrep = RP::slopes;
+      //kfrep =  RP::slopes_z ;        // (x,y,z,ux,uy)
+    //}
+    //else
+    //{
+    //  std::cout << "ERROR: model unknown" << std::endl;
+    //  exit (EXIT_FAILURE);
+    //}
     
     return kfrep;
   }
