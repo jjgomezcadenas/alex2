@@ -65,6 +65,10 @@ rprof_sigma = interp1d(rproftbl[:,0],rproftbl[:,2],kind='linear');
 splot_fchi2F = []; splot_fchi2R = [];
 splot_rchi2F = []; splot_rchi2R = [];
 for ntrk in range(num_tracks):
+
+    # Skip tracks that were not written.
+    if(not os.path.isfile("{0}/{1}_f{2}.dat".format(fnb_trk,run_name,ntrk))):
+      continue;
     
     print "-- Profile analysis for track {0}\n".format(ntrk);
 
@@ -183,11 +187,33 @@ lnd = plt.legend(loc=2,frameon=False,handletextpad=0);
 plt.title("Profile chi2 comparisons ($\chi^2$ limit = {0})".format(chi2_outlier));
 plt.xlabel("$\chi^{2}_F$");
 plt.ylabel("$\chi^{2}_R$");
-#plt.axis([0, 3.5, 0, 15]);
+plt.axis([0, 75000., 0, 75000.]);
 plt.savefig("{0}/prof_compare.pdf".format(plt_base), bbox_inches='tight');
 
-# Histogram the likelihood ratios.
 fig = plt.figure(2);
+fig.set_figheight(5.0);
+fig.set_figwidth(7.5);
+plt.plot(splot_fchi2F,splot_fchi2R,'.',color='blue',markersize=1.0,label='Forward fit');
+lnd = plt.legend(loc=2,frameon=False,handletextpad=0);
+plt.title("Forward fit: Profile chi2 comparisons ($\chi^2$ limit = {0})".format(chi2_outlier));
+plt.xlabel("$\chi^{2}_F$");
+plt.ylabel("$\chi^{2}_R$");
+plt.axis([0, 75000., 0, 75000.]);
+plt.savefig("{0}/prof_compare_forward.pdf".format(plt_base), bbox_inches='tight');
+
+fig = plt.figure(3);
+fig.set_figheight(5.0);
+fig.set_figwidth(7.5);
+plt.plot(splot_rchi2F,splot_rchi2R,'.',color='red',markersize=1.0,label='Reverse fit');
+lnd = plt.legend(loc=2,frameon=False,handletextpad=0);
+plt.title("Reverse fit: Profile chi2 comparisons ($\chi^2$ limit = {0})".format(chi2_outlier));
+plt.xlabel("$\chi^{2}_F$");
+plt.ylabel("$\chi^{2}_R$");
+plt.axis([0, 75000., 0, 75000.]);
+plt.savefig("{0}/prof_compare_reverse.pdf".format(plt_base), bbox_inches='tight');
+
+# Histogram the likelihood ratios.
+fig = plt.figure(4);
 fig.set_figheight(5.0);
 fig.set_figwidth(7.5);
 kn, kbins, kpatches = plt.hist(splot_fratio, 50, normed=0, histtype='step',color='blue',label='Forward fit');
@@ -199,7 +225,7 @@ plt.ylabel("Counts/bin");
 plt.savefig("{0}/likelihood_ratios.pdf".format(plt_base), bbox_inches='tight');
 
 # Histogram the differences.
-fig = plt.figure(3);
+fig = plt.figure(5);
 fig.set_figheight(5.0);
 fig.set_figwidth(7.5);
 kn, kbins, kpatches = plt.hist(splot_ratiodiff, 50, normed=0, histtype='step',color='blue',label='Difference');
@@ -209,7 +235,7 @@ plt.xlabel("difference in $\chi^{2}_{F}/\chi^{2}_{R}$");
 plt.ylabel("Counts/bin");
 plt.savefig("{0}/lratio_diff.pdf".format(plt_base), bbox_inches='tight');
 
-fig = plt.figure(4);
+fig = plt.figure(6);
 fig.set_figheight(5.0);
 fig.set_figwidth(7.5);
 kn, kbins, kpatches = plt.hist(splot_fdiff, 50, normed=0, histtype='step',color='blue',label='chi2F difference');
@@ -219,12 +245,12 @@ plt.xlabel("difference in $\chi^{2}_{F}/\chi^{2}_{R}$");
 plt.ylabel("Counts/bin");
 plt.savefig("{0}/chi2F_diff.pdf".format(plt_base), bbox_inches='tight');
 
-fig = plt.figure(5);
+fig = plt.figure(7);
 fig.set_figheight(5.0);
 fig.set_figwidth(7.5);
 plt.plot(bgr_vals,eff_vals,'-',color='blue',markersize=1.0);
 #lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
 #plt.axis([0,max(splot_ktot),0,max(splot_fratio)]);
-plt.xlabel("Background rejection (1-b)");
-plt.ylabel("Signal efficiency ($\epsilon$)");
+plt.xlabel("Reverse fit rejection (1-b)");
+plt.ylabel("Forward fit identification efficiency ($\epsilon$)");
 plt.savefig("{0}/signal_eff_vs_bgr.pdf".format(plt_base), bbox_inches='tight');

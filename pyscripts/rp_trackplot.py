@@ -40,7 +40,11 @@ chi2_totlist = [];
 
 # Create num_tracks tracks.
 for ntrk in range(num_tracks):
-    
+
+    # Skip tracks for which no valid file was written.
+    if(not os.path.isfile("{0}/{1}{2}.dat".format(fnb_trk,trk_name,ntrk))):
+      continue;   
+ 
     print "-- Plotting track {0}\n".format(ntrk);
 
     # chi2 lists for this track only
