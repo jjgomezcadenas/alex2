@@ -708,17 +708,12 @@ namespace alex {
 
     klog << log4cpp::Priority::DEBUG << " Initial position guess: (" << fKFv0[0] 
          << ", " << fKFv0[1] << ", " << fKFv0[2] << ")\n";
-    
-    // Use the first two hits to guess the momentum direction.
-    double dx0 = (fKFHits[1]->XYZ().X() - fKFHits[0]->XYZ().X());
-    double dy0 = (fKFHits[1]->XYZ().Y() - fKFHits[0]->XYZ().Y());
-    double dz0 = (fKFHits[1]->XYZ().Z() - fKFHits[0]->XYZ().Z());
-    double mag = sqrt(dx0*dx0 + dy0*dy0 + dz0*dz0);
 
-    double pmag = sqrt(energy*energy - 0.5109989*0.5109989);
-    fKFp0.push_back(pmag*dx0/mag);
-    fKFp0.push_back(pmag*dy0/mag);
-    fKFp0.push_back(pmag*dz0/mag);
+    // Guess the momentum direction.
+    std::vector<double> xlist; std::vector<double> ylist; std::vector<double> zlist;
+    xlist.push_back(fKFHits[0]->XYZ().X()); ylist.push_back(fKFHits[0]->XYZ().Y()); zlist.push_back(fKFHits[0]->XYZ().Z());
+    xlist.push_back(fKFHits[1]->XYZ().X()); ylist.push_back(fKFHits[1]->XYZ().Y()); zlist.push_back(fKFHits[1]->XYZ().Z());
+    GuessInitialMomentum(energy,fKFp0,xlist,ylist,zlist);
 
     /*// Perform a fit to the first few hits to guess the initial position.
     int nfit = 4;
@@ -745,6 +740,30 @@ namespace alex {
     //fKFMErrors.push_back(0.);
 
   }
+
+//
+// Fills the specified vector p0 with a guess of the initial momentum based on the given lists of (x,y,z) and energy.
+void IreneManager::GuessInitialMomentum(double energy, std::vector<double> &p0, std::vector<double> xlist, std::vector<double> ylist, std::vector<double> zlist) {
+
+    // Ensure we have enough hits to perform the operation.
+    double pmag = sqrt(energy*energy - 0.5109989*0.5109989);
+    if(xlist.size() < 2 || ylist.size() < 2 || zlist.size() < 2) {
+      std::cout << "ERROR: not enough hits to guess initial momentum: assuming in z direction" << std::endl;
+      p0.push_back(0.); p0.push_back(0.); p0.push_back(pmag);
+      return;
+    }
+
+    // Use the first two hits to guess the momentum direction.
+    double dx0 = (xlist[1] - xlist[0]);
+    double dy0 = (ylist[1] - ylist[0]);
+    double dz0 = (zlist[1] - zlist[0]);
+    double mag = sqrt(dx0*dx0 + dy0*dy0 + dz0*dz0);
+    
+    p0.push_back(pmag*dx0/mag);
+    p0.push_back(pmag*dy0/mag);
+    p0.push_back(pmag*dz0/mag);
+
+}
 
 /*
 // 

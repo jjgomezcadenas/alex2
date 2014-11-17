@@ -37,6 +37,7 @@ class IreneManager {
 		void CreateTracks(double maxDist);
                 void CreateRTracks(double coreDist, int fSparseWidth, double blobRadius);
 		void CreateKFObjects(double energy, double errXY, bool addPhotons = false, bool forwardFit = true);
+                void GuessInitialMomentum(double energy, std::vector<double> &p0, std::vector<double> xlist, std::vector<double> ylist, std::vector<double> zlist);
 
 		IParticles GetElectrons() const {return fElectrons;}
 		int GetNumberOfElectrons() const {return fElectrons.size();}
