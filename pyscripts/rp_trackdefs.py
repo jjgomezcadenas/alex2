@@ -21,10 +21,10 @@ rev_trk = False;  # Set to true to fit reverse tracks and false to fit forward t
 # Output directories
 dat_outdir = "/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain/out";    # output directory for tracks
 
-run_name = "magse06L";   # name assigned to this run; will be used in naming the output files
-num_tracks = 10000;     # number of tracks to generate and/or fit
+run_name = "magse07H_break4";   # name assigned to this run; will be used in naming the output files
+num_tracks = 10;     # number of tracks to generate and/or fit
 
-chi2_low = 1.0e-5;     # lower chi2 boundary for certain chi2 analyses
+chi2_low = 0.0; #1.0e-5;     # lower chi2 boundary for certain chi2 analyses
 chi2_outlier = 20.;     # upper chi2 boundary for chi2 profile and other analyses
 cfxy_low = 1.0e-5;     # similar to chi2_low but for for cfxy
 cfxy_outlier = 10000.; # similar to chi2_outlier but for cfxy
@@ -38,7 +38,7 @@ nfits = 1;
 # Less frequently modified parameters:
 # -------------------------------------------------------------------------------------------------------
 
-prof_name = "magse06L";  # name of run used to generate the profiles (only relevant if running fitprof.py)
+prof_name = "magse07H_break4";  # name of run used to generate the profiles (only relevant if running fitprof.py)
 E_0 = 2.447+0.511;         # initial energy in MeV
 MS0 = 13.6;        # multiple scattering parameter (should be 13.6)
 eslice = 0.05;     # slice energy in MeV

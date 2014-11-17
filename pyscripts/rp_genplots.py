@@ -31,6 +31,9 @@ if(not os.path.isdir("{0}/prof".format(plt_base))):
 plt_show = False;
 plt_print = True;
 
+# Record the number of tracks that were actually processed.
+nprocessed = 0;
+
 # Extract data from the tracks files for num_tracks tracks.
 splot_fchi2 = []; splot_rchi2 = [];
 
@@ -103,6 +106,8 @@ for ntrk in range(num_tracks):
     if(rchi2avg/rnavg < 0.5): print "reverse chi2 average is {0}".format(np.mean(rchi2avg/rnavg))
     #print "REV: Found {0} failures / {1} points".format(rnfail,rntotpts);
     if(rnfail > 0): failfrac_r.append(1.0*rnfail/rntotpts);
+
+    nprocessed += 1;
 
 # ---------------------------------------------------------------------------
 # Create the chi2 vs. k/N profiles.
@@ -226,8 +231,8 @@ chi2fn, chi2fbins, chi2fpatches = plt.hist(all_fchi2, 1000, normed=0, histtype='
 chi2rn, chi2rbins, chi2rpatches = plt.hist(all_rchi2, 1000, normed=0, histtype='step',color='red',label='Reverse fit');
 ax2.set_xlabel("$\chi^{2}$");
 ax2.set_ylabel("Counts/bin");
-ax2.set_xlim(0,200);
-plt.yscale("log");
+ax2.set_xlim(0,10);
+#plt.yscale("log");
 plt.savefig("{0}/chi2_histograms.pdf".format(plt_base), bbox_inches='tight');
 
 # ---------------------------------------------------------------------------
@@ -245,3 +250,6 @@ else:
     ax2.set_ylabel("Counts/bin");
     #ax2.set_xlim(0,1);
     plt.savefig("{0}/failed_fits_fraction.pdf".format(plt_base), bbox_inches='tight');
+    print "Note: {0} forward fits and {1} reverse fits had node failures.".format(len(failfrac_f),len(failfrac_r));
+
+print "{0} tracks in total were processed".format(nprocessed);

@@ -114,7 +114,7 @@ for ntrk in range(num_tracks):
         kon = 1.0*nn/ntotpts;
         chi2 = trk_chi2F[nn];
         
-        if(chi2 > chi2_low and chi2 < chi2_outlier and kon > kon_min and kon < kon_max):
+        if(chi2 >= chi2_low and chi2 < chi2_outlier and kon > kon_min and kon < kon_max):
             chi2F += (chi2-fprof(kon))**2/fprof_sigma(kon)**2;
             chi2R += (chi2-rprof(kon))**2/rprof_sigma(kon)**2;
             ndof += 1;
@@ -130,7 +130,7 @@ for ntrk in range(num_tracks):
     for nn in range(ntotpts):
         kon = 1.0*nn/ntotpts;
         chi2 = rtrk_chi2F[nn];
-        if(chi2 > chi2_low and chi2 < chi2_outlier and kon > kon_min and kon < kon_max):
+        if(chi2 >= chi2_low and chi2 < chi2_outlier and kon > kon_min and kon < kon_max):
             chi2F += (chi2-fprof(kon))**2/fprof_sigma(kon)**2;
             chi2R += (chi2-rprof(kon))**2/rprof_sigma(kon)**2;
             ndof += 1;
