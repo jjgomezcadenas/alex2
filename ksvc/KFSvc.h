@@ -38,7 +38,7 @@ namespace alex {
 
       RP::State* SeedState(std::vector<double> v0, std::vector<double> p0) ;
 
-      bool FitTrajectory(RP::Trajectory& traj, RP::State& seed);
+      int FitTrajectory(RP::Trajectory& traj, RP::State& seed);
      
       std::string Model() const;
       std::string FitRep() const;

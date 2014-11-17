@@ -2,6 +2,7 @@
 // JJ, April 2014
 
 #include <alex/KFSvc.h>
+#include <alex/ISvc.h>
 #include <iostream>
 #include <alex/KFSetup.h>
 #include <alex/LogUtil.h>
@@ -392,7 +393,8 @@ namespace alex {
     klog << log4cpp::Priority::INFO << " Initial state --> " 
           << v;
 
-    double qoverp=-1./PMAX;
+    double pmag = sqrt(p0[0]*p0[0] + p0[1]*p0[1] + p0[2]*p0[2]);
+    double qoverp = -1./pmag;
 
     //if (KFSetup::Instance().Model() =="helix")
     //{
@@ -408,11 +410,11 @@ namespace alex {
       std::cout << "qoverp hypervector is " << state->hv(RP::qoverp).vector()[0] << std::endl;
     //}
 
-    // give a large diagonal covariance matrix
-    C[0][0]= C[1][1]=100.*cm;
-    C[2][2]= EGeo::zero_cov()/2.; // no error on Z since planes are perpendicular to z
+    // diagonal covariance matrix
+    C[0][0] = C[1][1] = 0.1*cm;
+    C[2][2] = EGeo::zero_cov()/2.; // no error on Z since planes are perpendicular to z
     //C[0][0] = C[1][1] = C[2][2] = 100.*cm;
-    C[3][3]= C[4][4]=100;
+    C[3][3] = C[4][4] = 1.;
 
     klog << log4cpp::Priority::INFO << " Cov matrix --> " << C ;
 
@@ -444,16 +446,112 @@ namespace alex {
     return state;
   }
 
+// Returns number of fit breaks
 //--------------------------------------------------------------------
-  bool KFSvcManager::FitTrajectory(RP::Trajectory& traj, RP::State& seed ) 
+  int KFSvcManager::FitTrajectory(RP::Trajectory& traj, RP::State& seed ) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::INFO << "In KFSvcManager::Fitting -- " ;
-    
 
-    bool status = fRPMan.fitting_svc().fit(seed,traj);
-    return status;
+    // ---------------------------
+    // Set up for the initial fit.
+    // ---------------------------
+    bool status = false;
+    int last_fitted = 0;
+    int tot_nodes = traj.nodes().size();
+
+    // Perform the initial fit.
+    status = fRPMan.fitting_svc().fit(seed,traj);
+    last_fitted = traj.last_fitted_node();
+    //std::cout << "-- [FIT 0] returned status " << status << std::endl;
+
+    // If the entire fit succeeded, return.
+    if(last_fitted == tot_nodes-1) return 0; // status;
+
+    // If the fit did not succeed completely, fit again using a new trajectory constructed from
+    //  the remaining nodes that were not fit.
+   
+    // Keep track of the energy lost.
+    double elost = 0.;
+    
+    // Copy the trajectory and clear the original.
+    RP::Trajectory fitTraj(traj);
+    traj.reset();
+
+    // Loop until entire track is fit or maximum number of breaks has been reached.
+    int num_breaks = 1;
+    bool all_fit = false;
+    while(!all_fit && num_breaks < 40) {
+
+        // Add all fit nodes to the final trajectory and keep track of the energy lost.
+        const std::vector<Node*> tnodes =  fitTraj.nodes();
+        for(int n = 0; n < fitTraj.last_fitted_node(); n++) {
+            traj.add_node(*tnodes[n]);
+            elost += tnodes[n]->measurement().deposited_energy();
+        }
+        //std::cout << "-- [FIT " << num_breaks-1 << "]: " << fitTraj.last_fitted_node()+1 << " nodes" << std::endl;
+
+        // Create a new trajectory from the nodes that were not fit.
+        std::vector<Node*> tofit_nodes;
+        for(int n = fitTraj.last_fitted_node(); n < (int) tnodes.size(); n++) {
+            Node * nnode = new Node(*tnodes[n]);
+            tofit_nodes.push_back(nnode);
+        }
+        fitTraj.reset();
+        fitTraj.add_nodes(tofit_nodes);
+
+        // Only attempt to fit again if more than 2 nodes are left.
+        if(tofit_nodes.size() < 2) {
+            status = true;
+            all_fit = true;
+        }
+        else {
+       
+            //std::cout << "Creating new seed state..." << std::endl;
+ 
+            // Create a new seed state.
+            std::vector<double> v0;
+            v0.push_back(tofit_nodes[0]->measurement().position()[0]);
+            v0.push_back(tofit_nodes[0]->measurement().position()[1]);
+            v0.push_back(tofit_nodes[0]->measurement().position()[2]);
+
+            std::vector<double> p0;
+            std::vector<double> xlist; std::vector<double> ylist; std::vector<double> zlist;
+            xlist.push_back(tofit_nodes[0]->measurement().position()[0]); 
+            ylist.push_back(tofit_nodes[0]->measurement().position()[1]); 
+            zlist.push_back(tofit_nodes[0]->measurement().position()[2]);
+
+            xlist.push_back(tofit_nodes[1]->measurement().position()[0]);
+            ylist.push_back(tofit_nodes[1]->measurement().position()[1]); 
+            zlist.push_back(tofit_nodes[1]->measurement().position()[2]);        
+            ISvc::Instance().GuessInitialMomentum(QMAX+MELEC-elost, p0, xlist, ylist, zlist);
+ 
+            State * fitSeed = SeedState(v0,p0);
+
+            // Perform an additional fit.
+            status = fRPMan.fitting_svc().fit(*fitSeed,fitTraj);
+
+            // Update the last fitted node.
+            //last_fitted = fitTraj.last_fitted_node();
+
+            if(fitTraj.last_fitted_node() == ((int)fitTraj.nodes().size())-1) all_fit = true;
+        }
+
+        num_breaks++;
+    }
+
+    // Add the remaining fit nodes to the main track.
+    const std::vector<Node*> fnodes =  fitTraj.nodes();
+    //for(int n = 0; n < fitTraj.last_fitted_node(); n++) {
+    for(int n = 0; n < (int) fitTraj.nodes().size(); n++) {
+        traj.add_node(*fnodes[n]);
+    }
+
+    // Ensure we have fit all nodes.
+    if(!all_fit) status = false;
+
+    return num_breaks;
       
   }
 //--------------------------------------------------------------------
