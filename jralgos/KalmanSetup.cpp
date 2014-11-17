@@ -95,9 +95,11 @@ namespace alex {
     klog << log4cpp::Priority::DEBUG << " Fitting trajectory" ;
     //getline(cin, input);
 
-    bool status = KFSvc::Instance().FitTrajectory(*trj, *seed);
+    //bool status = KFSvc::Instance().FitTrajectory(*trj, *seed);
+    int nbreaks = KFSvc::Instance().FitTrajectory(*trj, *seed);
 
-    klog << log4cpp::Priority::DEBUG << " Fitting trajectory, result " << status;
+    //klog << log4cpp::Priority::DEBUG << " Fitting trajectory, result " << status;
+    klog << log4cpp::Priority::DEBUG << " Fitting trajectory, result " << nbreaks << " fits";
     //getline(cin, input);
 
     klog << log4cpp::Priority::DEBUG << " trajectory length = " << trj->length();

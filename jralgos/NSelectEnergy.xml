@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<NSelectEnergy>
+  <Param>
+    <name>fName</name>
+    <dataType>string</dataType>
+    <value>NSelectEnergy</value>
+  </Param>
+  
+  <!-- Set to 0 to skip selection cut, set to 1 to apply selection cut -->
+  <Param>
+    <name>fSelect</name>
+    <dataType>int</dataType>
+    <value>1</value>
+  </Param>
+
+  <!-- Set to the minimum energy in an event -->
+  <Param>
+    <name>fMinEnergy</name>
+    <dataType>double</dataType>
+    <value>2.4</value>
+  </Param>
+
+</NSelectEnergy>

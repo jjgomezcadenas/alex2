@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <AlgoConfig>
   <Algo>
+    <name>NSelectEnergy</name>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
+  </Algo>
+  <Algo>
     <name>NConstructIBetas</name>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/trunk/jralgos</path>
   </Algo>

@@ -13,7 +13,7 @@
   <Param>
     <name>fForwardFit</name>
     <dataType>int</dataType>
-    <value>0</value>
+    <value>1</value>
   </Param>
   <Param>
     <name>gas</name>
@@ -23,7 +23,7 @@
   <Param>
     <name>model</name>
     <dataType>string</dataType>
-    <value>sline</value>
+    <value>helix</value>
   </Param>
   <Param>
     <name>Pr</name>
@@ -33,17 +33,17 @@
   <Param>
     <name>B</name>
     <dataType>double</dataType>
-    <value>0</value>
+    <value>0.7</value>
   </Param>
   <Param>
     <name>maxChi2</name>
     <dataType>double</dataType>
-    <value>3000</value>
+    <value>4</value>
   </Param>
   <Param>
     <name>maxOutliers</name>
     <dataType>double</dataType>
-    <value>100</value>
+    <value>0</value>
   </Param>
   <Param>
     <name>maxExtrapFailures</name>
@@ -68,17 +68,17 @@
   <Param>
     <name>navigationVerbosity</name>
     <dataType>string</dataType>
-    <value>MUTE</value>
+    <value>INFO</value>
   </Param>
   <Param>
     <name>modelVerbosity</name>
     <dataType>string</dataType>
-    <value>MUTE</value>
+    <value>INFO</value>
   </Param>
   <Param>
     <name>matchingVerbosity</name>
     <dataType>string</dataType>
-    <value>MUTE</value>
+    <value>INFO</value>
   </Param>
   <Param>
     <name>outPath</name>
@@ -88,7 +88,7 @@
   <Param>
     <name>runName</name>
     <dataType>string</dataType>
-    <value>set</value>
+    <value>magse07H_break4_test</value>
   </Param>
 
   <H2D>
@@ -138,6 +138,30 @@
     <nbinsx>50</nbinsx>
     <xlow>0.</xlow>
     <xup>50.0</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_energy</name>
+    <title>Energy sum of effective hits</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.</xlow>
+    <xup>2.5</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_ediff</name>
+    <title>Energy difference: total-eff</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.</xlow>
+    <xup>2.5</xup>
+  </H1D>
+
+  <H1D>
+    <name>fH1_momentum</name>
+    <title>Momentum sum of effective hits</title>
+    <nbinsx>100</nbinsx>
+    <xlow>0.</xlow>
+    <xup>3.0</xup>
   </H1D>
 
   <H1D>
