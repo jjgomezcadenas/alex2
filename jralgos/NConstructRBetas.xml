@@ -15,7 +15,7 @@
   <Param>
     <name>fSparseWidth</name>
     <dataType>int</dataType>
-    <value>5</value>
+    <value>1</value>
   </Param>
 
   <Param>

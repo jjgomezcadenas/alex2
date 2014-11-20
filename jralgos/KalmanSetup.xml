@@ -13,7 +13,12 @@
   <Param>
     <name>fForwardFit</name>
     <dataType>int</dataType>
-    <value>1</value>
+    <value>0</value>
+  </Param>
+  <Param>
+    <name>errXY</name>
+    <dataType>double</dataType>
+    <value>0.1</value>
   </Param>
   <Param>
     <name>gas</name>
@@ -33,12 +38,12 @@
   <Param>
     <name>B</name>
     <dataType>double</dataType>
-    <value>0.7</value>
+    <value>0.05</value>
   </Param>
   <Param>
     <name>maxChi2</name>
     <dataType>double</dataType>
-    <value>4</value>
+    <value>30</value>
   </Param>
   <Param>
     <name>maxOutliers</name>
@@ -88,7 +93,7 @@
   <Param>
     <name>runName</name>
     <dataType>string</dataType>
-    <value>magse07H_break4_test</value>
+    <value>magse005H_lowerr_b30</value>
   </Param>
 
   <H2D>
