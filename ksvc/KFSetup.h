@@ -17,7 +17,7 @@ namespace alex {
     public:
       KFSetupManager(){};
       virtual ~KFSetupManager(){};
-      void Init(string gas, string model, double Pr, double B);
+      void Init(string gas, string model, double Pr, double B, int fitMomentum);
       void SetFitParameters (double maxChi2,double maxOutliers, double maxExtrapFailures);
                              
                              
@@ -48,7 +48,9 @@ namespace alex {
       double fRho ; // densitiy at gas pressure
       double fX0 ;        // rad length at gas pressure
       double fDeDx;  //dedx  at gas pressure
-    
+   
+      bool fFitMomentum;  // true if qoverp is to be included as a fit parameter in the Kalman filter
+ 
     public: 
     
       string Gas()const {return fGas;}
@@ -67,6 +69,8 @@ namespace alex {
       double MaxExtrapFailures()const {return fMaxExtrapFailures;}
       double MinDistanceNodeOrdering()const {return fMinDistanceNodeOrdering;}
       double MinGoodNodeOrdering()const {return fMinGoodNodeOrdering;}
+
+      bool FitMomentum() const { return fFitMomentum; }
 
       void Info(ostream& s) const;
       void Print() const;

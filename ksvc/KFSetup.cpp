@@ -10,14 +10,15 @@ using namespace CLHEP;
 
 namespace alex {
 
-  void KFSetupManager::Init(string gas, string model, double Pr, double B)
+  void KFSetupManager::Init(string gas, string model, double Pr, double B, int fitMomentum)
     {
       log4cpp::Category& klog = log4cpp::Category::getRoot();
       fGas = gas;
       fModel = model ;
       fPr = Pr;
       fB = B*tesla;
-
+      if(fitMomentum == 1) fFitMomentum = true;
+      else fFitMomentum = false;
     
       if (fGas == "Xe")
       {

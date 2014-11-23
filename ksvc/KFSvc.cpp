@@ -396,19 +396,19 @@ namespace alex {
     double pmag = sqrt(p0[0]*p0[0] + p0[1]*p0[1] + p0[2]*p0[2]);
     double qoverp = -1./pmag;
 
-    //if (KFSetup::Instance().Model() =="helix")
-    //{
-    //  v[5]=qoverp;  // assume forward fit!
-    //  C[5][5]= 0.1;  // not a large error like the others, momentum "known"
-    //}
-    //else
-    //{
+    if (KFSetup::Instance().Model() =="helix" && KFSetup::Instance().FitMomentum())
+    {
+      v[5]=qoverp;  // assume forward fit!
+      C[5][5]= 0.1;  // not a large error like the others, momentum "known"
+    }
+    else
+    {
       // For the Straight line model q/p is a fix parameter use for MS computation 
     
       klog << log4cpp::Priority::INFO << " Sline model, set qoverp --> " << qoverp ;
       state->set_hv(RP::qoverp,HyperVector(qoverp,0));
       std::cout << "qoverp hypervector is " << state->hv(RP::qoverp).vector()[0] << std::endl;
-    //}
+    }
 
     // diagonal covariance matrix
     C[0][0] = C[1][1] = 0.1*cm;
@@ -432,13 +432,12 @@ namespace alex {
     klog << log4cpp::Priority::INFO << " Set the model name --> " << fModel ;
     state->set_name(fModel);
 
-  // Set the representation (x,y,z dx/dz, dy/dz, q/p)
+    // Set the representation (x,y,z dx/dz, dy/dz, q/p)
     klog << log4cpp::Priority::INFO << " Set the representation --> "  ;
-    //if (KFSetup::Instance().Model() =="helix")
-    //  state->set_name(RP::representation,RP::slopes_curv_z);
-    //else
+    if (KFSetup::Instance().Model() =="helix" && KFSetup::Instance().FitMomentum())
+      state->set_name(RP::representation,RP::slopes_curv_z);
+    else
       state->set_name(RP::representation,RP::slopes_z);
-      //state->set_name(RP::representation,RP::slopes_z);
 
     // Set the particle type to electron.
     state->set_name(RP::PID, "Electron");
@@ -559,14 +558,14 @@ namespace alex {
 //--------------------------------------------------------------------
   {
     int dim;
-    //if (KFSetup::Instance().Model() =="helix")
-    //{
-    //  dim = 6;                     // dimension of the state vector for this model
-    //} 
-    //else if (KFSetup::Instance().Model() =="sline")
-    //{
+    if (KFSetup::Instance().Model() =="helix" && KFSetup::Instance().FitMomentum())
+    {
+      dim = 6;                     // dimension of the state vector for this model
+    } 
+    else // if (KFSetup::Instance().Model() =="sline")
+    {
       dim = 5; 
-    //}
+    }
     //else
     //{
     //  std::cout << "ERROR: model unknown" << std::endl;
@@ -600,15 +599,15 @@ namespace alex {
   {
     string kfrep;
 
-    //if (KFSetup::Instance().Model() =="helix")
-    //{
-    //  kfrep =  RP::slopes_curv_z ;        // (x,y,z,ux,uy,q/p)
-    //} 
-    //else if (KFSetup::Instance().Model() =="sline")
-    //{
+    if (KFSetup::Instance().Model() =="helix" && KFSetup::Instance().FitMomentum())
+    {
+      kfrep =  RP::slopes_curv;        // (x,y,z,ux,uy,q/p)  // RP::slopes_curv_z
+    } 
+    else //if (KFSetup::Instance().Model() =="sline")
+    {
       kfrep = RP::slopes;
       //kfrep =  RP::slopes_z ;        // (x,y,z,ux,uy)
-    //}
+    }
     //else
     //{
     //  std::cout << "ERROR: model unknown" << std::endl;
