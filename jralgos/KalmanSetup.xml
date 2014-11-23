@@ -13,7 +13,7 @@
   <Param>
     <name>fForwardFit</name>
     <dataType>int</dataType>
-    <value>0</value>
+    <value>1</value>
   </Param>
   <Param>
     <name>errXY</name>
@@ -31,6 +31,11 @@
     <value>helix</value>
   </Param>
   <Param>
+    <name>fFitMomentum</name>
+    <dataType>int</dataType>
+    <value>0</value>
+  </Param>
+  <Param>
     <name>Pr</name>
     <dataType>double</dataType>
     <value>10</value>
@@ -38,7 +43,7 @@
   <Param>
     <name>B</name>
     <dataType>double</dataType>
-    <value>0.05</value>
+    <value>0.7</value>
   </Param>
   <Param>
     <name>maxChi2</name>
@@ -78,7 +83,7 @@
   <Param>
     <name>modelVerbosity</name>
     <dataType>string</dataType>
-    <value>INFO</value>
+    <value>VVERBOSE</value>
   </Param>
   <Param>
     <name>matchingVerbosity</name>
@@ -93,7 +98,7 @@
   <Param>
     <name>runName</name>
     <dataType>string</dataType>
-    <value>magse005H_lowerr_b30</value>
+    <value>magse07H_sgn_test</value>
   </Param>
 
   <H2D>

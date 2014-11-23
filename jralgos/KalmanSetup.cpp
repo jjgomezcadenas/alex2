@@ -15,7 +15,7 @@ namespace alex {
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::DEBUG << " KalmanSetup::Init" ;
 
-    KFSetup::Instance().Init(gas, model, Pr, B);
+    KFSetup::Instance().Init(gas, model, Pr, B, fFitMomentum);
     KFSetup::Instance().SetFitParameters (maxChi2, maxOutliers, maxExtrapFailures);
     KFSetup::Instance().SetVerbosity(fitterVerbosity,navigationVerbosity,modelVerbosity,
                                      matchingVerbosity);
