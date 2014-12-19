@@ -18,6 +18,10 @@ from rp_trackdefs import *
 
 from abc import ABCMeta, abstractmethod
 
+# Plot options
+brk_medge = 2;
+brk_msize = 8;
+
 # Two main directories: the fit and plot directories.
 fnb_trk = "{0}/{1}/trk".format(dat_outdir,run_name);
 fnb_plt = "{0}/{1}/plt".format(dat_outdir,run_name);
@@ -43,6 +47,7 @@ for ntrk in range(num_tracks):
 
     # Skip tracks for which no valid file was written.
     if(not os.path.isfile("{0}/{1}{2}.dat".format(fnb_trk,trk_name,ntrk))):
+      #print "Skipping track {0}/{1}{2}.dat".format(fnb_trk,trk_name,ntrk);
       continue;   
  
     print "-- Plotting track {0}\n".format(ntrk);
@@ -66,16 +71,23 @@ for ntrk in range(num_tracks):
     trk_yF = trktbl[:,9];
     trk_zF = trktbl[:,10];
     trk_chi2F = trktbl[:,11];
+    trk_MSqoverp = trktbl[:,12];
+    trk_fqoverp = trktbl[:,13];
+    trk_fdeltaE = trktbl[:,14];
+    trk_brk = trktbl[:,15];
 
     # Remove outliers from predict and fit lists.
     plt_xP = []; plt_yP = []; plt_zP = []; plt_chi2P = [];
-    plt_xF = []; plt_yF = []; plt_zF = []; plt_chi2F = [];   
-    for xP,yP,zP,chi2P,xF,yF,zF,chi2F in zip(trk_xP,trk_yP,trk_zP,trk_chi2P,trk_xF,trk_yF,trk_zF,trk_chi2F):
+    plt_xF = []; plt_yF = []; plt_zF = []; plt_chi2F = [];
+    plt_xbrkF = []; plt_ybrkF = []; plt_zbrkF = []; 
+    for xP,yP,zP,chi2P,xF,yF,zF,chi2F,brk in zip(trk_xP,trk_yP,trk_zP,trk_chi2P,trk_xF,trk_yF,trk_zF,trk_chi2F,trk_brk):
 
       if(not (xP < -1.0e8 or yP < -1.0e8 or zP < -1.0e8 or chi2P < -1.0e8)):
         plt_xP.append(xP); plt_yP.append(yP); plt_zP.append(zP); plt_chi2P.append(chi2P);
       if(not (xF < -1.0e8 or yF < -1.0e8 or zF < -1.0e8 or chi2F < -1.0e8)):
         plt_xF.append(xF); plt_yF.append(yF); plt_zF.append(zF); plt_chi2F.append(chi2F);
+        if(brk == 1):
+            plt_xbrkF.append(xF); plt_ybrkF.append(yF); plt_zbrkF.append(zF);
  
     # Construct the chi2 lists.
     for k,chi2 in zip(trk_node,trk_chi2F):
@@ -126,7 +138,9 @@ for ntrk in range(num_tracks):
         # Create the 3D track plot.
         ax1 = fig.add_subplot(321, projection='3d');
         ax1.plot(trk_xM,trk_yM,trk_zM,'.',color='black');
-        if(plt_filtered): ax1.plot(plt_xF,plt_yF,plt_zF,'-',color='black');
+        if(plt_filtered): 
+          ax1.plot(plt_xF,plt_yF,plt_zF,'-',color='black');
+          ax1.plot(plt_xbrkF,plt_ybrkF,plt_zbrkF,'x',color='red',mew=brk_medge,ms=brk_msize);
         if(plt_prediction): ax1.plot(plt_xP,plt_yP,plt_zP,'.',color='blue');
         xst, xen = ax1.get_xlim(); ax1.xaxis.set_ticks(np.arange(xst,xen,(xen-xst)/5.));
         yst, yen = ax1.get_ylim(); ax1.yaxis.set_ticks(np.arange(yst,yen,(yen-yst)/5.));
@@ -143,7 +157,9 @@ for ntrk in range(num_tracks):
         # Create the x-y projection.
         ax2 = fig.add_subplot(322);
         ax2.plot(trk_xM,trk_yM,'.',color='black');
-        if(plt_filtered): ax2.plot(plt_xF,plt_yF,'-',color='black');
+        if(plt_filtered):
+          ax2.plot(plt_xF,plt_yF,'-',color='black');
+          ax2.plot(plt_xbrkF,plt_ybrkF,'x',color='red',mew=brk_medge,ms=brk_msize);
         if(plt_prediction): ax2.plot(plt_xP,plt_yP,'.',color='blue');
         ax2.set_xlabel("x ({0})".format(plt_units));
         ax2.set_ylabel("y ({0})".format(plt_units));
@@ -151,7 +167,9 @@ for ntrk in range(num_tracks):
         # Create the x-z projection.
         ax3 = fig.add_subplot(323);
         ax3.plot(trk_xM,trk_zM,'.',color='black');
-        if(plt_filtered): ax3.plot(plt_xF,plt_zF,'-',color='black');
+        if(plt_filtered):
+          ax3.plot(plt_xF,plt_zF,'-',color='black');
+          ax3.plot(plt_xbrkF,plt_zbrkF,'x',color='red',mew=brk_medge,ms=brk_msize);
         if(plt_prediction): ax3.plot(plt_xP,plt_zP,'.',color='blue');
         ax3.set_xlabel("x ({0})".format(plt_units));
         ax3.set_ylabel("z ({0})".format(plt_units));    
@@ -159,7 +177,9 @@ for ntrk in range(num_tracks):
         # Create the y-z projection.
         ax4 = fig.add_subplot(324);
         ax4.plot(trk_yM,trk_zM,'.',color='black');
-        if(plt_filtered): ax4.plot(plt_yF,plt_zF,'-',color='black');
+        if(plt_filtered):
+          ax4.plot(plt_yF,plt_zF,'-',color='black');
+          ax4.plot(plt_ybrkF,plt_zbrkF,'x',color='red',mew=brk_medge,ms=brk_msize);
         if(plt_prediction): ax4.plot(plt_yP,plt_zP,'.',color='blue');
         ax4.set_xlabel("y ({0})".format(plt_units));
         ax4.set_ylabel("z ({0})".format(plt_units));
@@ -181,20 +201,20 @@ for ntrk in range(num_tracks):
             
         plt.close();
             
-# Plot the chi2 histogram.
-if(plt_chi2):
-    fig = plt.figure(4);
-    fig.set_figheight(5.0);
-    fig.set_figwidth(7.5);
-    chi2n, chi2bins, chi2patches = plt.hist(chi2_list, 100, normed=0, histtype='step',color='blue',label='Forward fit');
-    plt.xlabel("$\chi^{2}$");
-    plt.ylabel("Counts/bin");
+    # Plot the chi2 histogram.
+    if(plt_chi2):
+        fig = plt.figure(4);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);
+        chi2n, chi2bins, chi2patches = plt.hist(chi2_list, 100, normed=0, histtype='step',color='blue',label='Forward fit');
+        plt.xlabel("$\chi^{2}$");
+        plt.ylabel("Counts/bin");
     
-    # Show and/or print the plot.
-    if(plt_print):
-        fn_plt = "{0}/chi2_{1}.pdf".format(fnb_plt,trk_name);
-        plt.savefig(fn_plt, bbox_inches='tight');
-    if(plt_show):
-        plt.show();
+        # Show and/or print the plot.
+        if(plt_print):
+            fn_plt = "{0}/chi2_{1}.pdf".format(fnb_plt,trk_name);
+            plt.savefig(fn_plt, bbox_inches='tight');
+        if(plt_show):
+            plt.show();
         
-    plt.close();
+        plt.close();
