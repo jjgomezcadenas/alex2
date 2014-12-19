@@ -4,6 +4,7 @@
 #include <alex/KFSvc.h>
 #include <alex/ISvc.h>
 #include <iostream>
+#include <fstream>
 #include <alex/KFSetup.h>
 #include <alex/LogUtil.h>
 #include <alex/Hit.h>
@@ -400,6 +401,11 @@ namespace alex {
     {
       v[5]=qoverp;  // assume forward fit!
       C[5][5]= 0.1;  // not a large error like the others, momentum "known"
+      
+      // Set a qoverp HyperVector for use only in multiple scattering calculations.
+      klog << log4cpp::Priority::INFO << " Helix model, set qoverp --> " << qoverp ;
+      state->set_hv("MSqoverp",HyperVector(qoverp,0));
+      state->set_hv("MSdeltaqoverp",HyperVector(0.,0));
     }
     else
     {
@@ -445,13 +451,16 @@ namespace alex {
     return state;
   }
 
-// Returns number of fit breaks
+// Returns the number of nodes on which the fit broke.
 //--------------------------------------------------------------------
-  int KFSvcManager::FitTrajectory(RP::Trajectory& traj, RP::State& seed ) 
+  int KFSvcManager::FitTrajectory(RP::Trajectory& traj, RP::State& seed, std::vector<int>& fit_breaks) 
 //--------------------------------------------------------------------
   { 
     log4cpp::Category& klog = log4cpp::Category::getRoot();
     klog << log4cpp::Priority::INFO << "In KFSvcManager::Fitting -- " ;
+
+    // Clear the list of fit breaks.
+    fit_breaks.clear();
 
     // ---------------------------
     // Set up for the initial fit.
@@ -467,6 +476,9 @@ namespace alex {
 
     // If the entire fit succeeded, return.
     if(last_fitted == tot_nodes-1) return 0; // status;
+
+    // Add the last fit node to the list of fit breaks.
+    fit_breaks.push_back(last_fitted);
 
     // If the fit did not succeed completely, fit again using a new trajectory constructed from
     //  the remaining nodes that were not fit.
@@ -531,10 +543,8 @@ namespace alex {
             // Perform an additional fit.
             status = fRPMan.fitting_svc().fit(*fitSeed,fitTraj);
 
-            // Update the last fitted node.
-            //last_fitted = fitTraj.last_fitted_node();
-
             if(fitTraj.last_fitted_node() == ((int)fitTraj.nodes().size())-1) all_fit = true;
+            else fit_breaks.push_back(fitTraj.last_fitted_node() + traj.nodes().size());
         }
 
         num_breaks++;
@@ -615,5 +625,96 @@ namespace alex {
     //}
     
     return kfrep;
+  }
+
+  //-------------------------------------------------------------------------------------------------------------------------------
+  void KFSvcManager::OutputFit(const char * fname, const std::vector<Node*> & nodes, const std::vector<int> & fit_breaks) const {
+  //-------------------------------------------------------------------------------------------------------------------------------
+
+    std::cout << "Outputting fit to file " << fname << std::endl;
+
+    std::ofstream outf(fname);
+    outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F qoverp qoverpfit deltaE brk sense\n";
+          
+    auto inode = 0;
+    for (auto node: nodes)  {
+
+      // Declare variables to record position and chi2 information in a file.
+      double xM = -1.e9, yM = -1.e9, zM = -1.e9;
+      double xP = -1.e9, yP = -1.e9, zP = -1.e9, chi2P = -1.e9;
+      double xF = -1.e9, yF = -1.e9, zF = -1.e9, chi2F = -1.e9;
+      double eM = -1.e9;
+      double varqoverp = -1.e9;
+      double stqoverp = -1.e9;
+      int fitsense = -1.e9;
+      int brk = 0;
+
+      // Get the measured values.
+      xM = node->measurement().position()[0];   // effHits[lseg_i + lseg_inode]->XYZ().X();
+      yM = node->measurement().position()[1];   // effHits[lseg_i + lseg_inode]->XYZ().Y();
+      zM = node->measurement().position()[2];   // effHits[lseg_i + lseg_inode]->XYZ().Z();
+      eM = node->measurement().deposited_energy(); // effHits[lseg_i + lseg_inode]->Edep();
+
+      // Determine if the fit was broken just after fitting this node.
+      for(unsigned int ibrk = 0; ibrk < fit_breaks.size(); ibrk++) {
+        if(fit_breaks[ibrk] == inode) brk = 1;
+      }
+        
+      if(node->status(RP::fitted)) {
+
+        State state = node->state();
+        const HyperVector hv_P = state.hv(RP::predicted);  //predicted 
+        const EVector x_P = hv_P.vector();  // vector state
+        const EMatrix C_P = hv_P.matrix();  //cov matrix
+
+        // get the q/p
+        if(state.hvmap().has_key("qoverp")) {
+          varqoverp = state.hv("qoverp").vector()[0];
+        }
+        else if(state.hvmap().has_key("MSqoverp")) {
+          varqoverp = state.hv("MSqoverp").vector()[0];
+          stqoverp = x_P[5];
+        }
+        else {
+          std::cout << "WARNING: no qoverp or MSqoverp found.";
+        }
+
+        // get the sense
+        fitsense = state.hv(RP::sense).vector()[0];
+              
+        // Retrieve predicted residual
+        HyperVector resHV_P = node->residuals().hv(RP::predicted);
+        const EVector r_P = resHV_P.vector();
+        const EMatrix R_P = resHV_P.matrix();
+        double tchi2 = resHV_P.chi2();
+        xP = x_P[0]; yP = x_P[1]; zP = x_P[2]; chi2P = tchi2;
+
+        // Retrieve filtered residual if present for this node.
+        if(state.hvmap().has_key(RP::filtered)) {
+          
+          const HyperVector hv_F = state.hv(RP::filtered);  //filtered
+          const EVector x_F = hv_F.vector();  // vector state
+          const EMatrix C_F = hv_F.matrix();  //cov matrix
+       
+          HyperVector resHV_F = node->residuals().hv(RP::filtered);
+          const EVector r_F = resHV_F.vector();
+          const EMatrix R_F = resHV_F.matrix();
+          double tchi2_F = resHV_F.chi2();
+
+          xF = x_F[0]; yF = x_F[1]; zF = x_F[2]; chi2F = tchi2_F;
+        }
+
+        // Output the information to file.
+        outf << inode << " "
+                  << xM << " " << yM << " " << zM << " "
+                  << xP << " " << yP << " " << zP << " " << chi2P << " "
+                  << xF << " " << yF << " " << zF << " " << chi2F << " "
+                  << varqoverp << " " << stqoverp << " " << eM << " "
+                  << brk << " " << fitsense << "\n";
+             
+        inode++;
+      }
+    }
+    std::cout << "End of output function." << std::endl;
   }
 }
