@@ -11,7 +11,7 @@
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.histos.root</name>
-  </HistoFile> -->
+  </HistoFile>-->
   <!-- <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_00tesla.Xe136_bb0nu.next</name>
@@ -37,14 +37,14 @@
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_005tesla.e2447.0.histos.root</name>
   </HistoFile>-->
-  <!-- <DST>
+  <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.0.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_00tesla.e2447.0.histos.root</name>
-  </HistoFile> -->
+  </HistoFile>-->
   <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_01tesla.e2447.0.next</name>
@@ -77,14 +77,14 @@
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_04tesla.e2447.0.histos.root</name>
   </HistoFile> -->
-  <!-- <DST>
+  <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_05tesla.e2447.0.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_05tesla.e2447.0.histos.root</name>
-  </HistoFile> -->
+  </HistoFile>-->
   <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_06tesla.e2447.0.next</name>
@@ -93,14 +93,14 @@
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_06tesla.e2447.0.histos.root</name>
   </HistoFile>-->
-  <DST>
+  <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_07tesla.e2447.0.next</name>
   </DST>
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_07tesla.e2447.0.histos.root</name>
-  </HistoFile>
+  </HistoFile>-->
   <!-- <DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_01tesla.Xe136_bb0nu.next</name>
@@ -124,7 +124,7 @@
   <HistoFile>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_05tesla.Xe136_bb0nu.histos.root</name>
-  </HistoFile> -->
+  </HistoFile>-->
   <!--<DST>
     <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
     <name>MagBox_Xe_10atm_05tesla.e2447.next</name>
@@ -133,6 +133,60 @@
     <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
     <name>MagBox_Xe_10atm_05tesla.e2447.histos.root</name>
   </HistoFile>-->
+
+  <DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_05tesla.Xe136_bb0nu.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_Xe_10atm_05tesla.Xe136_bb0nu.0.histos.root</name>
+  </HistoFile>
+
+  <!--<DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_5atm_005tesla.e2447.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_Xe_5atm_005tesla.e2447.0.histos.root</name>
+  </HistoFile>-->
+  <!--<DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_5atm_07tesla.e2447.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_Xe_5atm_07tesla.e2447.0.histos.root</name>
+  </HistoFile>-->
+
+  <!--<DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_H_1atm_05tesla.e2447.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_H_1atm_05tesla.e2447.0.histos.root</name>
+  </HistoFile>-->
+
+  <!--<DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_H_1atm_01tesla.e2447.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_H_1atm_01tesla.e2447.0.histos.root</name>
+  </HistoFile>-->
+
+  <!--<DST>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/NEXT/DATA</path>
+    <name>MagBox_Xe_10atm_0tesla.e1000.0.next</name>
+  </DST>
+  <HistoFile>
+    <path>/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain</path>
+    <name>MagBox_Xe_10atm_0tesla.e1000.0.histos.root</name>
+  </HistoFile>-->
+
   <Events>
     <runMax>10000</runMax>
     <runDebug>10</runDebug>

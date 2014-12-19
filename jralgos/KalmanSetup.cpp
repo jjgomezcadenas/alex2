@@ -53,12 +53,13 @@ namespace alex {
       etot += truehits[h].second;
     } 
 
-    RBeta* rBeta = ISvc::Instance().GetRBeta();
+    //RBeta* rBeta = ISvc::Instance().GetRBeta();
     //std::vector<const Hit*> effHits = rBeta->GetEffHits();
 
     bool forwardFit = true;
     if(fForwardFit == 0) forwardFit = false;
 
+    // Fit assuming the initial kinetic energy is QMAX.
     ISvc::Instance().CreateKFObjects(QMAX+MELEC,errXY,true,forwardFit);
 
     std::vector<const Hit*> effHits = ISvc::Instance().GetKFHits();
@@ -96,7 +97,8 @@ namespace alex {
     //getline(cin, input);
 
     //bool status = KFSvc::Instance().FitTrajectory(*trj, *seed);
-    int nbreaks = KFSvc::Instance().FitTrajectory(*trj, *seed);
+    std::vector<int> fit_breaks;
+    int nbreaks = KFSvc::Instance().FitTrajectory(*trj, *seed, fit_breaks);
 
     //klog << log4cpp::Priority::DEBUG << " Fitting trajectory, result " << status;
     klog << log4cpp::Priority::DEBUG << " Fitting trajectory, result " << nbreaks << " fits";
@@ -155,7 +157,7 @@ namespace alex {
     else
       sprintf(tempStr,"%s/%s/trk/%s_r%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),fEvent);
     std::ofstream outf(tempStr);
-    outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F qoverp deltaE\n";
+    outf << "# node xM yM zM xP yP zP chi2P xF yF zF chi2F qoverp qoverpfit deltaE brk sense\n";
 
     const std::vector<Node*> tnodes =  trj->nodes();
 
@@ -170,6 +172,9 @@ namespace alex {
       double eM = -1.e9;
       double Estate = 0.;
       double varqoverp = -1.e9;
+      double stqoverp = -1.e9;
+      int fitsense = -1.e9;
+      int brk = 0;
 
       // Get the measured values from the effective hits.
       if(inode < (int) effHits.size()) {
@@ -182,7 +187,10 @@ namespace alex {
         std::cout << "WARNING: attempting to access measurement beyond size of eff. hits.";
       }
 
-      // get the state X and C
+      // Determine if the fit was broken just after fitting this node.
+      for(unsigned int ibrk = 0; ibrk < fit_breaks.size(); ibrk++) {
+       if(fit_breaks[ibrk] == inode) brk = 1;  
+      }
 
       if(node->status(RP::fitted)) {
 
@@ -193,10 +201,22 @@ namespace alex {
         const EMatrix C_P = hv_P.matrix();  //cov matrix
 
         // get the q/p
-      
-        const HyperVector hv_qoverp = state.hv("qoverp");
-        const EVector qop_vec = hv_qoverp.vector();
-        varqoverp = qop_vec[0];
+        int index_qoverp;
+        bool ok = Recpack::rep_default().index(RP::qoverp, index_qoverp);
+        if(ok) std::cout << "Fitted q/p = " << index_qoverp <<  std::endl;
+        if(state.hvmap().has_key("qoverp")) {
+          varqoverp = state.hv("qoverp").vector()[0];
+        }
+        else if(state.hvmap().has_key("MSqoverp")) {
+          varqoverp = state.hv("MSqoverp").vector()[0];
+          stqoverp = x_P[5];
+        }
+        else {
+          std::cout << "WARNING: no qoverp or MSqoverp found.";
+        }
+
+        // get the sense
+        fitsense = state.hv(RP::sense).vector()[0];
 
         // Retrieve predicted residual
         /*
@@ -268,13 +288,156 @@ namespace alex {
            << xM << " " << yM << " " << zM << " " 
            << xP << " " << yP << " " << zP << " " << chi2P << " "
            << xF << " " << yF << " " << zF << " " << chi2F << " "
-           << varqoverp << " " << eM << "\n";
+           << varqoverp << " " << stqoverp << " " << eM << " "
+           << brk << " " << fitsense << "\n";
 
       inode++;
     }
 
     // Close the output file.
     outf.close();
+
+    // -------------------------------------------------------------------------------------
+    // Perform forward and reverse fits for the longest trajectory if this is a forward fit.
+    // -------------------------------------------------------------------------------------
+    if(forwardFit && fit_breaks.size() > 0) {
+
+      // First find the beginning and end of the largest segment.
+      int lseg_i = 0, lseg_f = -1;
+      int lseg_max = -1;
+      for(unsigned int si = 0; si < fit_breaks.size(); si++) {
+
+        int lseg_size = -1;
+     
+        // Treat the case of the first break. 
+        if(si == 0) {
+          lseg_size = fit_breaks[0] + 1;
+          lseg_max = lseg_size;
+          lseg_i = 0; lseg_f = fit_breaks[0]; 
+        }
+        else {
+  
+          lseg_size = fit_breaks[si] - fit_breaks[si-1];
+
+          // Update the indices if we have found a new largest segment.
+          if(lseg_size > lseg_max) {
+            lseg_i = fit_breaks[si-1]; lseg_f = fit_breaks[si];
+            lseg_max = lseg_size;
+          }
+        }
+      }
+
+      std::cout << "Found longest segment with lseg_i = " << lseg_i << " and lseg_f = " << lseg_f << std::endl;
+
+      // Set up variables used to construct and fit longest segment.
+      std::vector<Node*> lseg_fnodes; std::vector<Node*> lseg_rnodes;
+      std::vector<double> lseg_v0;
+      std::vector<double> lseg_p0;
+      std::vector<double> lseg_xlist; std::vector<double> lseg_ylist; std::vector<double> lseg_zlist;
+ 
+      // Build the segment in the forward direction.
+      double elostf = 0.;
+      for(int n = lseg_i; n < lseg_f; n++) {
+        if(n >= lseg_i) {
+          Node * nnode = new Node(*tnodes[n]);
+          lseg_fnodes.push_back(nnode);
+        }
+        else {
+          elostf += tnodes[n]->measurement().deposited_energy();
+        }
+      }
+
+      // Build the segment in the reverse direction.
+      double elostr = 0.;
+      for(int n = (int) (tnodes.size()-1); n > lseg_i; n--) {
+        std::cout << "Looking to add nodes with n = " << n << std::endl;
+        if(n < lseg_f) {
+          Node * nnode = new Node(*tnodes[n]);
+          lseg_rnodes.push_back(nnode);
+          std::cout << "Added node " << n << std::endl;
+        }
+        else {
+          elostr += tnodes[n]->measurement().deposited_energy();
+        }
+      }
+
+      // Forward fit to longest segment --------------------------------------------------------------------------
+
+      trj->reset();
+      trj->add_nodes(lseg_fnodes);
+
+      std::cout << "Built forward segment with " << lseg_fnodes.size() << " nodes; elost = " << elostf << std::endl;
+
+      // Create a seed state for the segment.
+      lseg_v0.push_back(lseg_fnodes[0]->measurement().position()[0]);
+      lseg_v0.push_back(lseg_fnodes[0]->measurement().position()[1]);
+      lseg_v0.push_back(lseg_fnodes[0]->measurement().position()[2]);
+
+      lseg_xlist.push_back(lseg_fnodes[0]->measurement().position()[0]);
+      lseg_ylist.push_back(lseg_fnodes[0]->measurement().position()[1]);
+      lseg_zlist.push_back(lseg_fnodes[0]->measurement().position()[2]);
+
+      lseg_xlist.push_back(lseg_fnodes[1]->measurement().position()[0]);
+      lseg_ylist.push_back(lseg_fnodes[1]->measurement().position()[1]);
+      lseg_zlist.push_back(lseg_fnodes[1]->measurement().position()[2]);
+      ISvc::Instance().GuessInitialMomentum(QMAX+MELEC-elostf, lseg_p0, lseg_xlist, lseg_ylist, lseg_zlist);
+ 
+      State * lseg_seedf = KFSvc::Instance().SeedState(lseg_v0,lseg_p0);
+
+      // Fit the segment.
+      fit_breaks.clear();
+      nbreaks = KFSvc::Instance().FitTrajectory(*trj, *lseg_seedf, fit_breaks);
+
+      std::cout << "Forward fit completed with " << nbreaks << " breaks" << std::endl;
+
+      // Output the results.
+      sprintf(tempStr,"%s/%s/trk/%s_flsegf%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),fEvent);
+      KFSvc::Instance().OutputFit(tempStr, trj->nodes(), fit_breaks);
+
+      // Clear the temporary variables/arrays ----------------------------------------------------------------------
+      elostr = 0.;
+      for(int n = 0; n < (int) lseg_fnodes.size(); n++) delete lseg_fnodes[n];
+      lseg_v0.clear(); lseg_p0.clear();
+      lseg_xlist.clear(); lseg_ylist.clear(); lseg_zlist.clear();
+
+      // Reverse fit to longest segment ----------------------------------------------------------------------------
+
+      std::cout << "Building reverse segment " << std::endl;
+
+      trj->reset();
+      trj->add_nodes(lseg_rnodes);
+
+      std::cout << "Built reverse segment with " << lseg_rnodes.size() << " nodes; elost = " << elostr << std::endl;
+
+      // Create a seed state for the segment.
+      lseg_v0.push_back(lseg_rnodes[0]->measurement().position()[0]);
+      lseg_v0.push_back(lseg_rnodes[0]->measurement().position()[1]);
+      lseg_v0.push_back(lseg_rnodes[0]->measurement().position()[2]);
+
+      lseg_xlist.push_back(lseg_rnodes[0]->measurement().position()[0]);
+      lseg_ylist.push_back(lseg_rnodes[0]->measurement().position()[1]);
+      lseg_zlist.push_back(lseg_rnodes[0]->measurement().position()[2]);
+
+      lseg_xlist.push_back(lseg_rnodes[1]->measurement().position()[0]);
+      lseg_ylist.push_back(lseg_rnodes[1]->measurement().position()[1]);
+      lseg_zlist.push_back(lseg_rnodes[1]->measurement().position()[2]);
+      ISvc::Instance().GuessInitialMomentum(QMAX+MELEC-elostr, lseg_p0, lseg_xlist, lseg_ylist, lseg_zlist);
+ 
+      State * lseg_seedr = KFSvc::Instance().SeedState(lseg_v0,lseg_p0);
+
+      // Fit the segment.
+      fit_breaks.clear();
+      nbreaks = KFSvc::Instance().FitTrajectory(*trj, *lseg_seedr, fit_breaks);
+      std::cout << "Reverse fit completed with " << nbreaks << " breaks" << std::endl;
+
+      // Output the results.    
+      sprintf(tempStr,"%s/%s/trk/%s_flsegr%i.dat",outPath.c_str(),runName.c_str(),runName.c_str(),fEvent);
+      KFSvc::Instance().OutputFit(tempStr, trj->nodes(), fit_breaks);
+
+      for(int n = 0; n < (int) lseg_rnodes.size(); n++) delete lseg_rnodes[n];
+      delete lseg_seedf;
+      delete lseg_seedr;
+    }
 
     //getline(cin, input);
     delete trj;
