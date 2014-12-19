@@ -225,88 +225,91 @@ namespace alex {
     current_track->SetVX(vt1,vt2);
 
     // Loop over all hits and calculate the minimum distance to the primary track.
-    for(int i = 0; i < (int) truehits.size(); i++)
-    {
-      IHit ih = truehits[i];
-
-      // Compute the minimum distance between all the hits in the
-      // track thus far and the current hit.
-      int imin, iside;
-      double mindist = ComputeMinDist(current_track->GetHit(), ih, imin, iside);
-      
-      // Record the minimum distance if the hit is not in the primary track.
-      if(mindist > 1.0e-8)
+    if(truehits.size() < 10000) {
+      std::cout << "Looping over " << truehits.size() << " true hits." << std::endl;
+      for(int i = 0; i < (int) truehits.size(); i++)
       {
-        minDistList.push_back(mindist);
+        IHit ih = truehits[i];
+
+        // Compute the minimum distance between all the hits in the
+        // track thus far and the current hit.
+        int imin, iside;
+        double mindist = ComputeMinDist(current_track->GetHit(), ih, imin, iside);
+       
+        // Record the minimum distance if the hit is not in the primary track.
+        if(mindist > 1.0e-8)
+        {
+          minDistList.push_back(mindist);
+        }
       }
-    }
 
-    // Loop over the hits, keeping track of the number of hits that
-    //  were not added to the current track (variable i).
-    int i = 0;
-    while(truehits.size() != 0)
-    {
-      //std::cout << "-- Looping with truehits.size = " << truehits.size() 
-      //          << " and i = " << i << std::endl;
+      // Loop over the hits, keeping track of the number of hits that
+      //  were not added to the current track (variable i).
+      int i = 0;
+      while(truehits.size() != 0)
+      {
+        //std::cout << "-- Looping with truehits.size = " << truehits.size() 
+        //          << " and i = " << i << std::endl;
 
-      IHit ih = truehits[i];
+        IHit ih = truehits[i];
 
-      // Compute the minimum distance between all the hits in the
-      // track thus far and the current hit.
-      int imin, iside;
-      double mindist = ComputeMinDist(current_track->GetHit(), ih, imin, iside);
-      //std::cout << "Found mindist = " << mindist << std::endl;
+        // Compute the minimum distance between all the hits in the
+        // track thus far and the current hit.
+        int imin, iside;
+        double mindist = ComputeMinDist(current_track->GetHit(), ih, imin, iside);
+        //std::cout << "Found mindist = " << mindist << std::endl;
       
-      // If mindist is zero within some tolerance, we have probably found the same hit: remove it.
-      if(mindist < 1.0e-8)
-      {
-        truehits.erase(truehits.begin()+i);
-      }
-      // Otherwise, if mindist is less than the chosen track separation, add to the current track.
-      else if(mindist < maxDist)
-      {
+        // If mindist is zero within some tolerance, we have probably found the same hit: remove it.
+        if(mindist < 1.0e-8)
+        {
+          truehits.erase(truehits.begin()+i);
+        }
+        // Otherwise, if mindist is less than the chosen track separation, add to the current track.
+        else if(mindist < maxDist)
+        {
+    
+          // This hit lies in the curent track; add it.
+          Hit trackHit(ih);
+          trackHit.SetMinDist(mindist);  // save the minimum distance so, for the primary track, it does not
+                                         // need to be recomputed later
+          current_track->InsertHit(trackHit,std::max(imin,iside));
+          //std::cout << "Added hit to IBeta " << fIBetas.size() << " with mindist = " << mindist << std::endl;
+          //std::cout << "Added close hit at (X, Y, Z) = (" << ih.first.X() << ", " << ih.first.Y() 
+          //      << ", " << ih.first.Z() << ")" << std::endl;
   
-        // This hit lies in the curent track; add it.
-        Hit trackHit(ih);
-        trackHit.SetMinDist(mindist);  // save the minimum distance so, for the primary track, it does not
-                                       // need to be recomputed later
-        current_track->InsertHit(trackHit,std::max(imin,iside));
-        //std::cout << "Added hit to IBeta " << fIBetas.size() << " with mindist = " << mindist << std::endl;
-        //std::cout << "Added close hit at (X, Y, Z) = (" << ih.first.X() << ", " << ih.first.Y() 
-        //      << ", " << ih.first.Z() << ")" << std::endl;
+          // Remove from the list of all hits.
+          truehits.erase(truehits.begin()+i);
 
-        // Remove from the list of all hits.
-        truehits.erase(truehits.begin()+i);
+          // Reset the hit counter.
+          i = 0;
+        }
+        else
+        {
+          // This hit lies outside the current track; advance to the next one.
+          i++;
+        }
 
-        // Reset the hit counter.
-        i = 0;
-      }
-      else
-      {
-        // This hit lies outside the current track; advance to the next one.
-        i++;
-      }
-
-      // If all remaining hits lie outside the current track, record
-      //  the current track object, and create a new current track.
-      if(i >= (int) truehits.size() && truehits.size() != 0)
-      {
-
-        // Save the current track.
-        fIBetas.push_back(current_track);
-
-        // Start the next track with the first hit in the list of remaining hits.
-        current_track = new IBeta();
-        current_track->AddHit(truehits[0]);
-        truehits.erase(truehits.begin());
-        i = 0;
+        // If all remaining hits lie outside the current track, record
+        //  the current track object, and create a new current track.
+        if(i >= (int) truehits.size() && truehits.size() != 0)
+        {
+  
+          // Save the current track.
+          fIBetas.push_back(current_track);
+  
+          // Start the next track with the first hit in the list of remaining hits.
+          current_track = new IBeta();
+          current_track->AddHit(truehits[0]);
+          truehits.erase(truehits.begin());
+          i = 0;
+        }
       }
     }
 
     // Push back the final track.
     fIBetas.push_back(current_track);
   }
-
+  
 //
 // coreDist: the maximum distance (in mm) a hit can be from the main track and
 //  still be considered part of the core
