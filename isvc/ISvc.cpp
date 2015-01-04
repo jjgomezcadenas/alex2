@@ -637,7 +637,7 @@ namespace alex {
 
     // Create a copy of the effective hits from the rBeta object and smear them.
     std::vector<const Hit*> effHits = fRBeta->GetEffHits();
-    std::vector<Hit*> updatedHits;
+    std::vector<double> uh_x; std::vector<double> uh_y; std::vector<double> uh_z; std::vector<double> uh_e;
     for(int h = 0; h < (int) effHits.size(); h++) {
 
       // Smear the x and y.
@@ -646,9 +646,15 @@ namespace alex {
       double hz = effHits[h]->XYZ().Z();
       double he = effHits[h]->Edep();
 
+      // Record the smeared x and y values.
+      uh_x.push_back(hx);
+      uh_y.push_back(hy);
+      uh_z.push_back(hz);
+      uh_e.push_back(he);
+
       // Create and add a new hit.
-      Hit * hit = new Hit(hx, hy, hz, he);
-      updatedHits.push_back(hit);
+      //Hit * hit = new Hit(hx, hy, hz, he);
+      //updatedHits.push_back(hit);
     }
    
     // Add the photons to the corresponding closest hits if this option is selected.
@@ -666,10 +672,10 @@ namespace alex {
 
         // Get the effective hits and compute the distance to each.
         double mindist = 0.; int imin = -1;
-        for(int j = 0; j < (int) updatedHits.size(); j++) {
-          double dx = (xphot - updatedHits[j]->XYZ().X());
-          double dy = (yphot - updatedHits[j]->XYZ().Y());
-          double dz = (zphot - updatedHits[j]->XYZ().Z());
+        for(int j = 0; j < (int) effHits.size(); j++) {
+          double dx = (xphot - uh_x[j]); // updatedHits[j]->XYZ().X());
+          double dy = (yphot - uh_y[j]); // updatedHits[j]->XYZ().Y());
+          double dz = (zphot - uh_z[j]); // updatedHits[j]->XYZ().Z());
           double dist = sqrt(dx*dx + dy*dy + dz*dz);
           
           if(imin < 0 || dist < mindist) {
@@ -679,10 +685,43 @@ namespace alex {
         }
 
         // Add the photon energy to the closest hit.
-        updatedHits[imin]->AddEnergy(ephot);
+        uh_e[imin] = uh_e[imin] + ephot;
+
+        //updatedHits[imin]->AddEnergy(ephot);
 
       }
     }
+
+    // Set up the low-pass filter.
+    std::vector<double> lpf_b;
+    lpf_b.push_back(0.00031166);
+    lpf_b.push_back(0.00155831);
+    lpf_b.push_back(0.00311661);
+    lpf_b.push_back(0.00311661);
+    lpf_b.push_back(0.00155831);
+    lpf_b.push_back(0.00031166);
+
+    std::vector<double> lpf_a;
+    lpf_a.push_back(1.);
+    lpf_a.push_back(-3.53560081);
+    lpf_a.push_back(5.15865807);
+    lpf_a.push_back(-3.85242964);
+    lpf_a.push_back(1.4661488);
+    lpf_a.push_back(-0.22680327);
+
+    // Filter each position array with the low-pass filter.
+    std::vector<double> flt_uh_x = ApplyLPF(lpf_b, lpf_a, uh_x);
+    std::vector<double> flt_uh_y = ApplyLPF(lpf_b, lpf_a, uh_y);
+    std::vector<double> flt_uh_z = ApplyLPF(lpf_b, lpf_a, uh_z);
+   
+    // Create a list of hits from the filtered position arrays.
+    std::vector<Hit*> updatedHits;
+    for(int h = 0; h < (int) effHits.size(); h++) {
+
+      // Create and add a new hit.
+      Hit * hit = new Hit(flt_uh_x[h], flt_uh_y[h], flt_uh_z[h], uh_e[h]);
+      updatedHits.push_back(hit);
+    } 
 
     // Save the list of hits, reversing the hits if necessary.
     if(forwardFit) {
@@ -945,4 +984,40 @@ void IreneManager::GuessInitialMomentum(double energy, std::vector<double> &p0, 
     return mindist;
   }
   */
+
+// Apply the low-pass filter using:
+// a[0]*y[n] = b[0]*x[n] + b[1]*x[n-1] + ... + b[nb]*x[n-ntot_b]
+//                       - a[1]*y[n-1] - ... - a[na]*y[n-ntot_a]
+//------------------------------------------------------------------------------------------------------
+  std::vector<double> IreneManager::ApplyLPF(const std::vector<double> & bc, const std::vector<double> & ac, const std::vector<double> & xv)
+//------------------------------------------------------------------------------------------------------
+  {
+    // Create the new filtered vector to be returned.
+    std::vector<double> yv;
+
+    // Get the orders of the a and b coefficients of the filter (note assuming ac and bc have the same length).
+    int ord_a = (int) ac.size();
+    int ord_b = (int) bc.size();
+
+    // Apply the filter.
+    for(int n = 0; n < (int) xv.size(); n++) {
+
+      // Next value yv[n] to be computed.
+      double ynext = 0.;
+
+      // Add the input-dependent parts of the filter.
+      for(int nb = 0; (nb <= n && nb < ord_b); nb++)
+        ynext += bc[nb]*xv[n-nb];
+      
+      // Add the output-dependent parts of the filter.
+      for(int na = 1; (na <= n && na < ord_a); na++)
+        ynext -= ac[na]*yv[n-na];
+
+      // Add the new y-value to the list.
+      yv.push_back(ynext/ac[0]);
+    }
+
+    // Return the filtered array.
+    return yv;
+  }
 }

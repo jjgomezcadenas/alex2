@@ -66,6 +66,7 @@ class IreneManager {
 		void FetchPMaxElectrons();
                 double ComputeMinDist(IHits ihs1, IHits ihs2);
 		double ComputeMinDist(std::vector<const alex::Hit*> ihs1, IHit ih, int& imin, int& iside);
+                std::vector<double> ApplyLPF(const std::vector<double> & bc, const std::vector<double> & ac, const std::vector<double> & xv);
 
         int startEvt;
         int evtNum;
