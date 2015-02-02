@@ -15,6 +15,11 @@ from rp_trackdefs import *
 from abc import ABCMeta, abstractmethod
 import logging 
 
+# Get the arguments, if any, for setting the run name.
+args = sys.argv;
+if(args[1] != ""):
+    run_name = args[1];
+
 # Ensure the track directory has been created.
 if(not os.path.isdir(dat_outdir)): 
     print "ERROR: track directory {0} not available".format(dat_outdir);
@@ -484,15 +489,16 @@ else:
 # ---------------------------------------------------------------------------
 # Histogram all average q/p values for the longest segments.
 
-fig = plt.figure(11);
-ax2 = fig.add_subplot(111);
-lsegqopfn, lsegqopfbins, lsegqopfpatches = plt.hist(lseg_qoverp_f, 30, normed=0, histtype='step',color='blue',label='Forward fit');
-lsegqoprn, lsegqoprbins, lsegqoprpatches = plt.hist(lseg_qoverp_r, 30, normed=0, histtype='step',color='red',label='Reverse fit');
-lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
-ax2.set_xlabel("Average q/p");
-ax2.set_ylabel("Counts/bin");
-#ax2.set_xlim(0,1);
-plt.savefig("{0}/lseg_avg_qoverp.pdf".format(plt_base), bbox_inches='tight');
-print "Note (avg. q/p histogram): {0} entries in forward histogram and {1} entries in reverse histogram.".format(len(lseg_qoverp_f),len(lseg_qoverp_r));
+if(len(lseg_qoverp_f) > 0):
+    fig = plt.figure(11);
+    ax2 = fig.add_subplot(111);
+    lsegqopfn, lsegqopfbins, lsegqopfpatches = plt.hist(lseg_qoverp_f, 30, normed=0, histtype='step',color='blue',label='Forward fit');
+    lsegqoprn, lsegqoprbins, lsegqoprpatches = plt.hist(lseg_qoverp_r, 30, normed=0, histtype='step',color='red',label='Reverse fit');
+    lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
+    ax2.set_xlabel("Average q/p");
+    ax2.set_ylabel("Counts/bin");
+    #ax2.set_xlim(0,1);
+    plt.savefig("{0}/lseg_avg_qoverp.pdf".format(plt_base), bbox_inches='tight');
+    print "Note (avg. q/p histogram): {0} entries in forward histogram and {1} entries in reverse histogram.".format(len(lseg_qoverp_f),len(lseg_qoverp_r));
 
 print "{0} tracks in total were processed".format(nprocessed);

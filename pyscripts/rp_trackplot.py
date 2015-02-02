@@ -185,12 +185,12 @@ for ntrk in range(num_tracks):
         ax4.set_ylabel("z ({0})".format(plt_units));
         
         # Plot the chi2.
-        ax5 = fig.add_subplot(325);
-        ax5.plot(chi2_k,chi2_list,color='black');
-        ax5.set_xlabel("k");
-        ax5.set_ylabel("$\chi^{2}$");
+        #ax5 = fig.add_subplot(325);
+        #ax5.plot(chi2_k,chi2_list,color='black');
+        #ax5.set_xlabel("k");
+        #ax5.set_ylabel("$\chi^{2}$");
         #ax5.set_yscale("log");
-        ax5.set_title("Avg. chi2f = {0}".format(np.mean(plt_chi2F)));
+        #ax5.set_title("Avg. chi2f = {0}".format(np.mean(plt_chi2F)));
 
         # Show and/or print the plot.
         if(plt_print):

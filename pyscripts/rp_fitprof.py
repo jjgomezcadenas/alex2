@@ -17,6 +17,11 @@ from scipy.interpolate import interp1d
 from abc import ABCMeta, abstractmethod
 import logging 
 
+# Get the arguments, if any, to change the run name.
+args = sys.argv;
+if(args[1] != ""):
+    run_name = args[1];
+
 fnb_trk = "{0}/{1}/trk".format(dat_outdir,run_name);
 plt_base = "{0}/{1}/plt".format(dat_outdir,run_name);
 
@@ -41,25 +46,6 @@ fprof_sigma = interp1d(fproftbl[:,0],fproftbl[:,2],kind='linear');
 rproftbl = np.loadtxt("{0}/{1}/plt/prof/prof_{2}_reverse.dat".format(dat_outdir,run_name,prof_name));
 rprof = interp1d(rproftbl[:,0],rproftbl[:,1],kind='linear');
 rprof_sigma = interp1d(rproftbl[:,0],rproftbl[:,2],kind='linear');
-
-#kon_vals = [];
-#fprof_vals = [];
-#rprof_vals = [];
-#for ii in np.arange(0.,0.9,0.01):
-#    kon_vals.append(ii);
-#    fprof_vals.append(fprof(ii))
-#    rprof_vals.append(rprof(ii))
-#    
-#fig = plt.figure(2);
-#fig.set_figheight(5.0);
-#fig.set_figwidth(7.5);
-#plt.plot(kon_vals,fprof_vals,'-',color='blue',markersize=1.0,label='Forward fit');
-#plt.plot(kon_vals,rprof_vals,'-',color='blue',markersize=1.0,label='Reverse fit');
-#lnd = plt.legend(loc=4,frameon=False,handletextpad=0);
-#plt.title("Profile chi2 comparisons ($\chi^2$ limit = {0}, k/N from 0.1 to 0.9)".format(chi2_outlier));
-#plt.xlabel("k/N");
-#plt.ylabel("$\chi^{2}$");
-#plt.show();
 
 # Run the profile analysis for each track.
 splot_fchi2F = []; splot_fchi2R = [];
@@ -170,12 +156,14 @@ for cval in np.arange(0,cmax,cmax/50.):
         
     # Add the cut to the cut values list.
     cut_vals.append(cval);
-
-#print "\n\n";
-#print "# eff (1-b)\n";
-#for eff,bgr in zip(eff_vals,bgr_vals):
-#    print "{0} {1}".format(eff,bgr);
-#print "\n\n";
+    
+# ---------------------------------------------------------------------------
+# Output the chi2 values computed
+fc2 = open("{0}/chi2values.dat".format(plt_base),"w");
+fc2.write("# (fchi2F) (fchi2R) (rchi2F) (rchi2R)\n");
+for fcF,fcR,rcF,rcR in zip(splot_fchi2F,splot_fchi2R,splot_rchi2F,splot_rchi2R):
+    fc2.write("{0} {1} {2} {3}\n".format(fcF,fcR,rcF,rcR));
+fc2.close();
     
 # Plot the quantities in a scatter plot.
 fig = plt.figure(1);
