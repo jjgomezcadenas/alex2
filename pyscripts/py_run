@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+## ---------------------------------------------------------------------------------
+## py_run
+## ---------------------------------------------------------------------------------
+## 
+## Runs the Python-based analysis.
+##
+##
+## ---------------------------------------------------------------------------------
+use POSIX;
+$debug = 1;       # debug output for this script
+
+# Parameters
+$n_evts = 5000;
+$t_evts = 10000;
+$walltime = "00:30:00";
+$qtype = "short";
+
+$rname_se = "magseHtest01_1mm_5sp";
+$rname_bb = "magbbHtest01_1mm_5sp";
+
+# ----------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------
+# Paths and directories
+# ----------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------
+# Determine the run number and directory structure
+# ----------------------------------------------------------------------------------
+$PATH_PYSCRIPTS = "/Users/jrenner/IFIC/software/alex2/trunk/pyscripts";
+$PATH_BUILD = "/Users/jrenner/IFIC/software/alex2/build/alexMain";
+$PATH_BASH = "$PATH_BUILD/bash";
+$dir_run = "$PATH_BASH/$rname_se";
+
+# Make sure the directory structure is present
+if($debug) { print "Creating directory structure...\n"; }
+if(!(-d $dir_run)) {
+  system("mkdir $dir_run"); print "--> Created $dir_run\n";
+  print "Done.\n\n";
+}
+
+# ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------
+
+# Construct the name of the input bash file
+my $bash_fname = "$dir_run/$rname_se" . "_py.pbs";
+
+$err_file = "$dir_run/$rname_se" . "_err.err";
+$out_file = "$dir_run/$rname_se" . "_out.out"; 
+
+# Write the input configuration file
+open(F_BASH, "> $bash_fname");
+print "Printing configuration file for run $s...\n";
+print F_BASH <<ENDFILE;
+#PBS -N imain
+#PBS -q $qtype
+#PBS -l nodes=1:ppn=1,walltime=$walltime
+#PBS -e $err_file
+#PBS -o $out_file
+
+cd $PATH_PYSCRIPTS
+python rp_genplots.py $rname_se
+python rp_fitprof.py $rname_se
+python rp_genplots.py $rname_bb
+cp $PATH_BUILD/out/$rname_se/plt/prof/* $PATH_BUILD/out/$rname_bb/plt/prof
+python rp_gfit.py $rname_se
+python rp_gfit.py $rname_bb
+python rp_cfmeans.py $rname_se $rname_bb
+python rp_sevsbb.py $rname_se $rname_bb
+ENDFILE
+close(F_BASH);
+
+    #print "--> Submitting job file $bash_fname to queue\n";
+    #system("qsub $bash_fname");
+
