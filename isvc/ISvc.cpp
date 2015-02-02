@@ -526,11 +526,11 @@ namespace alex {
     fRBeta->AddBlob(*blob1);
     fRBeta->AddBlob(*blob2); 
 
-//    // Reverse the effective hits if it turned out that blob2 was actually more energetic. (THIS SHOULD ONLY BE DONE FOR "DATA")
-//    if(eBlob2 > eBlob1) {
-//      std::cout << log4cpp::Priority::DEBUG << " *** Reversing eff. hits because eBlob2 > eBlob1" << std::endl;
-//      fRBeta->ReverseEffHits();
-//    }
+    // Reverse the effective hits if it turned out that blob2 was actually more energetic. (THIS SHOULD ONLY BE DONE FOR "DATA")
+    if(eBlob2 > eBlob1) {
+      std::cout << log4cpp::Priority::DEBUG << " *** Reversing eff. hits because eBlob2 > eBlob1" << std::endl;
+      fRBeta->ReverseEffHits();
+    }
  
     /* NOTE: this is not trivial as the effective hits can't be easily modified after created.
     // Add all photons to their closest effective hit.
@@ -694,32 +694,51 @@ namespace alex {
 
     // Set up the low-pass filter.
     std::vector<double> lpf_b;
-    lpf_b.push_back(0.00031166);
-    lpf_b.push_back(0.00155831);
-    lpf_b.push_back(0.00311661);
-    lpf_b.push_back(0.00311661);
-    lpf_b.push_back(0.00155831);
-    lpf_b.push_back(0.00031166);
+    lpf_b.push_back(-0.00097716);
+    lpf_b.push_back(0.00386142);
+    lpf_b.push_back(0.01047793);
+    lpf_b.push_back(0.01170774);
+    lpf_b.push_back(0.00047054);
+    lpf_b.push_back(-0.0218638);
+    lpf_b.push_back(-0.0407325);
+    lpf_b.push_back(-0.03358505);
+    lpf_b.push_back(0.01564067);
+    lpf_b.push_back(0.10189163);
+    lpf_b.push_back(0.19586773);
+    lpf_b.push_back(0.25724086);
+    lpf_b.push_back(0.25724086);
+    lpf_b.push_back(0.19586773);
+    lpf_b.push_back(0.10189163);
+    lpf_b.push_back(0.01564067);
+    lpf_b.push_back(-0.03358505);
+    lpf_b.push_back(-0.0407325);
+    lpf_b.push_back(-0.0218638);
+    lpf_b.push_back(0.00047054);
+    lpf_b.push_back(0.01170774);
+    lpf_b.push_back(0.01047793);
+    lpf_b.push_back(0.00386142);
+    lpf_b.push_back(-0.00097716);
 
     std::vector<double> lpf_a;
     lpf_a.push_back(1.);
-    lpf_a.push_back(-3.53560081);
-    lpf_a.push_back(5.15865807);
-    lpf_a.push_back(-3.85242964);
-    lpf_a.push_back(1.4661488);
-    lpf_a.push_back(-0.22680327);
+    //lpf_a.push_back(-3.53560081);
+    //lpf_a.push_back(5.15865807);
+    //lpf_a.push_back(-3.85242964);
+    //lpf_a.push_back(1.4661488);
+    //lpf_a.push_back(-0.22680327);
 
     // Filter each position array with the low-pass filter.
-    std::vector<double> flt_uh_x = ApplyLPF(lpf_b, lpf_a, uh_x);
-    std::vector<double> flt_uh_y = ApplyLPF(lpf_b, lpf_a, uh_y);
-    std::vector<double> flt_uh_z = ApplyLPF(lpf_b, lpf_a, uh_z);
+    //std::vector<double> flt_uh_x = ApplyLPF(lpf_b, lpf_a, uh_x);
+    //std::vector<double> flt_uh_y = ApplyLPF(lpf_b, lpf_a, uh_y);
+    //std::vector<double> flt_uh_z = ApplyLPF(lpf_b, lpf_a, uh_z);
    
     // Create a list of hits from the filtered position arrays.
     std::vector<Hit*> updatedHits;
     for(int h = 0; h < (int) effHits.size(); h++) {
 
       // Create and add a new hit.
-      Hit * hit = new Hit(flt_uh_x[h], flt_uh_y[h], flt_uh_z[h], uh_e[h]);
+      //Hit * hit = new Hit(flt_uh_x[h], flt_uh_y[h], flt_uh_z[h], uh_e[h]);
+      Hit * hit = new Hit(uh_x[h], uh_y[h], uh_z[h], uh_e[h]);
       updatedHits.push_back(hit);
     } 
 
