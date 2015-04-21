@@ -106,7 +106,7 @@ for ntrk in range(num_tracks):
         # Make the plot.
         fig = plt.figure(1);
         fig.set_figheight(5.0);
-        fig.set_figwidth(5.0);
+        fig.set_figwidth(7.5);
 
         # Create the 3D track plot.
         ax1 = fig.add_subplot(111, projection='3d');
@@ -129,9 +129,29 @@ for ntrk in range(num_tracks):
         if(plt_3dprint):
             fn_plt = "{0}/plt3d_{1}_{2}.pdf".format(fnb_plt,trk_name,ntrk);
             plt.savefig(fn_plt, bbox_inches='tight');
-        
-        # Make the plot.
+        plt.close();
+
+        # Plot the chi2.
         fig = plt.figure(2);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);
+
+        ax1 = fig.add_subplot(111);
+        ax1.plot(chi2_k,chi2_list,color='black');
+        ax1.set_xlabel("Hit number");
+        ax1.set_ylabel("$\chi^{2}$");
+        #ax5.set_yscale("log");
+        #ax1.set_title("Avg. chi2f = {0}".format(np.mean(plt_chi2F)));
+
+        # Print the chi2 plot along with the 3D plot.
+        if(plt_3dprint):
+            fn_plt = "{0}/pltchi2_{1}_{2}.pdf".format(fnb_plt,trk_name,ntrk);
+            plt.savefig(fn_plt, bbox_inches='tight');
+
+        plt.close();
+
+        # Make the plot collection.
+        fig = plt.figure(3);
         fig.set_figheight(15.0);
         fig.set_figwidth(10.0);
         
@@ -185,12 +205,12 @@ for ntrk in range(num_tracks):
         ax4.set_ylabel("z ({0})".format(plt_units));
         
         # Plot the chi2.
-        #ax5 = fig.add_subplot(325);
-        #ax5.plot(chi2_k,chi2_list,color='black');
-        #ax5.set_xlabel("k");
-        #ax5.set_ylabel("$\chi^{2}$");
+        ax5 = fig.add_subplot(325);
+        ax5.plot(chi2_k,chi2_list,color='black');
+        ax5.set_xlabel("k");
+        ax5.set_ylabel("$\chi^{2}$");
         #ax5.set_yscale("log");
-        #ax5.set_title("Avg. chi2f = {0}".format(np.mean(plt_chi2F)));
+        ax5.set_title("Avg. chi2f = {0}".format(np.mean(plt_chi2F)));
 
         # Show and/or print the plot.
         if(plt_print):

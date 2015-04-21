@@ -19,8 +19,9 @@ import logging
 
 # Get the arguments, if any, to change the run name.
 args = sys.argv;
-if(args[1] != ""):
+if(args[1] != "" and args[2] != ""):
     run_name = args[1];
+    prof_name = args[2];
 
 fnb_trk = "{0}/{1}/trk".format(dat_outdir,run_name);
 plt_base = "{0}/{1}/plt".format(dat_outdir,run_name);

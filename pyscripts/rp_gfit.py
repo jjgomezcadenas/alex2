@@ -3,11 +3,30 @@ rp_gfit.py
 
 Attempt at a global fit to a track.
 
+Usage:
+
+  python rp_gfit.py (run_name) (Pgas) (Bfield)
+
+Notes on the lowpass filter:
+- if the order is N samples, there is an N/2 sample delay introduced by the application of the filter
+- even after the delay is corrected for, there are still N/2 "meaningless" samples left at the end of the filtered array
+  (in this case we are just not including them in the analysis)
+- the frequency response of the lowpass filter is only computed over [0,pi] when:
+  freq, hfreq = signal.freqz(taps, worN=8000);
+  is called: the units of these frequencies are in rad/sample (divide by 2pi to get cycles/sample)
+
+Notes on NIST data:
+- for SeF6, retrieved the NIST stopping power on 03/03/15 using the "unique material" option and assuming rho = 0.0802 g/cm^3
+  (calculated rho assuming an ideal gas at 10 atm and, m = 192.96 amu, kB = 1.3806488x10-23 J/K, T = 293.15 K, NA = 6.02214129x10^23)
+  i.e.: (1013250./(1.3806488e-23*293.15))*192.96/6.02214129e23*1e-6
+
 """
 import sys
 import numpy as np
 import scipy.integrate as itg
 import random as rd
+import matplotlib.colors as mpcol
+import matplotlib.cm as cmx
 import matplotlib.pyplot as plt
 import os
 from mpl_toolkits.mplot3d import Axes3D
@@ -21,18 +40,29 @@ from abc import ABCMeta, abstractmethod
 args = sys.argv;
 if(args[1] != ""):
     trk_name = args[1];
+    Pgas = float(args[2]);
+    Bfield = float(args[3]);
 else:
     trk_name = "magseHtest01_1mm_5sp";
+    Pgas = 10.;   # gas pressure in atm
+    Bfield = 0.5; # magnetic field in Tesla
 
 # Input variables
 #trk_outdir = "/Users/jrenner/IFIC/pylosk/tracks";
-trk_outdir = "/Users/jrenner/IFIC/software/alex2/build/alexMain/out";
-num_tracks = 5;
+#trk_outdir = "/Users/jrenner/IFIC/software/alex2/build/alexMain/out";
+trk_outdir = "/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain/out";
+num_tracks = 10;
 rev_trk = False;
 apply_lpf = True;
-plt_drawfilter = False;
+plt_drawfilter = True;
 plt_drawtrk = True;
 output_means = False;
+gas_type = "xe";
+
+fcbar_fixed = True;
+fcbar_fix = 0.085;
+
+grdcol = 0.98;  # axis gray shade
 
 brk_win = 5;
 #brk_ns = 2;
@@ -40,25 +70,18 @@ brk_win = 5;
 
 # Constants
 KEinit = 2.447;   # initial electron kinetic energy (for a single-electron background event)
-Pgas = 10.;       # gas pressure in atm
 Tgas = 293.15;    # gas temperature in Kelvin
-Bfield = 0.5;     # applied magnetic field in Tesla
 
 pc_rho0 = 2.6867774e19;   # density of ideal gas at T=0C, P=1 atm in cm^(-3)
 pc_m_Xe = 131.293;        # mass of xenon in amu
+pc_m_sef6 = 192.96;        # mass of SeF6 in amu
 pc_NA = 6.02214179e23;    # Avogadro constant
 pc_eC = 1.602176487e-19;  # electron charge in C
 pc_me = 9.10938215e-31;   # electron mass in kg
 pc_clight = 2.99792458e8; # speed of light in m/s
 
-if(rev_trk):
-    plt_base = "{0}/{1}/plt_rev".format(trk_outdir,trk_name);
-else:
-    plt_base = "{0}/{1}/plt_fwd".format(trk_outdir,trk_name);
-    
-if(apply_lpf):
-    plt_base = "{0}_flt".format(plt_base);
-
+plt_base = "{0}/{1}/plt_curv".format(trk_outdir,trk_name);
+ 
 # Create the plot directory.
 if(not os.path.isdir(plt_base)):
     os.mkdir(plt_base);
@@ -228,8 +251,26 @@ def analyze_se(brkprof,curvprof):
 def calc_track_time():
 
     # Prepare the stopping power table.    
-    xesp_tbl = np.loadtxt("data/xe_estopping_power_NIST.dat");
-    rho = pc_rho0*(Pgas/(Tgas/273.15))*(pc_m_Xe/pc_NA);
+    if(gas_type == "sef6"):
+        xesp_tbl = np.loadtxt("data/sef6_estopping_power_NIST.dat");
+        rho = 0.007887*Pgas; #pc_rho0*(Pgas/(Tgas/273.15))*(pc_m_sef6/pc_NA);
+        print "Gas type is SeF6";
+    else:
+        xesp_tbl = np.loadtxt("data/xe_estopping_power_NIST.dat");
+
+        #if (Pgas > 9.5 and Pgas < 10.5):
+        #    rho = 0.055587;
+        #elif (Pgas > 14.5 and Pgas < 15.5):
+        #    rho = 0.08595;
+        #elif (Pgas > 19.5 and Pgas < 20.5):
+        #    rho = 0.1184;
+        #else:
+        #    rho = 0.0055*Pgas;
+        rho = pc_rho0*(Pgas/(Tgas/273.15))*(pc_m_Xe/pc_NA);
+        if(gas_type != "xe"):
+            print "**** NOTE: gas type defaulting to xenon";
+
+    print "Calculated density for gas {0} is {1}".format(gas_type,rho);
     e_vals = xesp_tbl[:,0];
     dEdx_vals = xesp_tbl[:,1];
     e_vals = np.insert(e_vals,0,0.0);
@@ -237,8 +278,11 @@ def calc_track_time():
     xesp = interp1d(e_vals,dEdx_vals*rho,kind='cubic');
 
     # Compute the integral.
-    tval = itg.quad(lambda x: (sqrt((x+0.511)**2-0.511**2)/(x+0.511)*xesp(x))**(-1),0.001,KEinit,limit=500)[0];
+    tval = itg.quad(lambda x: (sqrt((x+0.511)**2-0.511**2)/(x+0.511)*xesp(x))**(-1),0.00001,KEinit,limit=500)[0];
     tval = tval/(100*pc_clight);
+
+    xval = itg.quad(lambda x: (xesp(x))**(-1),0.00001,KEinit,limit=500)[0];
+    print "Average track length = {0} cm".format(xval);
     
     return tval;
 
@@ -255,10 +299,6 @@ l_scurv_mean = []; l_pcurv_frac = []; l_scurv_vertex = []; l_npseg = []; l_nnseg
 l_time = [];
 for trk_num in range(num_tracks):
 
-#    if(rev_trk):
-#        trk_file = "/Users/jrenner/IFIC/pylosk/tracks/{0}/rev/{1}_{2}.dat".format(trk_name,trk_name,trk_num);
-#    else:
-    #trk_file = "/Users/jrenner/IFIC/pylosk/tracks/{0}/{1}_{2}.dat".format(trk_name,trk_name,trk_num);
     trk_file = "{0}/{1}/toyMC/{2}/{3}_{4}.dat".format(trk_outdir,trk_name,trk_name,trk_name,trk_num);
 
     if(not os.path.isfile(trk_file)):
@@ -277,8 +317,11 @@ for trk_num in range(num_tracks):
     trk_uy = trktbl[:,5];
     trk_uz = trktbl[:,6];
     trk_eM = trktbl[:,7];
+    trk_deM = trktbl[:,8];
     trk_dxM = trktbl[:,9];
-    
+
+    mdeval = max(trk_deM);
+ 
     print "Processing track {0} with {1} samples".format(trk_num,len(trk_xM));
 
     # Calculate the time elapsed over the creation of the track.
@@ -288,35 +331,35 @@ for trk_num in range(num_tracks):
             vel = sqrt((ee+0.511)**2-0.511**2)/(ee+0.511)*pc_clight*1000;
             telapsed += dx/vel;
     print "Actual time elapsed = {0}".format(telapsed);
-    l_time.append(telapsed);
-    if(abs(telapsed-Ttrack) > Ttrack):
-        print "*** WARNING: Elapsed time not as expected... using computed average time.\n\n";
-        telapsed = Ttrack;
-    
-    # Design the Butterworth filter.
-    NN = len(trk_xM);
-    fsamp = NN/telapsed;
-    fcbar = abs(wcyc)/(2*pi*fsamp);
-    #[od, wn] = signal.buttord(1.0*fcbar, 1.5*fcbar, 3, 20);
-    [od, wn] = signal.buttord(1.5*fcbar, 2.0*fcbar, 3, 20);
-    print "fcbar = {0}".format(fcbar);
+    #l_time.append(telapsed);
+    #if(abs(telapsed-Ttrack) > Ttrack):
+    #    print "*** WARNING: Elapsed time not as expected... using computed average time.\n\n";
+    #    telapsed = Ttrack;
 
-    [bc, ac] = signal.butter(od,wn,'lowpass');
-    #print "Filter coefficients are: b = ";
-    #print bc;
-    #print "And a = ";
-    #print ac;
-    
-    print "Designing filter.";
-    
+    # Calculate the track length
+    xelapsed = 0.;
+    for dx in trk_dxM:
+        xelapsed += dx;
+    print "Actual track length is {0} mm".format(xelapsed);
+
+    # Design the LPF.
+    print "Designing filter...";
+    #ux0 = trk_ux[0]; uy0 = trk_uy[0]; print "ux = {0}, uy = {1}".format(ux0,uy0);
+    fsamp = len(trk_xM)/Ttrack;
+    if(fcbar_fixed):
+        fcbar = fcbar_fix;
+    else:
+        fcbar = abs(wcyc)/(2*pi*fsamp);
+    #rcyc = sqrt((KEinit+0.511)**2-0.511**2)/(KEinit+0.511)*sqrt(ux0**2 + uy0**2)*pc_clight*100/abs(wcyc);
+    print "Sampling frequency = {0} samp/s, cyclotron freq = {1} cyc/s, fcbar = {2}, should see {3} cycles".format(fsamp,wcyc/(2*pi),fcbar,abs(Ttrack*wcyc/(2*pi)));
+
     # -------------------------------------------------------------------------
     # FIR filter from: http://wiki.scipy.org/Cookbook/FIRFilter
     # The Nyquist rate of the signal.
-    nyq_rate = 1.0 / 2.0;  # assuming sampling freq = 1
+    nyq_rate = fsamp / 2.0;
     
     # The desired width of the transition from pass to stop,
-    # relative to the Nyquist rate.
-    width = 0.1 / nyq_rate;
+    width = 0.2;
     
     # The desired attenuation in the stop band, in dB.
     ripple_db = 40.0;
@@ -325,10 +368,10 @@ for trk_num in range(num_tracks):
     N, beta = signal.kaiserord(ripple_db, width);
 
     # The cutoff frequency of the filter.
-    cutoff_freq = 0.5*fcbar;
+    cutoff_freq = 1.2 * fcbar * fsamp;
 
     # Use firwin with a Kaiser window to create a lowpass FIR filter.
-    taps = signal.firwin(N, cutoff_freq/nyq_rate, window=('kaiser', beta), nyq=nyq_rate);
+    taps = signal.firwin(N, cutoff_freq, window=('kaiser', beta), nyq=nyq_rate);
     #print taps
 
     # Use lfilter to filter x with the FIR filter.
@@ -338,83 +381,36 @@ for trk_num in range(num_tracks):
     fdelay = int(N/2);
 
     # -------------------------------------------------------------------------
-
-    print "Drawing filter.";
     
-    # Draw the filter if the option is set to do so.
-    fnfreqs = np.fft.fftfreq(len(trk_xM));
-    wfreq, hfreq = signal.freqz(bc, ac, fnfreqs*pi);
-    wfreq_norm = [];
-    for ww in wfreq:
-        wfreq_norm.append(ww/pi);
-    if(plt_drawfilter):
-    
-        fig = plt.figure(1);
-        fig.set_figheight(5.0);
-        fig.set_figwidth(7.5);
-
-        plt.plot(wfreq_norm, abs(hfreq)); #20*np.log10(abs(hfreq)));
-        plt.xlabel("Frequency (half cycles/sample)");
-        plt.ylabel("Frequency Response");
-        plt.xscale('log');
-    
-        plt.savefig("{0}/filter_freq_response.pdf".format(plt_base), bbox_inches='tight');
-        plt.close();
-        
-        fig = plt.figure(2);
-        plt.clf();
-        w, h = signal.freqz(taps, worN=8000);
-        plt.plot(w/pi, np.absolute(h), linewidth=2);
-        plt.xlabel('Frequency (half cycles/sample)');
-        plt.ylabel('Gain');
-        plt.title('Frequency Response');
-        plt.ylim(-0.05, 1.05);
-        plt.grid(True);
-        
-        plt.savefig("{0}/FIR_freq_resp.pdf".format(plt_base), bbox_inches='tight');
-        plt.close();
-    
-    # Calculate the discrete cyclotron frequency.
-    ux0 = trk_ux[0]; uy0 = trk_uy[0]; print "ux = {0}, uy = {1}".format(ux0,uy0);
-    fsamp = len(trk_xM)/telapsed;
-    fcbar = abs(wcyc)/(2*pi*fsamp);
-    rcyc = sqrt((KEinit+0.511)**2-0.511**2)/(KEinit+0.511)*sqrt(ux0**2 + uy0**2)*pc_clight*100/abs(wcyc);
-    print "Sampling frequency = {0} samp/s, cyclotron freq = {1} cyc/s, fcbar = {2}, max. rcyc = {3} cm; should see {4} cycles".format(fsamp,wcyc/(2*pi),fcbar,rcyc,abs(telapsed*wcyc/(2*pi)));
-    
-    # Mean subtract and save the original unfiltered track.
-#    trk_xM_0 = []; trk_yM_0 = []; trk_zM_0 = [];
-#    muX = np.mean(trk_xM); muY = np.mean(trk_yM); muZ = np.mean(trk_zM);
-#    for xx in trk_xM: trk_xM_0.append(xx-muX);
-#    for yy in trk_yM: trk_yM_0.append(yy-muY);
-#    for zz in trk_zM: trk_zM_0.append(zz-muZ);
-
     # Reverse the hits if this is a reverse fit.
     if(rev_trk):
         trk_xM_0 = trk_xM[::-1];
         trk_yM_0 = trk_yM[::-1];
         trk_zM_0 = trk_zM[::-1];
+        trk_deM_0 = trk_deM[::-1];
     else:
         trk_xM_0 = trk_xM;
         trk_yM_0 = trk_yM;
         trk_zM_0 = trk_zM;
+        trk_deM_0 = trk_deM;
     
     # Apply the filters.
     if(apply_lpf):
         trk_xM = signal.lfilter(taps,1.0,trk_xM_0);
         trk_yM = signal.lfilter(taps,1.0,trk_yM_0);
         trk_zM = signal.lfilter(taps,1.0,trk_zM_0);
-        #trk_xM = signal.lfilter(bc,ac,trk_xM_0);
-        #trk_yM = signal.lfilter(bc,ac,trk_yM_0);
-        #trk_zM = signal.lfilter(bc,ac,trk_zM_0);
-        print "Applying filter with coefficients:";
-        print taps;
+        #print "Applying filter with coefficients:";
+        #print taps;
         
         # Correct for the FIR delay.
         print "Applying delay of {0} samples".format(fdelay);
-        trk_xM = np.roll(trk_xM,-1*fdelay);
-        trk_yM = np.roll(trk_yM,-1*fdelay);
-        trk_zM = np.roll(trk_zM,-1*fdelay);
-    
+        #print trk_xM;
+        trk_xM_f = np.roll(trk_xM,-1*fdelay); trk_xM = trk_xM_f[0:-fdelay];
+        trk_yM_f = np.roll(trk_yM,-1*fdelay); trk_yM = trk_yM_f[0:-fdelay];
+        trk_zM_f = np.roll(trk_zM,-1*fdelay); trk_zM = trk_zM_f[0:-fdelay];
+        trk_deM_f = np.roll(trk_deM,-1*fdelay); trk_deM = trk_deM_f[0:-fdelay];
+        #print trk_xM;
+
     # Compute the derivatives.
     dxdn = np.diff(trk_xM);
     dydn = np.diff(trk_yM);
@@ -433,6 +429,10 @@ for trk_num in range(num_tracks):
     remove_outliers(dxdn);
     remove_outliers(dydn);
     remove_outliers(dzdn);
+
+    remove_outliers(d2xdn2);
+    remove_outliers(d2ydn2);
+    remove_outliers(d2zdn2);
     
     # Calculate first derivatives.
     zz = []; nn = []; dxdz = []; dydz = [];
@@ -458,7 +458,7 @@ for trk_num in range(num_tracks):
     for dx,dy in zip(dxdz,dydz):
         diff_dxdy.append(dx-dy);
     
-    # Calculate seconds derivatives.
+    # Calculate second derivatives.
     d2xdz2 = []; d2ydz2 = []; rcurv = []; scurv = []; sscurv = [];
     for dxz,dyz,ddz,d2dx,d2dy,d2dz in zip(dxdz,dydz,dzdn,d2xdn2,d2ydn2,d2zdn2):
     
@@ -479,8 +479,8 @@ for trk_num in range(num_tracks):
     #print d2xdz2;
     
     # Remove outliers from the second derivatives.
-    #remove_outliers(d2xdz2);
-    #remove_outliers(d2ydz2);
+    remove_outliers(d2xdz2);
+    remove_outliers(d2ydz2);
     
     for dzn,dxz,dyz,d2xz,d2yz in zip(dzdn,dxdz,dydz,d2xdz2,d2ydz2):
     
@@ -510,7 +510,16 @@ for trk_num in range(num_tracks):
     #scurv_mean = np.mean(scurv[0:len(scurv)/5]);
     #scurv_mean = np.mean(scurv[4*len(scurv)/5:]);
     #scurv_mean = np.mean(scurv[3*len(scurv)/5:5*len(scurv)/5]);
-    scurv_mean = 1.0*(np.mean(sscurv[0:len(sscurv)/2]) - np.mean(sscurv[len(sscurv)/2:]))/len(sscurv);
+    halflen = len(sscurv) / 2;
+    if(len(sscurv) % 2 == 0):
+        m1 = 1.0*np.mean(sscurv[0:halflen])/halflen;
+        m2 = 1.0*np.mean(sscurv[halflen:])/halflen;
+        scurv_mean = m1 - m2;
+    else:
+        m1 = 1.0*np.mean(sscurv[0:halflen])/halflen;
+        m2 = 1.0*np.mean(sscurv[halflen:])/(halflen+1);
+        scurv_mean = m1 - m2;
+    #scurv_mean = 1.0*(np.mean(sscurv[0:len(sscurv)/2]) - np.mean(sscurv[len(sscurv)/2:])/(len(sscurv));
 
     # Calculate the vertex.
     scurv_vertex = calc_vertex(sscurv);
@@ -522,11 +531,6 @@ for trk_num in range(num_tracks):
             npos += 1;
     pfrac = 1.0*npos/len(sscurv);
     
-    # Correct for tracks traveling in the -z direction.
-#    if(trk_zM[-1] < trk_zM[0]): 
-#        scurv_mean *= -1;    # flip the sign for the opposite z-direction
-#        pfrac = 1 - pfrac;   # reverse the fraction
-        
     print "Mean curvature is {0}; positive fraction is {1}; vertex is {2}".format(scurv_mean,pfrac,scurv_vertex);
     l_scurv_mean.append(scurv_mean);
     l_pcurv_frac.append(pfrac);
@@ -538,11 +542,13 @@ for trk_num in range(num_tracks):
     #l_scurv_vertex_seg.append(scurv_vertex_seg);
     
     # Compute FFTs
+    nfreqs = np.fft.fftfreq(len(trk_xM_0));
+    wfreq, hfreq = signal.freqz(taps, worN=8000);
     ffxvals = np.fft.fft(trk_xM_0);
     #rffdxdz = np.real(ffdxdz);
     #print "Number of samples = {0}".format(len(dxdz));
     #print fnfreqs;
-    
+  
     # Make the plot.
     if(plt_drawtrk):
         
@@ -558,15 +564,20 @@ for trk_num in range(num_tracks):
                 nc_x.append(xx);
                 nc_y.append(yy);
                 nc_z.append(zz);
-        
+
+        nn0 = []; n = 0;
+        for zval in trk_zM_0:
+            nn0.append(n);
+            n += 1;
+
         fig = plt.figure(2);
         fig.set_figheight(15.0);
         fig.set_figwidth(10.0);
         
         ax1 = fig.add_subplot(321);
-        #ax1.plot(nn,dxdz,'.-',color='red');
-        ax1.plot(nn,trk_xM_0[0:-1],'.-',color='red');
-        ax1.plot(nn,trk_xM[0:-1],'.-',color='red');
+        ax1.plot(nn,dxdz,'.-',color='red');
+        #ax1.plot(nn0,trk_xM_0,'.-',color='red');
+        #ax1.plot(nn,trk_xM[0:-1],'.-',color='green');
         ax1.set_xlabel("hit number n");
         ax1.set_ylabel("dx/dz");
         
@@ -578,14 +589,16 @@ for trk_num in range(num_tracks):
         ax2.set_xlabel("hit number n");
         ax2.set_ylabel("d$^2$x/dz$^2$");
         
-        ax3 = fig.add_subplot(323); #fig = plt.figure(1);
-        scurvn, scurvbins, scurvpatches = ax3.hist(scurv, 40, normed=0, histtype='step',color='blue');
-        ax3.set_xlabel("signed curvature");
-        ax3.set_ylabel("Counts/bin");
-        
+        #ax3 = fig.add_subplot(323); #fig = plt.figure(1);
+        #scurvn, scurvbins, scurvpatches = ax3.hist(scurv, 40, normed=0, histtype='step',color='blue');
+        #ax3.set_xlabel("signed curvature");
+        #ax3.set_ylabel("Counts/bin");
+       
+        print "Wfrequencies are:";
+        print wfreq 
         ax3 = fig.add_subplot(323);
-        ax3.plot(fnfreqs,abs(ffxvals),'.',color='black',label='FFT');
-        ax3.plot(wfreq_norm, 20*abs(hfreq),label='LP filter x20');
+        ax3.plot(nfreqs,abs(ffxvals),'.',color='black',label='FFT');
+        ax3.plot(wfreq/pi, 80*abs(hfreq),label='LP filter x80');
         lnd = plt.legend(loc=1,frameon=False,handletextpad=0,fontsize=8);
         ax3.set_ylim([0,100]);
         ax3.set_xlabel("frequency");
@@ -613,7 +626,7 @@ for trk_num in range(num_tracks):
         lb_y = ax5.get_yticklabels();
         lb_z = ax5.get_zticklabels();
         for lb in (lb_x + lb_y + lb_z):
-            lb.set_fontsize(8);  
+            lb.set_fontsize(8);
         
         # Create the x-y projection.
         ax6 = fig.add_subplot(326);
@@ -623,19 +636,159 @@ for trk_num in range(num_tracks):
         ax6.set_xlabel("x (mm)");
         ax6.set_ylabel("y (mm)");
         
-        plt.savefig("{0}/plt_signals_{1}.pdf".format(plt_base,trk_num), bbox_inches='tight');
-        
+        plt.savefig("{0}/plt_signals_{1}_{2}.pdf".format(plt_base,trk_name,trk_num), bbox_inches='tight');
         plt.close();
         #plt.show();
+
+        # Plot the 3D plot with curvature designation alone.
+        fig = plt.figure(3);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);
+
+        ax1 = fig.add_subplot(111, projection='3d');
+        ax1.plot(trk_xM,trk_yM,trk_zM,'-',color='black');
+        ax1.plot(pc_x,pc_y,pc_z,'+',color='red');
+        ax1.plot(nc_x,nc_y,nc_z,'.',color='blue');
+        ax1.set_xlabel("x (mm)");
+        ax1.set_ylabel("y (mm)");
+        ax1.set_zlabel("z (mm)");
+
+        ax1.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax1.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax1.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax1.w_xaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax1.w_yaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax1.w_zaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
         
+        lb_x = ax1.get_xticklabels();
+        lb_y = ax1.get_yticklabels();
+        lb_z = ax1.get_zticklabels();
+        for lb in (lb_x + lb_y + lb_z):
+            lb.set_fontsize(8);
+
+        plt.savefig("{0}/plt_trkcurv_{1}_{2}.pdf".format(plt_base,trk_name,trk_num), bbox_inches='tight');
+        plt.close();
+
+        # Plot the 3D plot alone.
+        fig = plt.figure(4);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);
+
+        ax7 = fig.add_subplot(111, projection='3d');
+        #rainbw = plt.get_cmap('Blues');
+        #cNorm  = mpcol.Normalize(vmin=0, vmax=1.);
+        #scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=rainbw);
+	#for eval in trk_deM:
+            #cval = scalarMap.to_rgba(eval);
+            #print "color= ", eval, cval
+            #carr.append(eval/mval);
+	    #carr.append([0.0, eval/mval,0.0]);
+	    #carr.append([cval[0], cval[1], cval[2], cval[3]])
+        #print "carr =", carr
+        print "Lengths ... xlen = {0}, ylen = {1}, elen = {2}".format(len(trk_xM),len(trk_yM),len(trk_deM));
+        #ax1.plot(trk_xM,trk_yM,trk_zM,color='0.9');
+        s7 = ax7.scatter(trk_xM,trk_yM,trk_zM,marker='o',s=30,linewidth=0.2,c=trk_deM*1000,cmap=plt.get_cmap('rainbow'),vmin=0.0,vmax=max(trk_deM*1000));
+        s7.set_edgecolors = s7.set_facecolors = lambda *args:None;  # this disables automatic setting of alpha relative of distance to camera
+        ax7.set_xlabel("x (mm)");
+        ax7.set_ylabel("y (mm)");
+        ax7.set_zlabel("z (mm)");
+        ax7.grid(True);
+
+        ax7.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax7.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax7.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax7.w_xaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax7.w_yaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax7.w_zaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+ 
+        lb_x = ax7.get_xticklabels();
+        lb_y = ax7.get_yticklabels();
+        lb_z = ax7.get_zticklabels();
+        for lb in (lb_x + lb_y + lb_z):
+            lb.set_fontsize(8);
+
+        plt.title("Filtered");
+        cb7 = plt.colorbar(s7);
+        cb7.set_label('Hit energy (keV)');
+        plt.savefig("{0}/plt_trk_flt_{1}_{2}.pdf".format(plt_base,trk_name,trk_num), bbox_inches='tight');
+        plt.close();
+
+        # Plot the unfiltered 3D plot alone.
+        fig = plt.figure(5);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);
+
+        ax8 = fig.add_subplot(111, projection='3d');
+        #ax1.plot(trk_xM_0,trk_yM_0,trk_zM_0,'-',color='0.9');
+        s8 = ax8.scatter(trk_xM_0,trk_yM_0,trk_zM_0,marker='o',s=30,linewidth=0.2,c=trk_deM_0*1000,cmap=plt.get_cmap('rainbow'),vmin=0.0,vmax=max(trk_deM_0*1000));
+        s8.set_edgecolors = s8.set_facecolors = lambda *args:None;  # this disables automatic setting of alpha relative of distance to camera
+        #ax1.plot(trk_xM_0,trk_yM_0,trk_zM_0,'.',color='black');
+        ax8.set_xlabel("x (mm)");
+        ax8.set_ylabel("y (mm)");
+        ax8.set_zlabel("z (mm)");
+
+        ax8.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax8.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax8.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0));
+        ax8.w_xaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax8.w_yaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        ax8.w_zaxis._axinfo.update({'grid' : {'color': (grdcol, grdcol, grdcol, 1)}});
+        
+        lb_x = ax8.get_xticklabels();
+        lb_y = ax8.get_yticklabels();
+        lb_z = ax8.get_zticklabels();
+        for lb in (lb_x + lb_y + lb_z):
+            lb.set_fontsize(8);
+
+        plt.title("Unfiltered");
+        cb8 = plt.colorbar(s8);
+        cb8.set_label('Hit energy (keV)');
+        plt.savefig("{0}/plt_trk_unflt_{1}_{2}.pdf".format(plt_base,trk_name,trk_num), bbox_inches='tight');
+        plt.close();
+       
+     
+    if(plt_drawfilter):
+        
+        fig = plt.figure(6);
+        fig.set_figheight(5.0);
+        fig.set_figwidth(7.5);       
+
+        plt.clf();
+        ax1 = fig.add_subplot(111);
+        
+        ax1.plot(wfreq/(2*pi), np.absolute(hfreq), linewidth=2, color='black');
+        ax1.vlines(fcbar, -0.05, 1.15, color='blue', linestyle='--', lw=2);
+        ax1.set_xlabel('Frequency (cycles/samples)');
+        ax1.set_ylabel('Lowpass filter gain');
+        ax1.set_xlim(0.0, 0.5);
+        ax1.set_ylim(0.0, 1.1);
+
+        ax2 = ax1.twinx();
+        ax2.plot(nfreqs[0:len(nfreqs)/2],abs(ffxvals[0:len(ffxvals)/2]),'-',color='#cc0000', lw=2);
+        ax2.set_ylabel('FFT amplitude');
+        #plt.title('Frequency Response');
+        ax2.set_xlim(0.0, 0.5);
+        ax2.set_ylim(-0.05, 120.05);
+        #plt.grid(True);
+        ax2.yaxis.label.set_color('#cc0000');
+        for tl in ax2.get_yticklabels():
+            tl.set_color('#cc0000')
+
+        print nfreqs
+        plt.savefig("{0}/FIR_freq_resp_{1}_{2}.pdf".format(plt_base,trk_name,trk_num), bbox_inches='tight');
+        plt.close();
+
+ 
     print "\n";
 
 # Output the list of mean curvature values and fraction of positive curvature values.
 if(output_means):
+
+    print "Writing file with {0} entries...".format(len(l_scurv_mean));
     fm = open("{0}/scurv_means.dat".format(plt_base),"w");
     fm.write("# (trk) (scurv_avg) (pos_frac) (vertex frac.) (npseg) (nnseg) (time)\n");
     ntrk = 0;
-    for scurv,nfpos,vert,npseg,nnseg,tval in zip(l_scurv_mean,l_pcurv_frac,l_scurv_vertex,l_npseg,l_nnseg,l_time):
-        fm.write("{0} {1} {2} {3} {4} {5} {6}\n".format(ntrk,scurv,nfpos,vert,npseg,nnseg,tval));
+    for scurv,nfpos,vert,npseg,nnseg in zip(l_scurv_mean,l_pcurv_frac,l_scurv_vertex,l_npseg,l_nnseg):
+        fm.write("{0} {1} {2} {3} {4} {5}\n".format(ntrk,scurv,nfpos,vert,npseg,nnseg));
         ntrk += 1;
     fm.close();

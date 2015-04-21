@@ -19,10 +19,10 @@ import logging
 rev_trk = False;  # Set to true to fit reverse tracks and false to fit forward tracks (for kftrackfit.py only)
 
 # Output directories
-dat_outdir = "/Users/jrenner/IFIC/software/alex2/build/alexMain/out";    # output directory for tracks
+dat_outdir = "/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain/out";    # output directory for tracks
 
-run_name = "magbbHtest01_1mm_5sp";   # name assigned to this run; will be used in naming the output files
-num_tracks = 1000;     # number of tracks to generate and/or fit
+run_name = "nmagbb2";   # name assigned to this run; will be used in naming the output files
+num_tracks = 10;     # number of tracks to generate and/or fit
 
 chi2_low = 0.0; #1.0e-5;     # lower chi2 boundary for certain chi2 analyses
 chi2_outlier = 500.;     # upper chi2 boundary for chi2 profile and other analyses
@@ -65,12 +65,6 @@ plt_3dprint = True;
 
 me = 0.511;       # electron rest mass in MeV
 
-# Gas configuration parameters.
-Pgas = 10.;       # gas pressure in atm
-Tgas = 293.15;    # gas temperature in Kelvin
-LrXe = 1530.;     # xenon radiation length  * pressure in cm * bar
-Lr = LrXe/(Pgas/1.01325);
-
 # Physics constants.
 pc_rho0 = 2.6867774e19;   # density of ideal gas at T=0C, P=1 atm in cm^(-3)
 pc_m_Xe = 131.293;        # mass of xenon in amu
@@ -79,30 +73,3 @@ pc_NA = 6.02214179e23;    # Avogadro constant
 # Segment statistical analysis parameters.
 stat_nseg = 4;    # number of segments used to construct the forward-reverse discriminating param
 stat_efac = 0.5;  # fraction of total track that is considered to be in the first part of the track
-
-# Useful function definitions
-def Beta(P):
-    """
-    beta = P/E
-    """
-    E = sqrt(P**2+0.511**2)
-    beta = P/E
-
-    #logging.debug("Beta-> P ={0}, E={1} beta={2}".
-    #    format(P,E,beta))
-    return beta
-
-def SigmaThetaMs(P,L):
-    """
-    sigma(theta_ms) = 13.6 (Mev)/(beta*P)*Sqrt(LLr)*(1+0-038*log(LLr))
-    L in radiation length 
-    """
-    beta = Beta(P)
-    if(beta > 0. and L > 0.):
-        tms = (MS0/(P*1.*beta))*sqrt(L*1.)*(1 + 0.038*log(L*1.))
-    else:
-        tms = 0.;
-
-    #logging.debug("SigmaThetaMs->  L={0} P={1} beta={2}, tms={3}".
-    #    format(L,P,beta,tms))
-    return tms

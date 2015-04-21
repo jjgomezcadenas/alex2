@@ -11,48 +11,145 @@ use POSIX;
 $debug = 1;       # debug output for this script
 
 # Parameters
-$n_evts = 5000;
-$t_evts = 10000;
-$walltime = "00:30:00";
+$walltime = "04:00:00";
 $qtype = "short";
 
-$rname_se = "magseHtest01_1mm_5sp";
-$rname_bb = "magbbHtest01_1mm_5sp";
+# Run numbers
+$rnstart = 1;
+$rnend = 3;
+
+# Run name bases
+$rname_se = "nmagse";
+$rname_bb = "nmagbb";
 
 # ----------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------
-# Paths and directories
+# Set up the base directories
 # ----------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------
-# Determine the run number and directory structure
-# ----------------------------------------------------------------------------------
-$PATH_PYSCRIPTS = "/Users/jrenner/IFIC/software/alex2/trunk/pyscripts";
-$PATH_BUILD = "/Users/jrenner/IFIC/software/alex2/build/alexMain";
+$PATH_ALEX2 = "/data4/NEXT/users/jrenner/kalmanfilter/alex2";
+$PATH_PYSCRIPTS = "$PATH_ALEX2/trunk/pyscripts";
+$PATH_BUILD = "$PATH_ALEX2/build/alexMain";
 $PATH_BASH = "$PATH_BUILD/bash";
-$dir_run = "$PATH_BASH/$rname_se";
 
-# Make sure the directory structure is present
-if($debug) { print "Creating directory structure...\n"; }
-if(!(-d $dir_run)) {
-  system("mkdir $dir_run"); print "--> Created $dir_run\n";
-  print "Done.\n\n";
-}
+# Loop over all run numbers.
+for(my $rn = $rnstart; $rn <= $rnend; $rn++) {
 
-# ----------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------
+    # Set the gas pressure and B-field for the given run.
+    if($rn == 1) {
+        $Pgas = 10.;
+        $Bfield = 0.5;
+    }
+    elsif($rn == 2) {
+        $Pgas = 10.;
+        $Bfield = 0.5;
+    }
+    elsif($rn == 3) {
+        $Pgas = 10.;
+        $Bfield = 0.5;
+    }
+    elsif($rn == 4) {
+        $Pgas = 5.;
+        $Bfield = 0.1;
+    }
+    elsif($rn == 5) {
+        $Pgas = 5.;
+        $Bfield = 0.3;
+    }
+    elsif($rn == 6) {
+        $Pgas = 5.;
+        $Bfield = 0.5;
+    }   
+    elsif($rn == 7) {
+        $Pgas = 5.;
+        $Bfield = 0.7;
+    } 
+    elsif($rn == 8) {
+        $Pgas = 5.;
+        $Bfield = 1.0;
+    } 
+    elsif($rn == 9) {
+        $Pgas = 10.;
+        $Bfield = 0.1;
+    } 
+    elsif($rn == 10) {
+        $Pgas = 10.;
+        $Bfield = 0.3;
+    } 
+    elsif($rn == 11) {
+        $Pgas = 10.;
+        $Bfield = 0.7;
+    } 
+    elsif($rn == 12) {
+        $Pgas = 10.;
+        $Bfield = 1.0;
+    } 
+    elsif($rn == 13) {
+        $Pgas = 10.;
+        $Bfield = 0.1;
+    } 
+    elsif($rn == 14) {
+        $Pgas = 15.;
+        $Bfield = 0.3;
+    } 
+    elsif($rn == 15) {
+        $Pgas = 15.;
+        $Bfield = 0.5;
+    } 
+    elsif($rn == 16) {
+        $Pgas = 15.;
+        $Bfield = 0.7;
+    } 
+    elsif($rn == 17) {
+        $Pgas = 15.;
+        $Bfield = 1.0;
+    }
+    elsif($rn == 20) {
+        $Pgas = 10.;
+        $Bfield = 0.1;
+    }
+    elsif($rn == 21) {
+        $Pgas = 10.;
+        $Bfield = 0.3;
+    }
+    elsif($rn == 22) {
+        $Pgas = 10.;
+        $Bfield = 0.5;
+    }
+    elsif($rn == 23) {
+        $Pgas = 10.;
+        $Bfield = 0.7;
+    }
+    elsif($rn == 24) {
+        $Pgas = 10.;
+        $Bfield = 1.0;
+    }
+    else {
+        print "Invalid run number\n";
+    } 
 
-# Construct the name of the input bash file
-my $bash_fname = "$dir_run/$rname_se" . "_py.pbs";
+    # Construct the full run names.
+    $frname_se = $rname_se . "" . $rn;
+    $frname_bb = $rname_bb . "" . $rn;
 
-$err_file = "$dir_run/$rname_se" . "_err.err";
-$out_file = "$dir_run/$rname_se" . "_out.out"; 
+    # Make sure the directory structure is present.
+    $dir_run = "$PATH_BASH/$frname_se";
+    if($debug) { print "Creating directory structure...\n"; }
+    if(!(-d $dir_run)) {
+        system("mkdir $dir_run"); print "--> Created $dir_run\n";
+        print "Done.\n\n";
+    }
 
-# Write the input configuration file
-open(F_BASH, "> $bash_fname");
-print "Printing configuration file for run $s...\n";
-print F_BASH <<ENDFILE;
+    # Construct the name of the input bash file
+    my $bash_fname = "$dir_run/$frname_se" . "_py.pbs";
+
+    $err_file = "$dir_run/$frname_se" . "_err.err";
+    $out_file = "$dir_run/$frname_se" . "_out.out"; 
+
+    # Write the input configuration file
+    open(F_BASH, "> $bash_fname");
+    print "Printing configuration file for run $s...\n";
+    print F_BASH <<ENDFILE;
 #PBS -N imain
 #PBS -q $qtype
 #PBS -l nodes=1:ppn=1,walltime=$walltime
@@ -60,17 +157,29 @@ print F_BASH <<ENDFILE;
 #PBS -o $out_file
 
 cd $PATH_PYSCRIPTS
-python rp_genplots.py $rname_se
-python rp_fitprof.py $rname_se
-python rp_genplots.py $rname_bb
-cp $PATH_BUILD/out/$rname_se/plt/prof/* $PATH_BUILD/out/$rname_bb/plt/prof
-python rp_gfit.py $rname_se
-python rp_gfit.py $rname_bb
-python rp_cfmeans.py $rname_se $rname_bb
-python rp_sevsbb.py $rname_se $rname_bb
+python rp_gfit.py $frname_se $Pgas $Bfield
+python rp_gfit.py $frname_bb $Pgas $Bfield
+python rp_sevsbb.py $frname_se $frname_bb
 ENDFILE
 close(F_BASH);
 
-    #print "--> Submitting job file $bash_fname to queue\n";
-    #system("qsub $bash_fname");
+    print "--> Submitting job file $bash_fname to queue\n";
+    system("qsub $bash_fname");
 
+}
+
+# Complete Python run
+#python rp_gfit.py $frname_se $Pgas $Bfield
+#python rp_gfit.py $frname_bb $Pgas $Bfield
+#python rp_sevsbb.py $frname_se $frname_bb
+
+# Old bash file for running python scripts
+#cd $PATH_PYSCRIPTS
+#python rp_genplots.py $rname_se
+#python rp_fitprof.py $rname_se $rname_se
+#python rp_genplots.py $rname_bb
+#cp $PATH_BUILD/out/$rname_se/plt/prof/* $PATH_BUILD/out/$rname_bb/plt/prof
+#python rp_fitprof.py $rname_bb $rname_se
+#python rp_gfit.py $rname_se
+#python rp_gfit.py $rname_bb
+#python rp_sevsbb.py $rname_se $rname_bb
