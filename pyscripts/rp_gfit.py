@@ -51,18 +51,29 @@ else:
 #trk_outdir = "/Users/jrenner/IFIC/pylosk/tracks";
 #trk_outdir = "/Users/jrenner/IFIC/software/alex2/build/alexMain/out";
 trk_outdir = "/data4/NEXT/users/jrenner/kalmanfilter/alex2/build/alexMain/out";
-num_tracks = 10;
+num_tracks = 10000;
 rev_trk = False;
 apply_lpf = True;
-plt_drawfilter = True;
-plt_drawtrk = True;
-output_means = False;
+plt_drawfilter = False;
+plt_drawtrk = False;
+output_means = True;
 gas_type = "xe";
+
+prof_gen = False;
+prof_name = trk_name;       # run name of the sign profile to which to generate
+prof_cf = True;              # perform comparison of each track to the profile: automatically disabled if profile exists
+prof_sname = "nmagbb2";      # run name of the signal sign profile to which to compare
+prof_bname = "nmagse2";      # run name of the background profile to which to compare
+nbins_kon = 30;
 
 fcbar_fixed = True;
 fcbar_fix = 0.085;
 
 grdcol = 0.98;  # axis gray shade
+
+# Min and max k/N values for profile comparisons.
+kon_min = 0.05;
+kon_max = 0.95;
 
 brk_win = 5;
 #brk_ns = 2;
@@ -74,14 +85,17 @@ Tgas = 293.15;    # gas temperature in Kelvin
 
 pc_rho0 = 2.6867774e19;   # density of ideal gas at T=0C, P=1 atm in cm^(-3)
 pc_m_Xe = 131.293;        # mass of xenon in amu
-pc_m_sef6 = 192.96;        # mass of SeF6 in amu
+pc_m_sef6 = 192.96;       # mass of SeF6 in amu
 pc_NA = 6.02214179e23;    # Avogadro constant
 pc_eC = 1.602176487e-19;  # electron charge in C
 pc_me = 9.10938215e-31;   # electron mass in kg
 pc_clight = 2.99792458e8; # speed of light in m/s
 
 plt_base = "{0}/{1}/plt_curv".format(trk_outdir,trk_name);
- 
+prof_file = "{0}/{1}/plt_curv/prof_{2}.dat".format(trk_outdir,trk_name,prof_name);
+prof_sfile = "{0}/{1}/plt_curv/prof_{2}.dat".format(trk_outdir,prof_sname,prof_sname);
+prof_bfile = "{0}/{1}/plt_curv/prof_{2}.dat".format(trk_outdir,prof_bname,prof_bname);
+
 # Create the plot directory.
 if(not os.path.isdir(plt_base)):
     os.mkdir(plt_base);
@@ -294,9 +308,28 @@ print " *** Average time to create track is {0}".format(Ttrack);
 # Calculate the cyclotron frequency.
 wcyc = -1.0*(pc_eC/pc_me)*Bfield;
 
-# Record the values of the mean curvature and fraction of positive curvature.
+# Read in and interpolate the profile if it exists.
+if(not prof_gen and os.path.isfile(prof_sfile) and os.path.isfile(prof_bfile)):
+
+    # Read in and interpolate the profiles.
+    sproftbl = np.loadtxt(prof_sfile);
+    sprof = interp1d(sproftbl[:,0],sproftbl[:,1],kind='linear');
+    sprof_sigma = interp1d(sproftbl[:,0],sproftbl[:,2],kind='linear');
+    bproftbl = np.loadtxt(prof_bfile);
+    bprof = interp1d(bproftbl[:,0],bproftbl[:,1],kind='linear');
+    bprof_sigma = interp1d(bproftbl[:,0],bproftbl[:,2],kind='linear');
+
+else:
+    print "Not performing profile comparison, as this cannot be done simultaneously with profile generation, or profile {0} or {1} does not exist.".format(prof_sfile,prof_bfile);
+    prof_cf = False;
+
+# Lists
+prof_sgn_kon = []; prof_sgn_vals = [];
 l_scurv_mean = []; l_pcurv_frac = []; l_scurv_vertex = []; l_npseg = []; l_nnseg = [];
 l_time = [];
+l_chi2S = []; l_chi2B = [];
+
+# Iterate through all tracks.
 for trk_num in range(num_tracks):
 
     trk_file = "{0}/{1}/toyMC/{2}/{3}_{4}.dat".format(trk_outdir,trk_name,trk_name,trk_name,trk_num);
@@ -519,7 +552,6 @@ for trk_num in range(num_tracks):
         m1 = 1.0*np.mean(sscurv[0:halflen])/halflen;
         m2 = 1.0*np.mean(sscurv[halflen:])/(halflen+1);
         scurv_mean = m1 - m2;
-    #scurv_mean = 1.0*(np.mean(sscurv[0:len(sscurv)/2]) - np.mean(sscurv[len(sscurv)/2:])/(len(sscurv));
 
     # Calculate the vertex.
     scurv_vertex = calc_vertex(sscurv);
@@ -530,7 +562,7 @@ for trk_num in range(num_tracks):
         if(cval > 0):
             npos += 1;
     pfrac = 1.0*npos/len(sscurv);
-    
+
     print "Mean curvature is {0}; positive fraction is {1}; vertex is {2}".format(scurv_mean,pfrac,scurv_vertex);
     l_scurv_mean.append(scurv_mean);
     l_pcurv_frac.append(pfrac);
@@ -548,7 +580,38 @@ for trk_num in range(num_tracks):
     #rffdxdz = np.real(ffdxdz);
     #print "Number of samples = {0}".format(len(dxdz));
     #print fnfreqs;
-  
+
+    # Fill the profile lists.
+    Nsvals = len(sscurv);
+    kon = 0;
+    for sval in sscurv:
+        prof_sgn_kon.append(1.0*kon/Nsvals);
+        prof_sgn_vals.append(sval);
+        kon += 1;
+
+    # Calculate the profile comparison factors.
+    if(prof_cf):
+
+        # Compute the fchi2F and fchi2R.
+        nn = 0; ntotpts = Nsvals;
+        chi2S = 0.; chi2B = 0.; ndof = 0;
+        for nn in range(ntotpts):
+            kon = 1.0*nn/ntotpts;
+            sgn = sscurv[nn];
+
+            if(kon > kon_min and kon < kon_max):
+                chi2S += (sgn-sprof(kon))**2/sprof_sigma(kon)**2;
+                chi2B += (sgn-bprof(kon))**2/bprof_sigma(kon)**2;
+                ndof += 1;
+                #print "Signal: k/N = {0}, sign is {1}, prof. is {2}, prof. sigma is {3}".format(kon,sgn,sprof(kon),sprof_sigma(kon));
+        l_chi2S.append(chi2S/ndof);
+        l_chi2B.append(chi2B/ndof);
+
+    else:
+
+        l_chi2S.append(-1.0);
+        l_chi2B.append(-1.0);
+
     # Make the plot.
     if(plt_drawtrk):
         
@@ -781,14 +844,59 @@ for trk_num in range(num_tracks):
  
     print "\n";
 
+if(prof_gen):
+
+    # ---------------------------------------------------------------------------
+    # Create the sign vs. k/N profiles.
+    prof_kon = [];
+    prof_sgnN = []; prof_sgn = []; prof_sigma = [];
+
+    for nn in range(nbins_kon):
+        prof_kon.append(1.0*nn/nbins_kon);
+        prof_sgnN.append(0); prof_sgn.append(0.); prof_sigma.append(0.);
+
+    for kon,sgn in zip(prof_sgn_kon,prof_sgn_vals):
+        bb = int(kon*nbins_kon);
+        prof_sgnN[bb] += 1;
+        prof_sgn[bb] += sgn;
+        prof_sigma[bb] += sgn**2;
+
+    # Normalize.
+    for bb in range(nbins_kon):
+        if(prof_sgnN[bb] > 1):
+            NN = prof_sgnN[bb];
+            mu = prof_sgn[bb]/prof_sgnN[bb];
+            prof_sgn[bb] = mu;
+            prof_sigma[bb] = sqrt((prof_sigma[bb])/(NN-1) - NN*mu**2/(NN-1))/sqrt(NN);
+
+    # Write the file.
+    f_prof = open(prof_file,"w")
+    f_prof.write("# (k/N) (sgn) (sigma) (N)\n")
+    for kon,sgn,sigma,NN in zip(prof_kon,prof_sgn,prof_sigma,prof_sgnN):
+        f_prof.write("{0} {1} {2} {3}\n".format(kon,sgn,sigma,NN));
+    f_prof.close();
+
+    # Create plots.
+    fig = plt.figure(3);
+    fig.set_figheight(5.0);
+    fig.set_figwidth(7.5);
+
+    ax1 = fig.add_subplot(111);
+    ax1.plot(prof_kon,prof_sgn,'-',color='black');
+    ax1.set_xlabel("k/N");
+    ax1.set_ylabel("Average sign profile");
+
+    plt.savefig("{0}/prof_{1}.pdf".format(plt_base,prof_name), bbox_inches='tight');
+    plt.close();
+
 # Output the list of mean curvature values and fraction of positive curvature values.
 if(output_means):
 
     print "Writing file with {0} entries...".format(len(l_scurv_mean));
     fm = open("{0}/scurv_means.dat".format(plt_base),"w");
-    fm.write("# (trk) (scurv_avg) (pos_frac) (vertex frac.) (npseg) (nnseg) (time)\n");
+    fm.write("# (trk) (scurv_avg) (pos_frac) (vertex frac.) (npseg) (nnseg) (chi2s) (chi2b)\n");
     ntrk = 0;
-    for scurv,nfpos,vert,npseg,nnseg in zip(l_scurv_mean,l_pcurv_frac,l_scurv_vertex,l_npseg,l_nnseg):
-        fm.write("{0} {1} {2} {3} {4} {5}\n".format(ntrk,scurv,nfpos,vert,npseg,nnseg));
+    for scurv,nfpos,vert,npseg,nnseg,chi2s,chi2b in zip(l_scurv_mean,l_pcurv_frac,l_scurv_vertex,l_npseg,l_nnseg,l_chi2S,l_chi2B):
+        fm.write("{0} {1} {2} {3} {4} {5} {6} {7}\n".format(ntrk,scurv,nfpos,vert,npseg,nnseg,chi2s,chi2b));
         ntrk += 1;
     fm.close();

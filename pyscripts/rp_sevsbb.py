@@ -42,6 +42,7 @@ apply_lpf = True;
 
 fn_plt_sigvsb = "{0}/sigvsb_all.pdf".format(plt_base1);
 fn_plt_curv = "{0}/scurv_diff_means.pdf".format(plt_base1);
+fn_plt_chi2r = "{0}/chi2r.pdf".format(plt_base1);
 
 # Number of points in combined curve.
 ncpts = 50;
@@ -52,16 +53,32 @@ scurvtbl2 = np.loadtxt("{0}/scurv_means.dat".format(plt_base2));
 
 l_scurv1 = scurvtbl1[:,1];
 l_scurv2 = scurvtbl2[:,1];
+
+l_chi2S1 = scurvtbl1[:,6];
+l_chi2B1 = scurvtbl1[:,7];
+l_chi2S2 = scurvtbl2[:,6];
+l_chi2B2 = scurvtbl2[:,7];
+
+# Make the chi2B/chi2S ratios.
+l_chi2r1 = [];
+for chi2s,chi2b in zip(l_chi2S1,l_chi2B1):
+    l_chi2r1.append(chi2b/chi2s);
+
+l_chi2r2 = [];
+for chi2s,chi2b in zip(l_chi2S2,l_chi2B2):
+    l_chi2r2.append(chi2b/chi2s);
     
-# Cut ranges.
+# Cut ranges for curvature asymmetry factors.
 minCurv = min(min(l_scurv1), min(l_scurv2));
 maxCurv = max(max(l_scurv1), max(l_scurv1));
 curv_cuts = np.arange(minCurv, maxCurv, (maxCurv-minCurv)/100); # cut on curvature asymmetry values
 
+# Cut ranges for chi2 ratios.
+minR = min(min(l_chi2r1), min(l_chi2r2));
+maxR = max(max(l_chi2r1), max(l_chi2r2));
+chi2r_cuts = np.arange(minR, maxR, (maxR-minR)/100); # cut on 
+
 # Determine which events passed the curvature cut.
-# 0: would not pass the curvature cut
-# 1: passes the curvature cut with currently selected orientation
-# 2: passes the curvature cut if the sign of the asymmetry factor is flipped
 t_cut_curv1 = []; t_cut_curv2 = [];
 for mdiff_c in curv_cuts:
     
@@ -76,11 +93,28 @@ for mdiff_c in curv_cuts:
         if(mdiff > mdiff_c): cut_curv2.append(1);
         else: cut_curv2.append(0);
     t_cut_curv2.append(cut_curv2);
-    
-# Determine the signal (bb) acceptance and background (se) rejection.
+
+# Determine which events passed the chi2r cut.
+t_cut_chi2r1 = []; t_cut_chi2r2 = [];
+for chi2r_c in chi2r_cuts:
+
+    cut_chi2r1 = []; cut_chi2r2 = [];
+
+    for chi2r in l_chi2r1:
+        if(chi2r < chi2r_c): cut_chi2r1.append(1);
+        else: cut_chi2r1.append(0);
+    t_cut_chi2r1.append(cut_chi2r1);
+
+    for chi2r in l_chi2r2:
+        if(chi2r < chi2r_c): cut_chi2r2.append(1);
+        else: cut_chi2r2.append(0);
+    t_cut_chi2r2.append(cut_chi2r2);
+
+# Set the number of events in both datasets.
 nevts1 = len(l_scurv1);
 nevts2 = len(l_scurv2);
-sgacc = []; bgrej = [];
+
+# Determine the signal (bb) acceptance and background (se) rejection for the asymmetry factor.
 sgacc_curv = []; bgrej_curv = [];
 i_ccut = 0;
 fm = open("{0}/sevsb_tbl.dat".format(plt_base1),"w");
@@ -89,7 +123,6 @@ for mdiff_c in curv_cuts:
 
     cut_curv1 = t_cut_curv1[i_ccut];
     cut_curv2 = t_cut_curv2[i_ccut];
-    
         
     # Determine the number of signal and background events.
     f1cv = 0.; f2cv = 0.;  # fraction of events passing curv cut
@@ -118,6 +151,43 @@ for mdiff_c in curv_cuts:
 
 fm.close();
 
+# Determine the signal (bb) acceptance and background (se) rejection for the chi2 ratio.
+sgacc_chi2r = []; bgrej_chi2r = [];
+i_ccut = 0;
+fm = open("{0}/sevsb_tbl_chi2r.dat".format(plt_base1),"w");
+fm.write("# (chi2r_cut) (se_curv_fpass) (bb_curv_fpass)\n");
+for chi2r_c in chi2r_cuts:
+
+    cut_chi2r1 = t_cut_chi2r1[i_ccut];
+    cut_chi2r2 = t_cut_chi2r2[i_ccut];
+
+    # Determine the number of signal and background events.
+    f1cv = 0.; f2cv = 0.;  # fraction of events passing curv cut
+    for pcv1 in cut_chi2r1:
+
+        # Curvature cut
+        if(pcv1 > 0): f1cv += 1;
+
+    for pcv2 in cut_chi2r2:
+
+        # Curvature cut
+        if(pcv2 > 0): f2cv += 1;
+
+    # Convert to fractions.
+    f1cv /= nevts1;
+    f2cv /= nevts2;
+
+    # Print to file.
+    fm.write("{0} {1} {2}\n".format(chi2r_c,f1cv,f2cv));
+
+    # Fill one array of fse vs. fbb for the curvature cuts.
+    sgacc_chi2r.append(1 - f2cv);
+    bgrej_chi2r.append(f1cv);
+
+    i_ccut += 1;
+
+fm.close();
+
 # Output the combined signal acceptance vs. background rejection.
 fm = open("{0}/sevsb_combined.dat".format(plt_base1),"w");
 fm.write("# (signal_eff) (bg_rejection)\n");
@@ -142,6 +212,7 @@ fm.close();
 fig = plt.figure(1);
 fig.set_figheight(5.0);
 fig.set_figwidth(7.5);
+plt.plot(bgrej_chi2r,sgacc_chi2r,'-',color='black',label='Curvature profiles');
 plt.plot(bgrej_curv,sgacc_curv,'-.',color='black',label='Curvature');
 #plt.plot(lc_svals,lc_bvals,'-',color='black',label='Combined');
 lnd = plt.legend(loc=3,frameon=False,handletextpad=0);
@@ -159,4 +230,15 @@ lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
 plt.xlabel("Curvature asymmetry factor $\phi_C$");
 plt.ylabel("Counts/bin");
 plt.savefig(fn_plt_curv, bbox_inches='tight');
+plt.close();
+
+fig = plt.figure(3);
+fig.set_figheight(5.0);
+fig.set_figwidth(7.5);
+fmeann, fmeanbins, fmeanpatches = plt.hist(l_chi2r1, 40, lw=2, normed=0, histtype='step',color='red',label='Single e-');
+rmeann, rmeanbins, rmeanpatches = plt.hist(l_chi2r2, 40, normed=0, lw=2, histtype='step',color='blue',label='0vbb');
+lnd = plt.legend(loc=1,frameon=False,handletextpad=0);
+plt.xlabel("$\chi^2_B$/$\chi^2_S$");
+plt.ylabel("Counts/bin");
+plt.savefig(fn_plt_chi2r, bbox_inches='tight');
 plt.close();
